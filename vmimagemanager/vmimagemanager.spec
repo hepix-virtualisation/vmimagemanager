@@ -1,6 +1,6 @@
 Summary: vmimagemanager
 Name: vmimagemanager
-Version: 0.0.1
+Version: 0.0.2
 Vendor: Yokel
 Release: 0
 License: MPL
@@ -19,6 +19,7 @@ xen-image-manager is a generic image manager.
 %setup -c
 
 %build
+echo "configdir"=%{prefix}/etc/%{name}/* >> /tmp/log
 python setup.py  install  --root %{buildroot} --install-base %{prefix}
 
 %files
