@@ -1,6 +1,6 @@
 from distutils.core import setup
 setup(name='vmimagemanager',
-      version='0.0.2',
+      version='0.0.3',
       description="Virualisation image mover",
       author="owen synge",
       author_email="owen.synge@desy.de",
