@@ -1,0 +1,6 @@
+This work was originally worked on for Gridpp and then Dgrid it is released under Mozilla Public licence.
+
+
+vmimagemanager consists of two functions, 
+
+Swappping VM images as fast as posible and building xen domain templates.
