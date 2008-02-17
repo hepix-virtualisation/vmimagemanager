@@ -2,7 +2,6 @@ include README
 include config/vmimagemanager-example-au.cfg
 include config/vmimagemanager-example-esys.cfg
 include config/vmimagemanager-example-irl.cfg
-include config/vmimagemanager-example-irl.cfg
-include config/vmimagemanager-d430.cfg
+include config/vmimagemanager-example-d430.cfg
 include config/vmimagemanager-xen-example.template
 include vmimagemanager-example.cfg
