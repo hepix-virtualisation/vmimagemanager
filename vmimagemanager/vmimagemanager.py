@@ -105,7 +105,6 @@ class virtualhost:
         return self.__HostSwapSpace
 
     def PropertyHostRootSpaceSet(self, value):
-        print "skdlksjdlksdjlkdjs"
         self.__HostRootSpace = value
     def PropertyHostRootSpaceGet(self):
         return self.__HostRootSpace
@@ -385,18 +384,22 @@ class virtualhost:
             cmd = ""
             if "tgz" == self.ImageMode:
                 self.UnMount()
-                cmd="mkfs.ext3 %s" % (self.HostRootSpace)
-                (rc,cmdoutput) = commands.getstatusoutput(cmd)
-                if rc != 0:
-                    print cmdoutput
-                    print "command line failed running %s" % (cmd)
-                    return -1
+                # Formatting is faster but we have a catch, 
+                # With dcache must give it an option for XFS
+		# cmdFormatFilter="mkfs.xfs %s"
+		
+		cmd=self.cmdFormatFilter % (self.HostRootSpace)
+		(rc,cmdoutput) = commands.getstatusoutput(cmd)
+		if rc != 0:
+		    print cmdoutput
+		    print "command line failed running %s" % (cmd)
+		    return -1
                 self.MountImage()
                 cmd = "rm -rf %s" % (self.Mount)
                 (rc,cmdoutput) = commands.getstatusoutput(cmd)
                 cmd = "tar -zxf %s --exclude=lost+found   -C %s" % (ImageName,self.Mount)
-            if "rsync" == self.ImageMode:
-                cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,self.Mount)
+	    if "rsync" == self.ImageMode:
+		cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,self.Mount)
             #print cmd
             (rc,cmdoutput) = commands.getstatusoutput(cmd)
             if rc != 0:
@@ -466,51 +469,56 @@ class virtualHostContainer:
 	
 
     def LoadConfigFile(self,fileName):
-	GeneralSection = "VmImageManager"
-	HostListSection = "AvailalableHosts"
-	RequiredSections = [GeneralSection,HostListSection]
+        GeneralSection = "VmImageManager"
+        HostListSection = "AvailalableHosts"
+        RequiredSections = [GeneralSection]
+        #RequiredSections = [GeneralSection,HostListSection]
 	self.hostlist = []
-	config = ConfigParser.ConfigParser()
-	config.readfp(open(fileName,'r'))
-	#print config.sections()
-	configurationSections = config.sections()
-	for ASection in RequiredSections:
-	    if not ASection in configurationSections:
-	        print "Configuration file does not have a section '%s'"  % (ASection)
-	        sys.exit(1)
-	cfgHosts = config.options(HostListSection)
+        config = ConfigParser.ConfigParser()
+        cmdFormatFilter = "mkfs.ext3 %s"
+        config.readfp(open(fileName,'r'))
+        #print config.sections()
+        configurationSections = config.sections()
+        for ASection in RequiredSections:
+            if not ASection in configurationSections:
+                print "Configuration file does not have a section '%s'"  % (ASection)
+                sys.exit(1)
 	
+        cfgHosts = config.sections()
+
 	
 	newvmconfdir = config.get(GeneralSection,'vmconfdir')
 	if len(newvmconfdir) == 0:
-            print "Configuration file does not have a section '%s' with a key in it 'vmconfdir'" % (GeneralSection)
-            sys.exit(1)
+	    print "Configuration file does not have a section '%s' with a key in it 'vmconfdir'" % (GeneralSection)
+	    sys.exit(1)
 	self.vmconfdir = newvmconfdir
 	
 	newxenconftemplate = config.get(GeneralSection,'xenconftemplate')
 	if len(newxenconftemplate) == 0:
-            print "Configuration file does not have a section '%s' with a key in it 'vmconfdir'" % (GeneralSection)
-            sys.exit(1)
+	    print "Configuration file does not have a section '%s' with a key in it 'vmconfdir'" % (GeneralSection)
+	    sys.exit(1)
 	self.xenconftemplate = newxenconftemplate
 	
 	newXenImageDir = config.get(GeneralSection,'vmimages')
 	if len(newXenImageDir) == 0:
-            print "Configuration file does not have a section '%s' with a key in it 'vmimages'" % (GeneralSection)
-            sys.exit(1)
+	    print "Configuration file does not have a section '%s' with a key in it 'vmimages'" % (GeneralSection)
+	    sys.exit(1)
 	self.XenImageDir = newXenImageDir
-	
-	
+	if (config.has_option(GeneralSection, "formatFilter")):
+	    cmdFormatFilter = config.get(GeneralSection,'formatFilter')
 	
 	for aHost in cfgHosts:
-		#print "aHost '%s'"  % (aHost)
-	
-		#value = config.get(aHost,HostListSection)
-		#print "value '%s'"  % (aHost)
-		if (config.has_section(aHost)):
+		isanImage = 0
+		if (config.has_option(aHost, "vm_slot_enabled")):
+		    isanImageStr = config.get(aHost,"vm_slot_enabled")
+		    if (isanImageStr in (["Yes","YES","yes","y","On","on","ON","1"])):
+		        isanImage = 1
+		if isanImage > 0:
+		
 		    ThisVirtualHost =  virtualhost()
 		    
 		    if (config.has_option(aHost, "HostName")):
-			ThisVirtualHost.HostName  = config.get(aHost,"HostName")
+		        ThisVirtualHost.HostName  = config.get(aHost,"HostName")
 		    if (config.has_option(aHost, "mac")):
 		        ThisVirtualHost.HostMacAddress  = config.get(aHost,"mac")
 		    if (config.has_option(aHost, "ip")):
@@ -532,6 +540,11 @@ class virtualHostContainer:
 		        ThisVirtualHost.vmcfgFile  = config.get(aHost,"vmcfg")
 		    else:
 			ThisVirtualHost.vmcfgFile = self.vmconfdir + "/" + ThisVirtualHost.HostName
+		    if (config.has_option(aHost, "formatFilter")):
+		       
+		        ThisVirtualHost.cmdFormatFilter  = config.get(aHost,"formatFilter")
+		    else:
+			ThisVirtualHost.cmdFormatFilter = cmdFormatFilter
 		    if not os.access(ThisVirtualHost.vmcfgFile,os.R_OK):
 		        d = dict(
 			    DomainRootDev=ThisVirtualHost.HostRootSpace,
@@ -557,11 +570,6 @@ class virtualHostContainer:
             			
 			
 		    self.hostlist.append(ThisVirtualHost)
-	
-	
-	
-
-
 
 
 if __name__ == "__main__":
@@ -597,9 +605,6 @@ if __name__ == "__main__":
         if o in ("-b", "--box"):
 	    if a != None:
 		boxlist.append(a)
-           
-            
-            
         if o in ("-s", "--store"):
             actionList.append("store")
             storeImage = a
