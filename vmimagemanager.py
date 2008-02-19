@@ -74,8 +74,8 @@ class virtualhost:
         self.PropertyExtractionsSet({})
         self.PropertyImageRestoreNameSet("")
         self.PropertyImageStoreNameSet("")
-	self.ImageStoreDir = ""
-	self.ImageMode = "tgz"
+        self.ImageStoreDir = ""
+        self.ImageMode = "tgz"
     def PropertyHostNameSet(self, value):
         self.__HostName = value
         
@@ -112,7 +112,7 @@ class virtualhost:
     def PropertyMountSet(self, value):
         self.__Mount = value
     def PropertyMountGet(self):
-        return self.__Mount
+        return self.Mount
 
     def PropertyImageModeSet(self, value):
         self.__ImageMode = value
@@ -279,14 +279,7 @@ class virtualhost:
 
     
     def ExtractDir(self):
-        if not cfg.has_key('general'):
-            print "Error: Configuration Section 'general' not found"
-            sys.exit(1)
-        if not cfg['general'].has_key('vmextracts'):
-            print "Error: Configuration Section 'general/vmextracts' not found"
-            sys.exit(1)
-        output =  cfg['general']['vmextracts']
-        return output
+        return self.VmExtractsDir
         
     def AvailableExtract(self):
         if not os.path.isdir(self.ExtractDir()):
@@ -332,7 +325,7 @@ class virtualhost:
             print 'Exiting cleanly'
             sys.exit(1)
         self.MountImage()
-	cmd = ""
+        cmd = ""
         storedir =  self.ImageStoreDir
         if not os.path.isdir(storedir):
             os.makedirs(storedir)
@@ -341,10 +334,10 @@ class virtualhost:
         if "rsync" == self.ImageMode:
             cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/%s/" % (self.PropertyMountGet(),storedir,ImageName)
         if cmd == "":
-	    print "Error: Failing to store images"
-	    sys.exit(1)
-	    
-	#print "command='%s'" % (cmd)
+            print "Error: Failing to store images"
+            sys.exit(1)
+            
+        #print "command='%s'" % (cmd)
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             print 'The command failed "%s"' % (cmd)
@@ -386,20 +379,20 @@ class virtualhost:
                 self.UnMount()
                 # Formatting is faster but we have a catch, 
                 # With dcache must give it an option for XFS
-		# cmdFormatFilter="mkfs.xfs %s"
-		
-		cmd=self.cmdFormatFilter % (self.HostRootSpace)
-		(rc,cmdoutput) = commands.getstatusoutput(cmd)
-		if rc != 0:
-		    print cmdoutput
-		    print "command line failed running %s" % (cmd)
-		    return -1
+                # cmdFormatFilter="mkfs.xfs %s"
+                
+                cmd=self.cmdFormatFilter % (self.HostRootSpace)
+                (rc,cmdoutput) = commands.getstatusoutput(cmd)
+                if rc != 0:
+                    print cmdoutput
+                    print "command line failed running %s" % (cmd)
+                    return -1
                 self.MountImage()
                 cmd = "rm -rf %s" % (self.Mount)
                 (rc,cmdoutput) = commands.getstatusoutput(cmd)
                 cmd = "tar -zxf %s --exclude=lost+found   -C %s" % (ImageName,self.Mount)
-	    if "rsync" == self.ImageMode:
-		cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,self.Mount)
+            if "rsync" == self.ImageMode:
+                cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,self.Mount)
             #print cmd
             (rc,cmdoutput) = commands.getstatusoutput(cmd)
             if rc != 0:
@@ -420,7 +413,8 @@ class virtualhost:
         for ext in self.PropertyExtractionsGet().keys():
             target = "%s/%s" % (self.PropertyMountGet(),ext)
             if "tgz" == self.PropertyImageModeGet():
-                cmd = "tar -zcsf %s/%s --exclude=lost+found -C %s ." % (self.ExtractDir(),ext,self.PropertyMountGet())
+                selectedDir = self.PropertyExtractionsGet()[ext].strip('/')
+                cmd = "tar -zcsf %s/%s --exclude=lost+found -C %s %s" % (self.ExtractDir(),ext,self.PropertyMountGet(),selectedDir)
             if "rsync" == self.PropertyImageModeGet():
                 cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/%s %s/%s/" % (self.PropertyMountGet(),self.PropertyExtractionsGet()[ext],self.ExtractDir(),ext)
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
@@ -465,15 +459,15 @@ class virtualhost:
     
 class virtualHostContainer:
     def __init__(self):
-	self.hostlist = []
-	
+        self.hostlist = []
+        
 
     def LoadConfigFile(self,fileName):
         GeneralSection = "VmImageManager"
         HostListSection = "AvailalableHosts"
         RequiredSections = [GeneralSection]
         #RequiredSections = [GeneralSection,HostListSection]
-	self.hostlist = []
+        self.hostlist = []
         config = ConfigParser.ConfigParser()
         cmdFormatFilter = "mkfs.ext3 %s"
         config.readfp(open(fileName,'r'))
@@ -483,82 +477,100 @@ class virtualHostContainer:
             if not ASection in configurationSections:
                 print "Configuration file does not have a section '%s'"  % (ASection)
                 sys.exit(1)
-	
+        
         cfgHosts = config.sections()
 
-	
-	newvmconfdir = config.get(GeneralSection,'vmconfdir')
-	if len(newvmconfdir) == 0:
-	    print "Configuration file does not have a section '%s' with a key in it 'vmconfdir'" % (GeneralSection)
-	    sys.exit(1)
-	self.vmconfdir = newvmconfdir
-	
-	newxenconftemplate = config.get(GeneralSection,'xenconftemplate')
-	if len(newxenconftemplate) == 0:
-	    print "Configuration file does not have a section '%s' with a key in it 'vmconfdir'" % (GeneralSection)
-	    sys.exit(1)
-	self.xenconftemplate = newxenconftemplate
-	
-	newXenImageDir = config.get(GeneralSection,'vmimages')
-	if len(newXenImageDir) == 0:
-	    print "Configuration file does not have a section '%s' with a key in it 'vmimages'" % (GeneralSection)
-	    sys.exit(1)
-	self.XenImageDir = newXenImageDir
-	if (config.has_option(GeneralSection, "formatFilter")):
-	    cmdFormatFilter = config.get(GeneralSection,'formatFilter')
-	
-	for aHost in cfgHosts:
-		isanImage = 0
-		if (config.has_option(aHost, "vm_slot_enabled")):
-		    isanImageStr = config.get(aHost,"vm_slot_enabled")
-		    if (isanImageStr in (["Yes","YES","yes","y","On","on","ON","1"])):
-		        isanImage = 1
-		if isanImage > 0:
-		
-		    ThisVirtualHost =  virtualhost()
-		    
-		    if (config.has_option(aHost, "HostName")):
-		        ThisVirtualHost.HostName  = config.get(aHost,"HostName")
-		    if (config.has_option(aHost, "mac")):
-		        ThisVirtualHost.HostMacAddress  = config.get(aHost,"mac")
-		    if (config.has_option(aHost, "ip")):
-		        ThisVirtualHost.HostIp4Address  = config.get(aHost,"ip")
-		
-		    if (config.has_option(aHost, "root")):
-		        ThisVirtualHost.HostRootSpace  = config.get(aHost,"root")
-		    if (config.has_option(aHost, "swap")):
-		        ThisVirtualHost.HostSwapSpace  = config.get(aHost,"swap")
-		    if (config.has_option(aHost, "vmimages")):
-		       
-		        ThisVirtualHost.ImageStoreDir  = config.get(aHost,"vmimages")
-		    else:
-			ThisVirtualHost.ImageStoreDir = self.XenImageDir + "/" + ThisVirtualHost.HostName
-		    if (config.has_option(aHost, "mount")):
-		        ThisVirtualHost.Mount  = config.get(aHost,"mount")
-		    if (config.has_option(aHost, "vmcfg")):
-		       
-		        ThisVirtualHost.vmcfgFile  = config.get(aHost,"vmcfg")
-		    else:
-			ThisVirtualHost.vmcfgFile = self.vmconfdir + "/" + ThisVirtualHost.HostName
-		    if (config.has_option(aHost, "formatFilter")):
-		       
-		        ThisVirtualHost.cmdFormatFilter  = config.get(aHost,"formatFilter")
-		    else:
-			ThisVirtualHost.cmdFormatFilter = cmdFormatFilter
-		    if not os.access(ThisVirtualHost.vmcfgFile,os.R_OK):
-		        d = dict(
-			    DomainRootDev=ThisVirtualHost.HostRootSpace,
-			    DomainIp4Address=ThisVirtualHost.HostIp4Address,
-			    DomainName=ThisVirtualHost.HostName,
-			    DomainSwapDev=ThisVirtualHost.HostSwapSpace,
-			    DomainMac=ThisVirtualHost.HostMacAddress
-			)
-		        self.xenconftemplate
-			fpxenconftemp = open(self.xenconftemplate,'r')
+        
+        newvmconfdir = config.get(GeneralSection,'vmconfdir')
+        if len(newvmconfdir) == 0:
+            print "Configuration file does not have a section '%s' with a key in it 'vmconfdir'" % (GeneralSection)
+            sys.exit(1)
+        self.vmconfdir = newvmconfdir
+        
+        newxenconftemplate = config.get(GeneralSection,'xenconftemplate')
+        if len(newxenconftemplate) == 0:
+            print "Configuration file does not have a section '%s' with a key in it 'vmconfdir'" % (GeneralSection)
+            sys.exit(1)
+        self.xenconftemplate = newxenconftemplate
+        
+        newXenImageDir = config.get(GeneralSection,'vmimages')
+        if len(newXenImageDir) == 0:
+            print "Configuration file does not have a section '%s' with a key in it 'vmimages'" % (GeneralSection)
+            sys.exit(1)
+        self.XenImageDir = newXenImageDir
+        self.VmExtractsDir = newXenImageDir
+        
+        newVmExtractsDir = config.get(GeneralSection,'vmextracts')
+        if len(newVmExtractsDir) == 0:
+            print "Configuration file does not have a section '%s' with a key in it 'vmextracts' defaulting to '%s'" % (GeneralSection,GeneralSection)
+            print "You probably want to set this variable."
+        else:            
+            self.VmExtractsDir = newVmExtractsDir
+        
+        
+        
+        if (config.has_option(GeneralSection, "formatFilter")):
+            cmdFormatFilter = config.get(GeneralSection,'formatFilter')
+        
+        for aHost in cfgHosts:
+                isanImage = 0
+                if (config.has_option(aHost, "vm_slot_enabled")):
+                    isanImageStr = config.get(aHost,"vm_slot_enabled")
+                    if (isanImageStr in (["Yes","YES","yes","y","On","on","ON","1"])):
+                        isanImage = 1
+                if isanImage > 0:
+                
+                    ThisVirtualHost =  virtualhost()
+                    
+                    if (config.has_option(aHost, "HostName")):
+                        ThisVirtualHost.HostName  = config.get(aHost,"HostName")
+                    if (config.has_option(aHost, "mac")):
+                        ThisVirtualHost.HostMacAddress  = config.get(aHost,"mac")
+                    if (config.has_option(aHost, "ip")):
+                        ThisVirtualHost.HostIp4Address  = config.get(aHost,"ip")
+                
+                    if (config.has_option(aHost, "root")):
+                        ThisVirtualHost.HostRootSpace  = config.get(aHost,"root")
+                    if (config.has_option(aHost, "swap")):
+                        ThisVirtualHost.HostSwapSpace  = config.get(aHost,"swap")
+                    if (config.has_option(aHost, "vmimages")):
+                       
+                        ThisVirtualHost.ImageStoreDir  = config.get(aHost,"vmimages")
+                    else:
+                        ThisVirtualHost.ImageStoreDir = self.XenImageDir + "/" + ThisVirtualHost.HostName
+                    if (config.has_option(aHost, "mount")):
+                        ThisVirtualHost.Mount  = config.get(aHost,"mount")
+                    if (config.has_option(aHost, "vmcfg")):
+                       
+                        ThisVirtualHost.vmcfgFile  = config.get(aHost,"vmcfg")
+                    else:
+                        ThisVirtualHost.vmcfgFile = self.vmconfdir + "/" + ThisVirtualHost.HostName
+                    if (config.has_option(aHost, "vmextracts")):
+                       
+                        ThisVirtualHost.VmExtractsDir  = config.get(aHost,"vmextracts")
+                    else:
+                        ThisVirtualHost.VmExtractsDir = self.VmExtractsDir
+                    
+                    
+                    
+                    if (config.has_option(aHost, "formatFilter")):
+                        ThisVirtualHost.cmdFormatFilter  = config.get(aHost,"formatFilter")
+                    else:
+                        ThisVirtualHost.cmdFormatFilter = cmdFormatFilter
+                    if not os.access(ThisVirtualHost.vmcfgFile,os.R_OK):
+                        d = dict(
+                            DomainRootDev=ThisVirtualHost.HostRootSpace,
+                            DomainIp4Address=ThisVirtualHost.HostIp4Address,
+                            DomainName=ThisVirtualHost.HostName,
+                            DomainSwapDev=ThisVirtualHost.HostSwapSpace,
+                            DomainMac=ThisVirtualHost.HostMacAddress
+                        )
+                        self.xenconftemplate
+                        fpxenconftemp = open(self.xenconftemplate,'r')
                         newconfig = open(ThisVirtualHost.vmcfgFile,'w')
                         for line in fpxenconftemp:
                             subline = line
-			    #print line
+                            #print line
                             try:
                                 newconfig.write(string.Template(line).safe_substitute(d))
                             except:
@@ -567,9 +579,9 @@ class virtualHostContainer:
                                 newconfig.write(subline)
                         newconfig.close()
                         fpxenconftemp.close()
-            			
-			
-		    self.hostlist.append(ThisVirtualHost)
+                                    
+                        
+                    self.hostlist.append(ThisVirtualHost)
 
 
 if __name__ == "__main__":
@@ -603,8 +615,8 @@ if __name__ == "__main__":
                 print "vmimagemanager.py version: " + cvsTag
             sys.exit(0)
         if o in ("-b", "--box"):
-	    if a != None:
-		boxlist.append(a)
+            if a != None:
+                boxlist.append(a)
         if o in ("-s", "--store"):
             actionList.append("store")
             storeImage = a
@@ -639,7 +651,7 @@ if __name__ == "__main__":
             actionList.append("print-config")
 
     
-	
+        
     HostContainer = virtualHostContainer()
     #hostlist = makeConfig()
     
@@ -654,21 +666,21 @@ if __name__ == "__main__":
     
     processingBoxes = []
     if len(boxlist) >0:
-	configuredBoxes = []
+        configuredBoxes = []
 
         for ahost in HostContainer.hostlist:
             configuredBoxes.append(ahost.HostName)
-	    
+            
         for box in boxlist:
-	    found = False
-	    for ahost in HostContainer.hostlist:
-	        if ahost.HostName == box:
-		    found = True
-		    processingBoxes.append(ahost)
-	    
-	    if (not found):
-	        print "Host '%s' not found! The following Host slots exist." % (box)
-		for ahost in HostContainer.hostlist:
+            found = False
+            for ahost in HostContainer.hostlist:
+                if ahost.HostName == box:
+                    found = True
+                    processingBoxes.append(ahost)
+            
+            if (not found):
+                print "Host '%s' not found! The following Host slots exist." % (box)
+                for ahost in HostContainer.hostlist:
                     print ahost.HostName
                 sys.exit(1) 
     #print "dslkjsdljsdlkjsd"
@@ -698,11 +710,11 @@ if __name__ == "__main__":
         print "Error: No task selected"
         usage()
         sys.exit(1)
-	
+        
     
     if "list-images" in actionList:
         for box in processingBoxes:
-	    #print dir(box)
+            #print dir(box)
             for image in box.AvailableImageListGet():
                 print image
         sys.exit(0)
@@ -776,3 +788,4 @@ if __name__ == "__main__":
                 box.StartUp()
         
     
+
