@@ -1,6 +1,115 @@
-This work was originally worked on for Gridpp and then Dgrid it is released under Mozilla Public licence.
+Introduction to vm-image-manager
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Is a simple python script for managing a small cluster of xen virtual machines on a single host with one command.
+It is designed to complement the xm series of commands.
+So far its optimized for repeatedly restarting a Virtual Machine slot with an image, with one command line.
+
+Features
+
+    * Templates xen configuration files
+    * Simple Slot and Virtual Machine model of deployment.
+    * Per Slot configuration, at the template, or a hand customized version.
+    * Speeds the import and export of xen images to tgz archives
+    * Speedy frequent redeploys with rsync, should also be possible to extend for zfs or lvm snapshotting and redeploy.
+    * Extracting or Overlaying Archived Directories images.
+    * Defaults and per Slot configuration.
+    * Manages mounting domains when then Vm is down and un-mounting when the domain is launched.
+    * Manages exporting images in tar.gz format.
 
 
-vmimagemanager consists of two functions, 
+Limitations
 
-Swappping VM images as fast as posible and building xen domain templates.
+    * Only works with xen at the moment.
+    * Only works with linux virtulization.
+    * Only works with xfs/ext3 at the moment.
+    * Still requires Work on mis configured Xen systems.
+
+Model
+
+Virtualization hosts will run a fixed number of "Slots" upon which Virtual Machines can be started, The rational of this is based on the work of many groups in HTC (*1) it seems that the number of jobs per host is typically proportional to the CPU/cores's, Memory allowing, although this varies with IO jobs and CPU requirements for the job. On this reasoning the slot and virtual machine model was used.
+
+This simple model can be complicated further by migration of hosts. At the moment I am only thinking about this.
+
+Performance
+
+In testing timings for shutting down, rsync reinstalling and rebooting a standard a vanilla Scientific Linux (Strives to be Red Hat Enterprise Binary compatible) where in the region of 30-40 seconds for SL3 and 40-50 seconds for SL4, your performance may vary mine does, on an unltra portable laptop with slower hard drives with debian testing 70-80 seconds, the latency rync delay(*2) shows the file system or block level tools will have to be options in the future. The test cycle was from a static running system, shutdown, rsync, bootup and running busy (ssh comes up a few seconds later).  The messurements are to the time of execution of the vmimagemanager using the unix command "time" the unix on line help system has detailed execusion details.
+
+(2)Im sure with minimal changes this code base can support the use of volume management or zfs, the performance of bootup may still dominate execution time if not modified.
+
+Roadmap
+
+This script is intended to be placed on an LHC worker node along with SGE (sun grid engine) to virtualize the worker node, while remaining as user friendly as possible. Other Plans include a platform aplication flexible virtulization abstraction for a build system, so that software projects can build rpm's or debian debs easily with virtual build servers. This will be released as alpha shortly.
+
+Why use vmimagemanager script to manage virtual machines ?
+
+Useful for off line backing up virtual machine systems, extracting and inserting directories, and reseting the operating system, using rsync.
+My script is a simple script, and is meant to be useful and user friendly.
+Its usage is meant to be combined with the xm tools from xen and depends on them and complements them until a better solution for end users comes.
+This tool is also meant to be used by other automation tools, such as automated build and testing set ups, where simplicity of managing virtual machine slots for your own scripts is a priority not a gui.
+
+Notes
+
+(1) HTC and HPC:High performance Computing became well defined and included low latency communication between different computer CPU's, and through this definition came the need to define High Throughput Computing, which differs in the amount of synchronization operations the computers need to perform.
+
+Setting Up
+~~~~~~~~~~
+
+Installing prerequasits
+
+Running Xen kernel.
+Download the python script tar,gz
+open the compressed directory.
+run the python setup command to install from what ever format you chose, we seek to retain python 2.3 backward compatibility for some time.
+
+python setup.py  --help-commands
+
+should help you get started I prefure to only install packages (Mine or other peoples) but to save time you might want to do a 
+
+$python setup.py install 
+
+
+Setting up vmimagemanager
+
+Copy a template over to the correct location.
+
+d430:~# cp  /etc/vmimagemanager/vmimagemanager-example-d430.cfg \
+           /etc/vmimagemanager/vmimagemanager.cfg
+d430:~# vim /etc/vmimagemanager/vmimagemanager.cfg
+
+Configuration Section "VmImageManager"
+
+vmimagemanager manages your snapshots of an OS to devices and a large image store location.This path is set.on my server this space is mounted under "/server/vmstore"
+
+vmimages=/server/vmstore/images
+vmextracts=/server/vmstore/extracts
+
+the Generated configurations for Xen and for the templates to generate them (Q: should posibly be in a "/var/lib/" directory ?) are by default in the "/etc/vmimagemanager"
+
+vmconfdir=/etc/vmimagemanager/
+xenconftemplate=/etc/vmimagemanager/vmimagemanager-xen.template
+
+Configuring a Slot Section
+
+The slot section can be titled anything though calling it the box name "HostName=" is stated.
+
+[DebianStable]
+HostName=DebianStable
+root=/dev/hda5
+swap=/dev/hda10
+mount=/mnt/virt.yokel.org
+host=virt.yokel.org
+mac=02:11:62:22:21:13
+ 
+[d430vm01]
+HostName=d430vm01.yokel.org
+root=/dev/hda11
+swap=/dev/hda12
+mount=/mnt/vm001.yokel.org
+host=virt.yokel.org
+mac=02:01:63:22:51:13
+
+These configuration fields are set to be applied with the template for the xen configuration. which is stored in the setting
+
+[VmImageManager]
+xenconftemplate=/etc/vmimagemanager/vmimagemanager-xen.template
