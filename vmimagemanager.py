@@ -35,7 +35,8 @@ import logging, logging.handlers
 def usage():
     print ' -h, --help                        Display help information'
     print ' -v, --version                     Version'
-    print ' -c, --print-config                Print config'
+    print ' -c, --config                      Set config file'
+    print ' -p, --print-config                Print config'
     print ' -b, --box       [host]            Set Virtual Box'
     print ' -s, --store     [image]           Store Virtual Box as parameter'
     print ' -r, --restore   [image]           Restore Virtual Box as parameter'
@@ -463,6 +464,7 @@ class virtualHostContainer:
         
 
     def LoadConfigFile(self,fileName):
+        
         GeneralSection = "VmImageManager"
         HostListSection = "AvailalableHosts"
         RequiredSections = [GeneralSection]
@@ -513,6 +515,7 @@ class virtualHostContainer:
             cmdFormatFilter = config.get(GeneralSection,'formatFilter')
         
         for aHost in cfgHosts:
+                #print aHost
                 isanImage = 0
                 if (config.has_option(aHost, "vm_slot_enabled")):
                     isanImageStr = config.get(aHost,"vm_slot_enabled")
@@ -534,7 +537,6 @@ class virtualHostContainer:
                     if (config.has_option(aHost, "swap")):
                         ThisVirtualHost.HostSwapSpace  = config.get(aHost,"swap")
                     if (config.has_option(aHost, "vmimages")):
-                       
                         ThisVirtualHost.ImageStoreDir  = config.get(aHost,"vmimages")
                     else:
                         ThisVirtualHost.ImageStoreDir = self.XenImageDir + "/" + ThisVirtualHost.HostName
@@ -587,7 +589,7 @@ class virtualHostContainer:
 if __name__ == "__main__":
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "b:s:r:e:i:udlLhvkzyc", ["box=", "store=","restore=","extract=","insert=","up","down","list-boxes","list-images","help","version","kill","tgz","rsync","print-config"])
+        opts, args = getopt.getopt(sys.argv[1:], "b:s:r:e:i:c:udlLhvkzyp", ["box=", "store=","restore=","extract=","insert=","config=","up","down","list-boxes","list-images","help","version","kill","tgz","rsync","print-config"])
     except:
         pass
     hostName = None
@@ -602,7 +604,7 @@ if __name__ == "__main__":
     actionList = []
     boxlist = []
     ParsedImage = ""
-    
+    ParsedConfigFile = ""
     for o, a in opts:
         if o in ("-h", "--help"):
             usage()
@@ -629,7 +631,9 @@ if __name__ == "__main__":
         if o in ("-i", "--insert"):
             actionList.append("insert")
             insertions.append(a)
-
+        
+        if o in ("-c", "--config"):
+            ParsedConfigFile = a
         if o in ("-u", "--up"):
             actionList.append("up")
             start = True
@@ -647,14 +651,17 @@ if __name__ == "__main__":
             ParsedImage = "tgz"
         if o in ("-y", "--rsync"):
             ParsedImage = "rsync"
-        if o in ("-c", "--print-config"):
+        if o in ("-p", "--print-config"):
             actionList.append("print-config")
-
-    
         
+            
+    
+    #print "foof",ParsedConfigFile,"fd"
     HostContainer = virtualHostContainer()
     #hostlist = makeConfig()
-    
+    if ParsedConfigFile != "":
+        #print "foof"
+        ConfigFile = ParsedConfigFile
     if os.path.isfile(ConfigFile):
         HostContainer.LoadConfigFile(ConfigFile)
     else:
@@ -663,26 +670,22 @@ if __name__ == "__main__":
     
     if ParsedImage != "":
         HostContainer.ImageMode = ParsedImage
-    
     processingBoxes = []
-    if len(boxlist) >0:
-        configuredBoxes = []
-
-        for ahost in HostContainer.hostlist:
-            configuredBoxes.append(ahost.HostName)
-            
+    if len(boxlist) >0:       
+        notfound = False
         for box in boxlist:
             found = False
             for ahost in HostContainer.hostlist:
                 if ahost.HostName == box:
                     found = True
                     processingBoxes.append(ahost)
-            
-            if (not found):
-                print "Host '%s' not found! The following Host slots exist." % (box)
-                for ahost in HostContainer.hostlist:
-                    print ahost.HostName
-                sys.exit(1) 
+            if found == False:
+               notfound = True 
+        if (notfound):
+            print "box slot '%s' not found! The following Host slots exist." % (box)
+            for ahost in HostContainer.hostlist:
+                print ahost.HostName
+            sys.exit(1) 
     #print "dslkjsdljsdlkjsd"
     if "list-boxes" in actionList:
         #print  HostContainer.hostlist
@@ -703,7 +706,7 @@ if __name__ == "__main__":
         sys.exit(0)
     
     if len(processingBoxes) == 0:
-        print "Error: No Virtual 'boxes' not stated on command line, one or more must be stated"
+        print "Error: No Valid 'boxes' not stated on command line."
         sys.exit(1)
     
     if len(actionList) == 0:
