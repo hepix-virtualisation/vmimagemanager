@@ -7,3 +7,4 @@ include config/vmimagemanager-example-whitehouse.cfg
 include config/vmimagemanager-xen-example.template
 include config/xen.template
 include vmimagemanager-example.cfg
+include vmimagemanager.cfg
