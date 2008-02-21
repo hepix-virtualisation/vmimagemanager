@@ -1,0 +1,39 @@
+
+digraph SGE_WN {
+	node [shape = box];
+	node [color=chocolate, style=filled];
+	"CE"
+	"Job running on a VM defined by JDL";
+	node [shape = box];
+	node [color=yellow, style=filled];
+	"Shepard";
+	"Execusion Deamon";
+	"QMaster";
+	 "Scheduler";
+	 "gsub";
+	node [shape = box];
+	node [color=lightblue2, style=filled];
+	"#gsub -l os=SLC4.5ILC, hw=x86" ;
+	"CE" -> "#gsub -l os=SLC4.5ILC, hw=x86";
+	"gsub" -> "QMaster";
+	"#gsub -l os=SLC4.5ILC, hw=x86" -> "gsub";
+        "QMaster" -> "Scheduler";
+	"Scheduler" -> "QMaster";
+	"QMaster" -> "Execusion Deamon";
+	"Execusion Deamon" -> "Shepard";
+	"Shepard" -> "prolog";
+	"Shepard" -> "starter";
+	"Shepard" -> "suspend";
+	"Shepard" -> "resume";
+	"Shepard" -> "terminate";
+	"Shepard" -> "epilog";
+	"prolog" -> "vm up" [color=red  ] ;
+	"starter" -> "ssh" [color=red  ] ;
+	"terminate" -> "vm down" [color=red  ] ;
+	"epilog" -> "vm down" [color=red  ] ;
+	"ssh" -> "Job running on a VM defined by JDL";
+	"suspend" -> "vm suspend" [color=red  ] ;
+	"resume" -> "vm resume" [color=red  ] ;
+	"ssh" -> "starter"[color=red  ] ;
+	
+}
