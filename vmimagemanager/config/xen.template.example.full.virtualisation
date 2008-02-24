@@ -1,0 +1,21 @@
+kernel="hvmloader" 
+builder="hvm"
+
+memory = 512
+
+# A name for your domain. All domains must have different names.
+name = "${DomainName}"
+
+vcpus = 1
+vif = [ 'bridge=xenbr0' ]
+disk = [
+'file:/server/vmstore/images/windisk.img,ioemu:hda,w',
+"phy:/dev/scd0,ioemu:hdc:cdrom,r",
+]
+root = "/dev/sdb1 ro"
+sdl=1
+vnc=0
+vncviewer=0
+
+boot='c'
+#boot='d'
