@@ -5,6 +5,7 @@ include config/vmimagemanager-example-irl.cfg
 include config/vmimagemanager-example-d430.cfg
 include config/vmimagemanager-example-whitehouse.cfg
 include config/vmimagemanager-xen-example.template
+include config/xen.template.example.full.virtualisation
 include config/xen.template
 include vmimagemanager-example.cfg
 include vmimagemanager.cfg

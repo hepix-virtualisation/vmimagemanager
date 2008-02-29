@@ -1,6 +1,6 @@
 from distutils.core import setup
 ProjectName='vmimagemanager'
-versionString='0.0.5'
+versionString='0.0.6'
 docRoot='/usr/share/doc/' + ProjectName + '-' + versionString
 setup(name=ProjectName,
         version=versionString,
@@ -14,7 +14,8 @@ setup(name=ProjectName,
         'config/vmimagemanager-example-au.cfg',   'config/vmimagemanager-example-irl.cfg',
         'config/vmimagemanager-example-esys.cfg','config/vmimagemanager-example-whitehouse.cfg']),
         (docRoot, ['README']),
-        (docRoot + '/example-template/', ['config/vmimagemanager-xen-example.template']),
+        (docRoot + '/example-template/', ['config/vmimagemanager-xen-example.template',
+	  'config/xen.template.example.full.virtualisation']),
         ],
     scripts=['vmimagemanager.py']
 )
