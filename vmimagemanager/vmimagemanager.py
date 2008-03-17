@@ -58,8 +58,9 @@ def VitualHostsList():
     for line in cmdoutput.split('\n'):
         if counter > 0:
             section = line.split(' ')
-            #output[section[0]] = [section[1],section[2],section[3],section[4],section[5],section[6]]
-            output[section[0]] = [section[1],section[2],section[3],section[4],section[5]]
+	    if len(section) > 5:
+	        #output[section[0]] = [section[1],section[2],section[3],section[4],section[5],section[6]]
+		output[section[0]] = [section[1],section[2],section[3],section[4],section[5]]
         counter += 1
     return output
 
