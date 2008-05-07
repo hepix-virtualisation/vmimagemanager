@@ -331,6 +331,8 @@ class virtualhost:
         storedir =  self.ImageStoreDir
         if not os.path.isdir(storedir):
             os.makedirs(storedir)
+        if os.path.isdir('%s/%s' % (storedir,ImageName)):
+            self.ImageMode = "rsync"
         if "tgz" == self.ImageMode:
             cmd = "tar -zcsf %s/%s --exclude=lost+found -C %s ." % (storedir,ImageName,self.Mount)
         if "rsync" == self.ImageMode:
@@ -365,7 +367,6 @@ class virtualhost:
             self.PropertyImageModeSet("tgz")
         if True == os.path.isdir(ImageName):
             self.PropertyImageModeSet("rsync")
-        
         if not self.ShutDown():
             print 'Exiting cleanly'
             sys.exit(1)
@@ -373,11 +374,11 @@ class virtualhost:
             print 'Failed to get mount point aborting "%s"' % (self.PropertyMountGet())
             sys.exit(1)
         
-        if self.ImageMode == None:
+        if self.PropertyImageModeGet() == None:
             print "Warning: Could not find image type"
         else:
             cmd = ""
-            if "tgz" == self.ImageMode:
+            if "tgz" == self.PropertyImageModeGet():
                 self.UnMount()
                 # Formatting is faster but we have a catch, 
                 # With dcache must give it an option for XFS
@@ -393,7 +394,7 @@ class virtualhost:
                 cmd = "rm -rf %s" % (self.Mount)
                 (rc,cmdoutput) = commands.getstatusoutput(cmd)
                 cmd = "tar -zxf %s --exclude=lost+found   -C %s" % (ImageName,self.Mount)
-            if "rsync" == self.ImageMode:
+            if "rsync" == self.PropertyImageModeGet():
                 cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,self.Mount)
             #print cmd
             (rc,cmdoutput) = commands.getstatusoutput(cmd)
@@ -440,6 +441,7 @@ class virtualhost:
                 continue
             insertFormat = ""
             insertDone = False
+            
             if True == os.path.isfile(ImageName):
                 insertFormat = "tgz"
             if True == os.path.isdir(ImageName):
@@ -604,7 +606,7 @@ if __name__ == "__main__":
     kill = False
     actionList = []
     boxlist = []
-    ParsedImage = ""
+    ParsedImage = None
     ParsedConfigFile = ""
     for o, a in opts:
         if o in ("-h", "--help"):
@@ -669,7 +671,7 @@ if __name__ == "__main__":
         print "Error: Configuration File '%s' not found" % (ConfigFile)
         sys.exit(1)
     
-    if ParsedImage != "":
+    if ParsedImage != None:
         HostContainer.ImageMode = ParsedImage
     processingBoxes = []
     if len(boxlist) >0:       
@@ -792,4 +794,6 @@ if __name__ == "__main__":
                 box.StartUp()
         
     
+
+
 
