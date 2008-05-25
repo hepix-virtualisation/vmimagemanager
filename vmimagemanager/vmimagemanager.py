@@ -508,6 +508,36 @@ class virtualhost(DiscLocking):
 
     def StartUp(self):
         self.UnMount()
+        if not os.access(self.XenCfgFile,os.R_OK):
+            d = dict(
+                DomainRootDev=self.HostRootSpace,
+                DomainIp4Address=self.HostIp4Address,
+                DomainName=self.HostName,
+                DomainSwapDev=self.HostSwapSpace,
+                DomainMac=self.HostMacAddress
+            )
+            directory = os.path.dirname( self.XenCfgFile)
+            if not os.path.isdir(directory):
+                try:
+                    os.makedirs(directory)
+                except:
+                    logging.error("could not create directory '%s'" %(directory))
+                    sys.exit(1)
+            self.xenconftemplate
+            fpxenconftemp = open(self.xenconftemplate,'r')
+            newconfig = open(self.XenCfgFile,'w')
+            for line in fpxenconftemp:
+                subline = line
+                #print line
+                try:
+                    newconfig.write(string.Template(line).safe_substitute(d))
+                except:
+                    for key in d.keys():
+                        subline = subline.replace("${%s}" % (key), d[key])
+                    newconfig.write(subline)
+            newconfig.close()
+            fpxenconftemp.close()
+                                    
         domainList = VitualHostsList()
         if not domainList.has_key(self.HostName):
             cmd = "xm create %s  %s" % (self.HostName,self.XenCfgFile)
@@ -796,36 +826,12 @@ class virtualHostContainer:
                         ThisVirtualHost.cmdFormatFilter  = config.get(aHost,"formatFilter")
                     else:
                         ThisVirtualHost.cmdFormatFilter = cmdFormatFilter
-                    if not os.access(ThisVirtualHost.XenCfgFile,os.R_OK):
-                        d = dict(
-                            DomainRootDev=ThisVirtualHost.HostRootSpace,
-                            DomainIp4Address=ThisVirtualHost.HostIp4Address,
-                            DomainName=ThisVirtualHost.HostName,
-                            DomainSwapDev=ThisVirtualHost.HostSwapSpace,
-                            DomainMac=ThisVirtualHost.HostMacAddress
-                        )
-                        directory = os.path.dirname( ThisVirtualHost.XenCfgFile)
-                        if not os.path.isdir(directory):
-                            try:
-                                os.makedirs(directory)
-                            except:
-                                logging.error("could not create directory '%s'" %(directory))
-                                sys.exit(1)
-                        self.xenconftemplate
-                        fpxenconftemp = open(self.xenconftemplate,'r')
-                        newconfig = open(ThisVirtualHost.XenCfgFile,'w')
-                        for line in fpxenconftemp:
-                            subline = line
-                            #print line
-                            try:
-                                newconfig.write(string.Template(line).safe_substitute(d))
-                            except:
-                                for key in d.keys():
-                                    subline = subline.replace("${%s}" % (key), d[key])
-                                newconfig.write(subline)
-                        newconfig.close()
-                        fpxenconftemp.close()
-                                    
+                    
+                    if (config.has_option(aHost, "xenconftemplate")):
+                        ThisVirtualHost.xenconftemplate  = config.get(aHost,"xenconftemplate")
+                    else:
+                        ThisVirtualHost.xenconftemplate = self.xenconftemplate
+                    
                         
                     self.hostlist.append(ThisVirtualHost)
 
