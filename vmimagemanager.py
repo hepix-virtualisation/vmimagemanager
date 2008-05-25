@@ -1111,7 +1111,7 @@ if __name__ == "__main__":
     FoundLockedBox = False
     
     for abox in processingBoxes:
-        print abox.HostName
+        #print abox.HostName
         if not abox in lockedBoxes:
             logging.error("Slot '%s' was locked when it was attempted to be used" % (abox.HostName))
             abox.Unlock()
