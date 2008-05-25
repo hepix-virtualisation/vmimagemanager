@@ -105,7 +105,7 @@ class DiscLocking():
         pid = os.getpid()
         newlockfileName = self.LockFile + ".new.%d5" % (pid)
         tmplockfileName = self.LockFile + ".tmp.%d5" % (pid)
-        
+        #print newlockfileName
         fi = open(newlockfileName, 'w')
         #msg = 'pid="%s" message="%s"\n' % (pid,self.message)
         msg = 'pid="%s"\n' % (pid)
@@ -201,7 +201,8 @@ class DiscLocking():
         if self.lockedByOtherKnown:
             return False
         if self.lockedByMeKnown:
-            os.remove(self.LockFile)
+            if os.path.isfile(self.LockFile):
+                os.remove(self.LockFile)
             self.lockedByMeKnown = False
             return True
         return False
@@ -271,7 +272,7 @@ class virtualhost(DiscLocking):
         return self.__HostRootSpace
 
     def PropertyMountSet(self, value):
-        self.__Mount = value
+        self.__Mount = os.path.normpath(value)
     def PropertyMountGet(self):
         
         if hasattr(self,"__Mount" ):
@@ -312,18 +313,19 @@ class virtualhost(DiscLocking):
         self.__ImageStoreName = value
     def PropertyImageStoreNameGet(self):
         return self.__ImageStoreName
+        
     def PropertyImageStoreDirSet(self, value):
-        print " got here"
-        self.__ImageStoreDir = value
+        self.__ImageStoreDir = os.path.normpath(value)
+        
     def PropertyImageStoreDirGet(self):
         return self.__ImageStoreDir
 
     def PropertyXenCfgFileGet(self):
         if not hasattr(self,"self.__XenCfgFile" ):
-            return self.VmSlotVarDir + "/xend"
+            return os.path.join(self.VmSlotVarDir, "/xen")
         return self.__XenCfgFile
     def PropertyXenCfgFileSet(self, value):
-        self.__XenCfgFile = value
+        self.__XenCfgFile = os.path.normpath(value)
 
 
     def PropertyVmSlotVarDirGet(self):
@@ -337,19 +339,19 @@ class virtualhost(DiscLocking):
         self.__VmSlotVarDir = value
     
     def PropertyLockFileGet(self):
-        if self.LockFileFixed:
-            return self.__LockFile
-        self.__LockFile = self.VmSlotVarDir + "/lock"
-        return (self.__LockFile )
+        if hasattr(self,"lockfile" ):
+            return self.lockfile
+        return (self.VmSlotVarDir + "/lock" )
         
     def PropertyLockFileSet(self, value):
         if not hasattr(self,"lockfile" ):
-            self.lockfile = value 
+            self.lockfile = os.path.normpath(value)
         self.__LockFile = value 
     
     
     def delx(self): 
         del self.HostRootSpace
+    
     HostName = property(PropertyHostNameGet, PropertyHostNameSet)
     HostId = property(PropertyHostIdGet, PropertyHostIdSet)
     HostIp4Address = property(PropertyHostIp4AddressGet, PropertyHostIp4AddressSet)
@@ -368,6 +370,7 @@ class virtualhost(DiscLocking):
     XenCfgFile = property(PropertyXenCfgFileGet,PropertyXenCfgFileSet)
     VmSlotVarDir = property(PropertyVmSlotVarDirGet,PropertyVmSlotVarDirSet)
     LockFile = property(PropertyLockFileGet,PropertyLockFileSet)
+    
     def MountStatus(self):
         # Returns 0 for not mounted
         # Returns 1 for device mounted
@@ -385,6 +388,7 @@ class virtualhost(DiscLocking):
             #print mntsplit[2]    
             if mntsplit[0] == self.HostRootSpace or mntsplit[2] == self.Mount:
                 # Assumes no VM host maps to same directory
+                #print "sdsdSD"
                 result = 1
         return result
     
@@ -393,6 +397,7 @@ class virtualhost(DiscLocking):
         if self.MountStatus() == 1:
             return
         if not os.path.isdir(self.Mount):
+            #print "os.makedirs(%s)%s" % (self.Mount,self.HostRootSpace)
             os.makedirs(self.Mount)
         cmd="mount %s %s" % (self.HostRootSpace,self.Mount)
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
@@ -465,10 +470,15 @@ class virtualhost(DiscLocking):
         
     def AvailableImage(self):
         restoreImage = self.PropertyImageRestoreNameGet()
-        ImageName = "%s/%s" % (self.StorageDir(),restoreImage)
-        if False == os.path.isfile(ImageName) and False == os.path.isdir(ImageName):
-            return False
-        return True
+        ImageName = os.path.join(self.StorageDir(),restoreImage)
+        ImageName = os.path.realpath(ImageName)
+        #print "imageName=%s" % (ImageName)
+        if os.path.isdir(ImageName):
+            return True
+        if os.path.isfile(ImageName.strip()):
+            return True
+        #print "dfsdfsdF"
+        return False
         
     def AvailableImageListGet(self):
         output = []
@@ -485,7 +495,7 @@ class virtualhost(DiscLocking):
         if not os.path.isdir(self.ExtractDir()):
             return False
         for ext in self.PropertyInsertionsGet().keys():
-            ImageName = "%s/%s" % (self.ExtractDir(),ext)
+            ImageName = os.path.join(self.ExtractDir(),ext)
             if False == os.path.isfile(ImageName) and False == os.path.isdir(ImageName):
                 return False
         return True        
@@ -504,7 +514,7 @@ class virtualhost(DiscLocking):
             (rc,cmdoutput) = commands.getstatusoutput(cmd)
             if rc != 0:
                 logging.error("Failed to start up '%s'" % self.HostName)
-                logging.info(cmdoutput)
+                logging.warning(cmdoutput)
             else:
                 for n in range(60):
                     time.sleep(1)
@@ -526,7 +536,7 @@ class virtualhost(DiscLocking):
             sys.exit(1)
         self.MountImage()
         cmd = ""
-        storedir =  self.ImageStoreDir
+        storedir =  normpath(self.ImageStoreDir)
         if not os.path.isdir(storedir):
             os.makedirs(storedir)
         if os.path.isdir('%s/%s' % (storedir,ImageName)):
@@ -536,7 +546,7 @@ class virtualhost(DiscLocking):
         if "rsync" == self.ImageMode:
             cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/%s/" % (self.PropertyMountGet(),storedir,ImageName)
         if cmd == "":
-            print "Error: Failing to store images"
+            logging.error( "Error: Failing to store images")
             sys.exit(1)
             
         #print "command='%s'" % (cmd)
@@ -586,8 +596,8 @@ class virtualhost(DiscLocking):
                 cmd=self.cmdFormatFilter % (self.HostRootSpace)
                 (rc,cmdoutput) = commands.getstatusoutput(cmd)
                 if rc != 0:
-                    print cmdoutput
-                    print "command line failed running %s" % (cmd)
+                    logging.error(cmdoutput)
+                    logging.error("command line failed running %s" % (cmd))
                     return -1
                 self.MountImage()
                 cmd = "rm -rf %s" % (self.Mount)
@@ -598,9 +608,9 @@ class virtualhost(DiscLocking):
             #print cmd
             (rc,cmdoutput) = commands.getstatusoutput(cmd)
             if rc != 0:
-                print 'Failed "%s"' % (cmd)
-                print cmdoutput
-                print 'Return Code=%s' % (rc)
+                logging.error('Failed "%s"' % (cmd))
+                logging.error(cmdoutput)
+                logging.error('Return Code=%s' % (rc))
                 return rc
         filename="%s/sourceimage" % (self.Mount)
         fpvmconftemp = open(filename,'w+')
@@ -621,9 +631,9 @@ class virtualhost(DiscLocking):
                 cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/%s %s/%s/" % (self.PropertyMountGet(),self.PropertyExtractionsGet()[ext],self.ExtractDir(),ext)
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
-            print 'Failed "%s"' % (cmd)
-            print cmdoutput
-            print 'Return Code=%s' % (rc)
+            logging.error('Failed "%s"' % (cmd))
+            logging.error(cmdoutput)
+            logging.error('Return Code=%s' % (rc))
             
     def Insert(self):
         #print "Debug: PropertyInsertionsGet=%s" % (self.PropertyInsertionsGet())
@@ -631,12 +641,14 @@ class virtualhost(DiscLocking):
         #print "Debug: MountDir=%s" % (self.PropertyMountGet())
         #print "Debug: PropertyImageModeGet=%s" % (self.PropertyImageModeGet())
         if not os.path.isdir(self.ExtractDir()):
-            print "Error: Directory %s is not found" % (self.ExtractDir())
+            logging.error("Error: Directory %s is not found" % (self.ExtractDir()))
             sys.exit(1)
         for ext in self.PropertyInsertionsGet().keys():
-            ImageName = "%s/%s" % (self.ExtractDir(),ext)
+            #ImageName = "%s/%s" % (self.ExtractDir(),ext)
+            ImageName = os.path.join(self.ExtractDir(),ext)
+            ImageName = os.path.realpath(ImageName)
             if False == os.path.isfile(ImageName) and False == os.path.isdir(ImageName):
-                print "Error: Insert '%s' is not found in '%s'" % (ext,self.ExtractDir())
+                logging.error("Insert '%s' is not found in '%s'" % (ext,self.ExtractDir()))
                 continue
             insertFormat = ""
             insertDone = False
@@ -654,9 +666,9 @@ class virtualhost(DiscLocking):
             #print cmd
             (rc,cmdoutput) = commands.getstatusoutput(cmd)
             if rc != 0:
-                print 'Failed "%s"' % (cmd)
-                print cmdoutput
-                print 'Return Code=%s' % (rc)
+                logging.error('Failed "%s"' % (cmd))
+                logging.error(cmdoutput)
+                logging.error('Return Code=%s' % (rc))
         return 0        
             
     
@@ -667,16 +679,11 @@ class virtualHostContainer:
     def PropertyVmSlotVarDirSet(self, value):
         for aHost in self.hostlist:
             aHost.VmSlotVarDir = value
-            print "aHost.VmSlotVarDir=%s" % (aHost.VmSlotVarDir)
+            logging.error("aHost.VmSlotVarDir=%s" % (aHost.VmSlotVarDir))
             aHost.PropertyVmSlotVarDirSet(value)
         self.__VmSlotVarDir = value
+    
         
-    def PropertyVmSlotVarDirGet(self):
-        return self.__VmSlotVarDir
-        
-        
-            
-    VmSlotVarDir = property(PropertyVmSlotVarDirGet,PropertyVmSlotVarDirSet)
     def LoadConfigFile(self,fileName):
         
         GeneralSection = "VmImageManager"
@@ -722,7 +729,7 @@ class virtualHostContainer:
             logging.warning("Configuration file does not have a section '%s' with a key in it 'vmextracts' defaulting to '%s'" % (GeneralSection,GeneralSection))
         else:            
             self.VmExtractsDir = newVmExtractsDir
-        
+        VmMountsBaseDir = config.get(GeneralSection,'mount')
         
         
         if (config.has_option(GeneralSection, "formatFilter")):
@@ -741,6 +748,12 @@ class virtualHostContainer:
                     
                     if (config.has_option(aHost, "HostName")):
                         ThisVirtualHost.HostName  = config.get(aHost,"HostName")
+                    else:
+                        
+                        continue
+                    
+                    
+                    
                     if (config.has_option(aHost, "mac")):
                         ThisVirtualHost.HostMacAddress  = config.get(aHost,"mac")
                     if (config.has_option(aHost, "ip")):
@@ -753,12 +766,23 @@ class virtualHostContainer:
                     if (config.has_option(aHost, "vmimages")):
                         ThisVirtualHost.ImageStoreDir  = config.get(aHost,"vmimages")
                     else:
-                        ThisVirtualHost.ImageStoreDir = self.XenImageDir + "/" + ThisVirtualHost.HostName
+                        ThisVirtualHost.ImageStoreDir = os.path.join(self.XenImageDir , ThisVirtualHost.HostName)
                     if (config.has_option(aHost, "mount")):
                         ThisVirtualHost.Mount  = config.get(aHost,"mount")
+                    else:
+                        ThisVirtualHost.Mount  = os.path.join(VmMountsBaseDir ,ThisVirtualHost.HostName)
+                    ThisVirtualHost.VmSlotVarDir = os.path.join(newvmconfdir , ThisVirtualHost.HostName)
+                    
+                    ThisVirtualHost.XenCfgFile  =  os.path.join(ThisVirtualHost.VmSlotVarDir , "xen")
                     if (config.has_option(aHost, "vmcfg")):
                        
                         ThisVirtualHost.XenCfgFile  = config.get(aHost,"vmcfg")
+                    
+                    ThisVirtualHost.LockFile  = os.path.join( newvmconfdir , ThisVirtualHost.HostName ,"lock")
+                    #print ThisVirtualHost.LockFile
+                    if (config.has_option(aHost, "vmlock")):
+                       
+                        ThisVirtualHost.XenCfgFile  = config.get(aHost,"vmlock")
                     
                     if (config.has_option(aHost, "vmextracts")):
                        
@@ -1006,15 +1030,18 @@ if __name__ == "__main__":
     
         box.PropertyImageRestoreNameSet(restoreImage)
         box.PropertyImageStoreNameSet(storeImage)
-        
+        #print restoreImage
         imageList = []
         if "restore" in actionList:
             if not box.AvailableImage():
                 mesage = "Image '%s' not found in directory '%s'" % (restoreImage,box.ImageStoreDir)
                 logging.error(mesage)
-                for item in box.AvailableImageListGet():
-                    mesage += "\n" + item
-                logging.error(mesage)
+                AvailableImageList = box.AvailableImageListGet()
+                if len(AvailableImageList) > 0:
+                    mesage = "The following images where found:"
+                    for item in AvailableImageList:
+                        mesage += "\n" + item
+                    logging.warning(mesage)
                 sys.exit(1)
             
         if "insert" in actionList:
@@ -1028,9 +1055,12 @@ if __name__ == "__main__":
     HaveToCheckBoxes = []
     lockedBoxes = []
     for abox in processingBoxes:
+        #print abox.HostName
         if abox.IsLockedByMe():
+            #print "dabox.HostName"
             lockedBoxes.append(abox)
         else:
+            #print "dabox.fffffffffHostName"
             if abox.Lock():
                 HaveToCheckBoxes.append(abox)
             else:
@@ -1079,9 +1109,11 @@ if __name__ == "__main__":
        
         box.Unlock()
     FoundLockedBox = False
+    
     for abox in processingBoxes:
+        print abox.HostName
         if not abox in lockedBoxes:
-            logging.error("Slot '%s' was locked when it was attempted to be used" % (ahost.HostName))
+            logging.error("Slot '%s' was locked when it was attempted to be used" % (abox.HostName))
             abox.Unlock()
             FoundLockedBox = True
     if FoundLockedBox:
