@@ -7,9 +7,9 @@ memory = 512
 name = "${DomainName}"
 
 vcpus = 1
-vif = [ 'bridge=xenbr0' ]
+vif = [ 'mac=${DomainMac}','bridge=xenbr0' ]
 disk = [
-'file:/server/vmstore/images/windisk.img,ioemu:hda,w',
+'phy:/${DomainRootDev},ioemu:hda,w',
 "phy:/dev/scd0,ioemu:hdc:cdrom,r",
 ]
 root = "/dev/sdb1 ro"

@@ -1,6 +1,6 @@
 from distutils.core import setup
 ProjectName='vmimagemanager'
-versionString='0.0.7'
+versionString='0.0.8'
 docRoot='/usr/share/doc/' + ProjectName + '-' + versionString
 setup(name=ProjectName,
         version=versionString,
