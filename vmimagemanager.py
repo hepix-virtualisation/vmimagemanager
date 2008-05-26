@@ -59,7 +59,7 @@ def usage():
     print ' -y, --rsync                       rsync Virtual Box Image [Default]'
 
 
-class DiscLocking():
+class DiscLocking:
     def __init__(self):
         
         self.lockedByMeKnown = False
