@@ -102,6 +102,9 @@ class DiscLocking:
             #print "heher"
             return False
         #print "can lock %s" % ( self.LockFile)
+        lockfiledir = os.path.dirname(self.LockFile)
+        if not os.path.isdir(lockfiledir):
+            os.makedirs(lockfiledir)
         pid = os.getpid()
         newlockfileName = self.LockFile + ".new.%d5" % (pid)
         tmplockfileName = self.LockFile + ".tmp.%d5" % (pid)
