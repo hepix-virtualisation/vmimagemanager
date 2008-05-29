@@ -59,7 +59,7 @@ def usage():
     print ' -y, --rsync                       rsync Virtual Box Image [Default]'
 
 
-class DiscLocking:
+class DiscLocking():
     def __init__(self):
         
         self.lockedByMeKnown = False
@@ -569,7 +569,7 @@ class virtualhost(DiscLocking):
             sys.exit(1)
         self.MountImage()
         cmd = ""
-        storedir =  normpath(self.ImageStoreDir)
+        storedir =  os.path.normpath(self.ImageStoreDir)
         if not os.path.isdir(storedir):
             os.makedirs(storedir)
         if os.path.isdir('%s/%s' % (storedir,ImageName)):
@@ -768,74 +768,70 @@ class virtualHostContainer:
         if (config.has_option(GeneralSection, "formatFilter")):
             cmdFormatFilter = config.get(GeneralSection,'formatFilter')
         
-        for aHost in cfgHosts:
-                #print aHost
+        for cfgSection in cfgHosts:
+                #print cfgSection
                 isanImage = 0
-                if (config.has_option(aHost, "vm_slot_enabled")):
-                    isanImageStr = config.get(aHost,"vm_slot_enabled")
+                if (config.has_option(cfgSection, "vm_slot_enabled")):
+                    isanImageStr = config.get(cfgSection,"vm_slot_enabled")
                     if (isanImageStr in (["Yes","YES","yes","y","On","on","ON","1"])):
                         isanImage = 1
                 if isanImage > 0:
                 
                     ThisVirtualHost =  virtualhost()
                     
-                    if (config.has_option(aHost, "HostName")):
-                        ThisVirtualHost.HostName  = config.get(aHost,"HostName")
+                    if (config.has_option(cfgSection, "HostName")):
+                        ThisVirtualHost.HostName  = config.get(cfgSection,"HostName")
                     else:
-                        
-                        continue
+                        ThisVirtualHost.HostName = cfgSection
                     
                     
                     
-                    if (config.has_option(aHost, "mac")):
-                        ThisVirtualHost.HostMacAddress  = config.get(aHost,"mac")
-                    if (config.has_option(aHost, "ip")):
-                        ThisVirtualHost.HostIp4Address  = config.get(aHost,"ip")
+                    if (config.has_option(cfgSection, "mac")):
+                        ThisVirtualHost.HostMacAddress  = config.get(cfgSection,"mac")
+                    if (config.has_option(cfgSection, "ip")):
+                        ThisVirtualHost.HostIp4Address  = config.get(cfgSection,"ip")
                 
-                    if (config.has_option(aHost, "root")):
-                        ThisVirtualHost.HostRootSpace  = config.get(aHost,"root")
-                    if (config.has_option(aHost, "swap")):
-                        ThisVirtualHost.HostSwapSpace  = config.get(aHost,"swap")
-                    if (config.has_option(aHost, "vmimages")):
-                        ThisVirtualHost.ImageStoreDir  = config.get(aHost,"vmimages")
+                    if (config.has_option(cfgSection, "root")):
+                        ThisVirtualHost.HostRootSpace  = config.get(cfgSection,"root")
+                    if (config.has_option(cfgSection, "swap")):
+                        ThisVirtualHost.HostSwapSpace  = config.get(cfgSection,"swap")
+                    if (config.has_option(cfgSection, "vmimages")):
+                        ThisVirtualHost.ImageStoreDir  = config.get(cfgSection,"vmimages")
                     else:
                         ThisVirtualHost.ImageStoreDir = os.path.join(self.XenImageDir , ThisVirtualHost.HostName)
-                    if (config.has_option(aHost, "mount")):
-                        ThisVirtualHost.Mount  = config.get(aHost,"mount")
+                    if (config.has_option(cfgSection, "mount")):
+                        ThisVirtualHost.Mount  = config.get(cfgSection,"mount")
                     else:
                         ThisVirtualHost.Mount  = os.path.join(VmMountsBaseDir ,ThisVirtualHost.HostName)
                     ThisVirtualHost.VmSlotVarDir = os.path.join(newvmconfdir , ThisVirtualHost.HostName)
                     
                     ThisVirtualHost.XenCfgFile  =  os.path.join(ThisVirtualHost.VmSlotVarDir , "xen")
-                    if (config.has_option(aHost, "vmcfg")):
-                       
-                        ThisVirtualHost.XenCfgFile  = config.get(aHost,"vmcfg")
+                    if (config.has_option(cfgSection, "vmcfg")):
+                        ThisVirtualHost.XenCfgFile  = config.get(cfgSection,"vmcfg")
                     
                     ThisVirtualHost.LockFile  = os.path.join( newvmconfdir , ThisVirtualHost.HostName ,"lock")
                     #print ThisVirtualHost.LockFile
-                    if (config.has_option(aHost, "vmlock")):
+                    if (config.has_option(cfgSection, "vmlock")):
                        
-                        ThisVirtualHost.XenCfgFile  = config.get(aHost,"vmlock")
+                        ThisVirtualHost.LockFile  = config.get(cfgSection,"vmlock")
                     
-                    if (config.has_option(aHost, "vmextracts")):
+                    if (config.has_option(cfgSection, "vmextracts")):
                        
-                        ThisVirtualHost.VmExtractsDir  = config.get(aHost,"vmextracts")
+                        ThisVirtualHost.VmExtractsDir  = config.get(cfgSection,"vmextracts")
                     else:
                         ThisVirtualHost.VmExtractsDir = self.VmExtractsDir
                     
                     
                     
-                    if (config.has_option(aHost, "formatFilter")):
-                        ThisVirtualHost.cmdFormatFilter  = config.get(aHost,"formatFilter")
+                    if (config.has_option(cfgSection, "formatFilter")):
+                        ThisVirtualHost.cmdFormatFilter  = config.get(cfgSection,"formatFilter")
                     else:
                         ThisVirtualHost.cmdFormatFilter = cmdFormatFilter
                     
-                    if (config.has_option(aHost, "xenconftemplate")):
-                        ThisVirtualHost.xenconftemplate  = config.get(aHost,"xenconftemplate")
+                    if (config.has_option(cfgSection, "xenconftemplate")):
+                        ThisVirtualHost.xenconftemplate  = config.get(cfgSection,"xenconftemplate")
                     else:
                         ThisVirtualHost.xenconftemplate = self.xenconftemplate
-                    
-                        
                     self.hostlist.append(ThisVirtualHost)
 
 

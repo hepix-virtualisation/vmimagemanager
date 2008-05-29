@@ -7,11 +7,12 @@ So far its optimized for repeatedly restarting a Virtual Machine slot with an im
 
 Features
 
-    * Templates xen configuration files
+    * Templates xen configuration files.
     * Simple Slot and Virtual Machine model of deployment.
     * Per Slot configuration, at the template, or a hand customized version.
+    * Locking of slots wile processing I/O demands. (Over riddern by killing the originating process)
     * Speeds the import and export of xen images to tgz archives
-    * Speedy frequent redeploys with rsync, should also be possible to extend for zfs or lvm snapshotting and redeploy.
+    * Speedy frequent redeploys with rsync.
     * Extracting or Overlaying Archived Directories images.
     * Defaults and per Slot configuration.
     * Manages mounting domains when then Vm is down and un-mounting when the domain is launched.
@@ -21,9 +22,9 @@ Features
 Limitations
 
     * Only works with xen at the moment.
-    * Only works with linux virtulization.
     * Only works with xfs/ext3 at the moment.
-    * Still requires Work on mis configured Xen systems.
+    * Still requires work on mis-configured Xen systems.
+    * Does very little but speed some common operations.
 
 Model
 
@@ -33,13 +34,19 @@ This simple model can be complicated further by migration of hosts. At the momen
 
 Performance
 
-In testing timings for shutting down, rsync reinstalling and rebooting a standard a vanilla Scientific Linux (Strives to be Red Hat Enterprise Binary compatible) where in the region of 30-40 seconds for SL3 and 40-50 seconds for SL4, your performance may vary mine does, on an unltra portable laptop with slower hard drives with debian testing 70-80 seconds, the latency rync delay(*2) shows the file system or block level tools will have to be options in the future. The test cycle was from a static running system, shutdown, rsync, bootup and running busy (ssh comes up a few seconds later).  The messurements are to the time of execution of the vmimagemanager using the unix command "time" the unix on line help system has detailed execusion details.
+In testing timings for shutting down, rsync reinstalling and rebooting a standard a vanilla Scientific Linux (Red Hat Enterprise Binary compatible) where in the region of 30-40 seconds for SL3 and 40-50 seconds for SL4, your performance may vary mine does, on an unltra portable laptop with slower hard drives with debian testing 70-80 seconds, the latency rync delay(*2) shows the file system or block level tools will have to be options in the future. The test cycle was from a static running system, shutdown, rsync, bootup and running busy (ssh comes up a few seconds later).  The messurements are to the time of execution of the vmimagemanager using the unix command "time" the unix on line help system has detailed execusion details.
 
 (2)Im sure with minimal changes this code base can support the use of volume management or zfs, the performance of bootup may still dominate execution time if not modified.
 
 Roadmap
 
-This script is intended to be placed on an LHC worker node along with SGE (sun grid engine) to virtualize the worker node, while remaining as user friendly as possible. Other Plans include a platform aplication flexible virtulization abstraction for a build system, so that software projects can build rpm's or debian debs easily with virtual build servers. This will be released as alpha shortly.
+This script is intended to be in the developers tool box. It has also evolved to become something intended to provide some stop gap until virtualisation awareness is available with mature batch queues. The script is intended to forfill only the initial requirement for resorces specified explisitly by specific referancable OS images.
+
+ are available grid OS requirements placed on an LHC worker node. Along with SGE (sun grid engine) virtualizing the worker node, into a library of images generated at the experiments repeatble deployment demands. 
+
+This script will always aim to be as user friendly as possible. 
+
+Other Plans include a platform application for flexible virtulization abstraction for a build system, so that software projects can build rpm's or debian debs easily with virtual build servers. This will be released as alpha shortly.
 
 Why use vmimagemanager script to manage virtual machines ?
 
@@ -84,7 +91,8 @@ vmimagemanager manages your snapshots of an OS to devices and a large image stor
 vmimages=/server/vmstore/images
 vmextracts=/server/vmstore/extracts
 
-the Generated configurations for Xen and for the templates to generate them (Q: should posibly be in a "/var/lib/" directory ?) are by default in the "/etc/vmimagemanager"
+
+the Generated configurations for Xen and for the templates to generate them are by default in the "/var/lib/vmimagemanager/xen" allong with the lock files, with a directory for maintaining state per host.
 
 vmconfdir=/etc/vmimagemanager/
 xenconftemplate=/etc/vmimagemanager/vmimagemanager-xen.template
@@ -94,20 +102,33 @@ Configuring a Slot Section
 The slot section can be titled anything though calling it the box name "HostName=" is stated.
 
 [DebianStable]
+vm_slot_enabled=on
 HostName=DebianStable
 root=/dev/hda5
 swap=/dev/hda10
 mount=/mnt/virt.yokel.org
 host=virt.yokel.org
 mac=02:11:62:22:21:13
- 
-[d430vm01]
-HostName=d430vm01.yokel.org
-root=/dev/hda11
-swap=/dev/hda12
-mount=/mnt/vm001.yokel.org
-host=virt.yokel.org
+
+I then use LVM now in conjunction with these scripts becasue I use a lot of partitions, and the current linux Kernel (2.6.18) does not support more than 15 partitions per drive which is clearly no enough if your Virtual maschines are small in memorry demands.
+
+[pong]
+vm_slot_enabled=on
+HostName=pong
+root=/dev/mapper/d430-sysLenny
+#root=/dev/sbird/vm001sys
+swap=/dev/mapper/d430-swapLenny
+#swap=/dev/sbird/vm001swap
+#mount=/mnt/vm001.yokel.org
 mac=02:01:63:22:51:13
+#ip=192.168.0.28
+
+vmcfg
+vmlock
+vmextracts
+cmdFormatFilter
+xenconftemplate
+
 
 These configuration fields are set to be applied with the template for the xen configuration. which is stored in the setting
 
