@@ -198,6 +198,8 @@ class DiscLocking():
                     self.lockedByOtherKnown = True
             if self.lockedByOtherKnown:
                 return True
+            if os.path.isfile(self.LockFile):
+                os.remove(self.LockFile)
             return False
             
     def Unlock(self):
