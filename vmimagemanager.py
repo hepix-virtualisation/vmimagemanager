@@ -485,8 +485,9 @@ class virtualhost(DiscLocking):
         
     def AvailableImageListGet(self):
         output = []
-        for filename in os.listdir(self.ImageStoreDir):
-            output.append(filename)
+        if os.path.isdir(self.ImageStoreDir):
+            for filename in os.listdir(self.ImageStoreDir):
+                output.append(filename)
         return output
 
 
