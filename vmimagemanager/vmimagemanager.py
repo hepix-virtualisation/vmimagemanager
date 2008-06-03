@@ -239,7 +239,7 @@ class virtualhost(DiscLocking):
         self.PropertyImageRestoreNameSet("")
         self.PropertyImageStoreNameSet("")
         self.ImageStoreDir = ""
-        self.ImageMode = "tgz"
+        self.ImageMode = "rsync"
         DiscLocking.__init__(self)
         self.LockFileFixed = False
         
