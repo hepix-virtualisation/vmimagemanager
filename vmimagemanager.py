@@ -59,7 +59,7 @@ def usage():
     print ' -y, --rsync                       rsync Virtual Box Image [Default]'
 
 
-class DiscLocking():
+class DiscLocking:
     def __init__(self):
         
         self.lockedByMeKnown = False
@@ -580,7 +580,7 @@ class virtualhost(DiscLocking):
         if "tgz" == self.ImageMode:
             cmd = "tar -zcsf %s/%s --exclude=lost+found -C %s ." % (storedir,ImageName,self.Mount)
         if "rsync" == self.ImageMode:
-            cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/%s/" % (self.PropertyMountGet(),storedir,ImageName)
+            cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/%s/" % (self.Mount,storedir,ImageName)
         if cmd == "":
             logging.error( "Error: Failing to store images")
             sys.exit(1)
@@ -665,6 +665,7 @@ class virtualhost(DiscLocking):
                 cmd = "tar -zcsf %s/%s --exclude=lost+found -C %s %s" % (self.ExtractDir(),ext,self.PropertyMountGet(),selectedDir)
             if "rsync" == self.PropertyImageModeGet():
                 cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/%s %s/%s/" % (self.PropertyMountGet(),self.PropertyExtractionsGet()[ext],self.ExtractDir(),ext)
+        #print cmd
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             logging.error('Failed "%s"' % (cmd))
@@ -806,6 +807,7 @@ class virtualHostContainer:
                         ThisVirtualHost.Mount  = config.get(cfgSection,"mount")
                     else:
                         ThisVirtualHost.Mount  = os.path.join(VmMountsBaseDir ,ThisVirtualHost.HostName)
+                    #print "tskjdfhksjldf=%s" % (ThisVirtualHost.Mount)
                     ThisVirtualHost.VmSlotVarDir = os.path.join(newvmconfdir , ThisVirtualHost.HostName)
                     
                     ThisVirtualHost.XenCfgFile  =  os.path.join(ThisVirtualHost.VmSlotVarDir , "xen")
