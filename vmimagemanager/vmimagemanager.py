@@ -286,10 +286,10 @@ class virtualhost(DiscLocking):
             return ""
 
     def PropertyImageModeSet(self, value):
-        self.__ImageMode = value
+        self.ImageMode = value
         
     def PropertyImageModeGet(self):
-        return self.__ImageMode
+        return self.ImageMode
 
     def PropertyExtensionModeSet(self, value):
         self.__ExtensionMode = value
@@ -576,10 +576,10 @@ class virtualhost(DiscLocking):
         if not os.path.isdir(storedir):
             os.makedirs(storedir)
         if os.path.isdir('%s/%s' % (storedir,ImageName)):
-            self.ImageMode = "rsync"
-        if "tgz" == self.ImageMode:
+            self.PropertyImageModeSet("rsync")
+        if "tgz" == self.PropertyImageModeGet():
             cmd = "tar -zcsf %s/%s --exclude=lost+found -C %s ." % (storedir,ImageName,self.Mount)
-        if "rsync" == self.ImageMode:
+        if "rsync" == self.PropertyImageModeGet():
             cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/%s/" % (self.Mount,storedir,ImageName)
         if cmd == "":
             logging.error( "Error: Failing to store images")
@@ -1128,3 +1128,4 @@ if __name__ == "__main__":
             FoundLockedBox = True
     if FoundLockedBox:
         sys.exit(100)
+
