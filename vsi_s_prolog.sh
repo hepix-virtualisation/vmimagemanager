@@ -10,7 +10,7 @@ echo "prolog:        user="$USER
 
 echo "prolog:        start loading VM   = "`/bin/date`
 echo sge_queue=$QUEUE
-sudo /server/vmstore/SGE/prod_vmimage_start.sh "$QUEUE" "$JOBID"
+sudo /opt/vmimagesgeint/sbin/vsi_v_start.sh "$QUEUE" "$JOBID"
 vmimagemanagerc=$?
 echo "prolog:        end   loading VM rc=$vmimagemanagerc  = "`/bin/date`
 
