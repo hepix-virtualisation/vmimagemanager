@@ -3,7 +3,7 @@
 # invoke the epilog script as
 #    epilog path/to/epilog/script
 
-virthost=`cat /tmp/$JOB_ID`
+
 
 echo start epilog: hostname=`/bin/hostname` --- JOBID = $JOB_ID 
 echo sge_queue=$QUEUE

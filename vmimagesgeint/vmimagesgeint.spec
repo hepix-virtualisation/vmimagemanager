@@ -1,6 +1,6 @@
 Summary: vmimagesgeint
 Name: vmimagesgeint
-Version: 0.0.3
+Version: 0.0.4
 Vendor: LCG/CERN
 Release: 0
 License: LCG
