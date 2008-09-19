@@ -25,6 +25,12 @@ hostLockFile="/${hostSelectionLockFileDir}/job_host_${JOB_ID}"
 
 
 host=`/bin/hostname`
+
+if [ ! -f "${hostLockFile}" ] ; then
+  echo No Host Lock file ${hostLockFile} found.
+  exit 1
+fi
+
 virthost=`cat ${hostLockFile}`
 userhost=$USER"@"$virthost
 

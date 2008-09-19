@@ -13,6 +13,10 @@ echo sge_queue=$QUEUE
 sudo /opt/vmimagesgeint/sbin/vsi_v_start.sh "$QUEUE" "$JOBID"
 vmimagemanagerc=$?
 echo "prolog:        end   loading VM rc=$vmimagemanagerc  = "`/bin/date`
+if [ "0" != "${vmimagemanagerc}" ] ; then
+  echo ERROR: Failed to start virtual maschine
+  exit ${vmimagemanagerc}
+fi
 
 # synchronization
 sleep 30                       
