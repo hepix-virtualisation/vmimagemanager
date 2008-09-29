@@ -5,8 +5,33 @@
 #   starter_method        /server/vmstore/SGE/starter_<queue.q>.sh
 #   ...
 
+
+if [ -z "${prefix}" ] ; then
+prefix="/opt/vmimagesgeint/"
+fi
+
+if [ -z "${hostSelectionLockFile}" ] ; then
+hostSelectionLockFile=${prefix}/var/vmimagesgeint/hostSelectionLockFile
+fi
+
+
+hostSelectionLockFileDir=`dirname ${hostSelectionLockFile}`
+if [ ! -d ${hostSelectionLockFileDir} ] ; then
+  echo the directory hostSelectionLockFileDir does not exist at patch ${hostSelectionLockFileDir}
+  exit 1
+fi
+
+hostLockFile="/${hostSelectionLockFileDir}/job_host_${JOB_ID}"
+
+
 host=`/bin/hostname`
-virthost=`cat /tmp/$JOB_ID`
+
+if [ ! -f "${hostLockFile}" ] ; then
+  echo No Host Lock file ${hostLockFile} found.
+  exit 1
+fi
+
+virthost=`cat ${hostLockFile}`
 userhost=$USER"@"$virthost
 
 file=$SGE_ROOT"/default/spool/"$host
@@ -15,12 +40,13 @@ file=$file"/job_scripts/"$JOB_ID
 filerem="/home/"$USER
 filerem=$filerem"/"$JOB_ID
 
-VHOST=`cat /tmp/$JOB_ID`
 
 echo starter.sh --- hostname: `/bin/hostname` --- USER=$USER
 echo starter.sh --- file: $file
 echo starter.sh --- filerem: $filerem
-echo starter.sh --- VHOST: $VHOST
+echo starter.sh --- VHOST: $virthost
+filetype=`file $file`
+echo filetype=$filetype
 # copy batch job to the virtual machine
 scp $file $userhost:$filerem
 

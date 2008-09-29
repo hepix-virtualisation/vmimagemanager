@@ -6,40 +6,46 @@
 #   Cmnd_Alias SGE = /server/vmstore/SGE/prod_vmimage_start.sh, /server/vmstore/
 #   SGE/prod_vmimage_stop.sh/server/vmstore/SGE/vmimage_start.sh
 #
-
-gethost()
-{
-local freeHost
-RET="XXXXX"
-LocalfreeHost=`/usr/bin/vmimagemanager.py -f | head -n 1`
-if [ -z "$LocalfreeHost" ] ; then 
-  echo "No virtual maschine available"
-  exit 1
-fi
-echo "$LocalfreeHost" > /tmp/$1
-RET=$LocalfreeHost
-}
-
-
 Queue=$1
 JobId=$2
+
+
+if [ -z "${prefix}" ] ; then
+prefix="/opt/vmimagesgeint"
+fi
+
+if [ -z "${hostSelectionLockFile}" ] ; then
+hostSelectionLockFile=${prefix}/var/vmimagesgeint/hostSelectionLockFile
+fi
+
+
+hostSelectionLockFileDir=`dirname ${hostSelectionLockFile}`
+if [ ! -d ${hostSelectionLockFileDir} ] ; then
+  echo the directory hostSelectionLockFileDir does not exist at patch ${hostSelectionLockFileDir}
+  exit 1
+fi
+
+
+
+doTheWork()
+{
 echo Queue=$Queue
 echo JobId=$JobId
 
 export PATH=$PATH:/usr/sbin/
-
-gethost "${JobId}"
-freeHost=$RET
-count=`grep "$freeHost" /tmp/* | wc -l`
-while [ "$count" != 1 ] ; do
-  sleep 1
-  gethost "${JobId}"
-  freeHost=$RET
-  count=`grep "$freeHost" /tmp/* | wc -l`
-  
-done
-echo "vmimage start: VM=$freeHost - Queue=$Queue" 
+freeHost=`/usr/bin/vmimagemanager.py -f | head -n 1`
+if [ -z "$freeHost" ] ; then 
+  echo "No virtual maschine available"
+  return 1
+fi
+echo ${freeHost} > /${hostSelectionLockFileDir}/job_host_${JobId}
+echo "vmimage start: VM=$freeHost -Queue=$Queue" 
 /usr/bin/vmimagemanager.py -b $freeHost -r $Queue
 echo "vmimage start: finished"
+}
 
-exit 0
+lockfile ${hostSelectionLockFile}
+doTheWork
+RET=$?
+rm -f ${hostSelectionLockFile}
+exit ${RET}
