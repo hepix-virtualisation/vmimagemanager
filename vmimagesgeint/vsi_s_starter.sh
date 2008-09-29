@@ -45,6 +45,8 @@ echo starter.sh --- hostname: `/bin/hostname` --- USER=$USER
 echo starter.sh --- file: $file
 echo starter.sh --- filerem: $filerem
 echo starter.sh --- VHOST: $virthost
+filetype=`file $file`
+echo filetype=$filetype
 # copy batch job to the virtual machine
 scp $file $userhost:$filerem
 

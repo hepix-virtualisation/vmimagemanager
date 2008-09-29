@@ -11,7 +11,7 @@ JobId=$2
 
 
 if [ -z "${prefix}" ] ; then
-prefix="/opt/vmimagesgeint/"
+prefix="/opt/vmimagesgeint"
 fi
 
 if [ -z "${hostSelectionLockFile}" ] ; then
