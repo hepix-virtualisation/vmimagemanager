@@ -613,7 +613,7 @@ class virtualhost(DiscLocking):
         if True == os.path.isdir(ImageName):
             self.PropertyImageModeSet("rsync")
         if not self.ShutDown():
-            logging.critical('Requesting to store host wher Running Programming error')
+            logging.critical('Requesting to restore host when host is not shut down yet.')
             sys.exit(1)
         if len(self.Mount) == 0 :
             logging.error('Failed to get mount point aborting "%s"' % (self.PropertyMountGet()))
@@ -1128,4 +1128,3 @@ if __name__ == "__main__":
             FoundLockedBox = True
     if FoundLockedBox:
         sys.exit(100)
-
