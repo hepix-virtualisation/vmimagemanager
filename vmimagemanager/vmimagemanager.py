@@ -13,6 +13,24 @@ import re
 import ConfigParser, os
 import random
 import shutil
+import libvirt
+
+class Error(Exception):
+    """Base class for exceptions in this module."""
+    pass
+
+class InputError(Error):
+    """Exception raised for errors in the input.
+
+    Attributes:
+        message -- explanation of the error
+    """
+
+    def __init__(self, Message):
+        self.Message = Message
+
+
+
 #for line in file('vmimagemanager.dict'):
 #    cfg = eval(line)
 InstallPrefix="/"
@@ -60,10 +78,11 @@ def usage():
 
 
 class DiscLocking:
-    def __init__(self):
+    def __init__(self,LockFile):
         
         self.lockedByMeKnown = False
         self.lockedByOtherKnown = False
+        self.LockFile = LockFile
     def __del__(self):
         self.Unlock()
     def IsLocked(self):
@@ -226,6 +245,111 @@ def VitualHostsList():
         counter += 1
     return output
 
+
+class VirtualHostDisk():
+    def __init__(self):
+        self.CanMount = False
+
+    def MountIs(self):
+        # Returns False for not mounted
+        # Returns True for device mounted
+        result = False
+        cmd="mount"
+        (rc,cmdoutput) = commands.getstatusoutput(cmd)
+        if rc != 0:
+            logging.error('mount Failed with error code %s and the folleowing error:%s' % (rc,cmdoutput))
+            sys.exit(1)            
+        #print "%s %s" % (self.PropertyHostRootSpaceGet(),self.PropertyMountGet())
+        for mntline in cmdoutput.split("\n"):
+            mntsplit = mntline.split(" ")
+            if len(mntsplit) < 3:
+                print "Error parsing mount command!"   
+            #print mntsplit[2]    
+            if mntsplit[2] == self.Mount:
+                # Assumes no VM host maps to same directory
+                #print "sdsdSD"
+                result = True
+        return result
+
+
+    def ImageMount():
+        return False
+    def ImageUnMount(self):
+        return not self.MountIs()
+
+class VirtualHostDiskPartitionsShared(VirtualHostDisk):
+    def __init__(self):
+        self.CanMount = True
+    def MountIs(self):
+        # Returns False for not mounted
+        # Returns True for device mounted
+        result = 0
+        cmd="mount"
+        (rc,cmdoutput) = commands.getstatusoutput(cmd)
+        if rc != 0:
+            logging.error('mount Failed with error code %s and the folleowing error:%s' % (rc,cmdoutput))
+            sys.exit(1)            
+        #print "%s %s" % (self.PropertyHostRootSpaceGet(),self.PropertyMountGet())
+        for mntline in cmdoutput.split("\n"):
+            mntsplit = mntline.split(" ")
+            if len(mntsplit) < 3:
+                print "Error parsing mount command!"   
+            #print mntsplit[2]    
+            if mntsplit[0] == self.HostRootSpace or mntsplit[2] == self.Mount:
+                # Assumes no VM host maps to same directory
+                #print "sdsdSD"
+                result = 1
+        return result
+    
+    
+    def ImageMount(self):
+        if self.MountStatus() == 1:
+            return
+        if not os.path.isdir(self.Mount):
+            #print "os.makedirs(%s)%s" % (self.Mount,self.HostRootSpace)
+            os.makedirs(self.Mount)
+            logging.info( 'Made Directory %s' % (self.Mount))
+        cmd="mount %s %s" % (self.HostRootSpace,self.Mount)
+        (rc,cmdoutput) = commands.getstatusoutput(cmd)
+        if rc != 0:
+            
+            logging.error('Command "%s" Failed' % (cmd))
+            logging.info( 'rc=%s,output=%s' % (rc,cmdoutput))
+            sys.exit(1)            
+        return
+
+    def ImageUnMount(self):
+        if self.MountStatus() == 0:
+            return
+        if not os.path.isdir(self.Mount):
+            os.makedirs(self.Mount)
+        cmd="umount %s" % (self.HostRootSpace)
+        (rc,cmdoutput) = commands.getstatusoutput(cmd)
+        if rc != 0:
+            logging.error('Command "%s" Failed' % (cmd))
+            logging.info('rc=%s,output=%s' % (rc,cmdoutput))
+            sys.exit(1)            
+        return
+
+    def MountTest(self):
+        logging.debug("MountStatus %s" % (self.MountStatus()))
+        self.Mount()
+        logging.debug("MountStatus %s" % (self.MountStatus()))
+        self.UnMount()
+        logging.debug("MountStatus %s" % (self.MountStatus()))
+        sys.exit(0)    
+    
+   
+
+class VirtualHostDiskKpartx(VirtualHostDisk):
+    def __init__(self,properties):
+        VirtualHostDisk.__init__(self)
+        self.CanMount = True
+    def ImageMount(self):
+        return False
+    def ImageUnMount(self):
+        return False
+        
 class virtualhost(DiscLocking):
     def __init__(self):
         self.HostName = ""
@@ -242,7 +366,34 @@ class virtualhost(DiscLocking):
         self.ImageMode = "rsync"
         DiscLocking.__init__(self)
         self.LockFileFixed = False
+    def __init__(self,properties):
+        if not "HostName" in properties:
+            raise InputError("No HostName Spcified for virtualhost")
+        self.HostName = properties["HostName"]
+        DiscLocking.__init__(self,properties["LockFile"])
+        found = False
+        if "HostMacAddress" in properties:
+            found = True
+            self.HostMacAddress = properties["HostMacAddress"]
+        if "HostIp4Address" in properties:
+            found = True
+            self.HostIp4Address = properties["HostIp4Address"]
+        if not found:
+            raise InputError("HostMacAddress or HostIp4Address must be set for %s" %  self.HostName)
         
+        found = False
+        if ("HostRootSpace" in properties) and ("HostSwapSpace" in properties):
+            found = True
+            self.HostRootSpace = properties["HostRootSpace"]
+            
+        if ("HostDisk" in properties) and ("HostPartition" in properties):
+            found = True
+            self.HostRootSpace = properties["HostRootSpace"]        
+            self.HostDisk = properties["HostDisk"]
+        if "ConfTemplateXen" in properties:
+            self.ConfTemplateXen = properties["ConfTemplateXen"]
+        if not found:
+            raise InputError("(HostRootSpace and HostSwapSpace) or (HostPartition and HostDisk) must be set for %s" %  self.HostName)        
     def PropertyHostNameSet(self, value):
         self.__HostName = value
         
@@ -258,7 +409,10 @@ class virtualhost(DiscLocking):
         self.__HostIp4Address = value
 
     def PropertyHostIp4AddressGet(self):
-        return self.__HostIp4Address
+        if hasattr(self,"__HostIp4Address" ):
+            return self.__HostIp4Address
+        else:
+            return ""
 
     def PropertyHostMacAddressSet(self, value):
         self.__HostMacAddress = value
@@ -269,7 +423,10 @@ class virtualhost(DiscLocking):
     def PropertyHostSwapSpaceSet(self, value):
         self.__HostSwapSpace = value
     def PropertyHostSwapSpaceGet(self):
-        return self.__HostSwapSpace
+        if hasattr(self,"__HostSwapSpace" ):
+            return self.__HostSwapSpace
+        else:
+            return ""
 
     def PropertyHostRootSpaceSet(self, value):
         self.__HostRootSpace = value
@@ -404,6 +561,7 @@ class virtualhost(DiscLocking):
         if not os.path.isdir(self.Mount):
             #print "os.makedirs(%s)%s" % (self.Mount,self.HostRootSpace)
             os.makedirs(self.Mount)
+            logging.info( 'Made Directory %s' % (self.Mount))
         cmd="mount %s %s" % (self.HostRootSpace,self.Mount)
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
@@ -529,8 +687,7 @@ class virtualhost(DiscLocking):
                 except:
                     logging.error("could not create directory '%s'" %(directory))
                     sys.exit(1)
-            self.xenconftemplate
-            fpxenconftemp = open(self.xenconftemplate,'r')
+            fpxenconftemp = open(self.ConfTemplateXen,'r')
             newconfig = open(self.XenCfgFile,'w')
             for line in fpxenconftemp:
                 subline = line
@@ -748,11 +905,11 @@ class virtualHostContainer:
         ##self.VmSlotVarDir = newvmconfdir
         self.PropertyVmSlotVarDirSet(newvmconfdir)
         #logging.warning( self.__VmSlotVarDir
-        newxenconftemplate = config.get(GeneralSection,'xenconftemplate')
-        if len(newxenconftemplate) == 0:
-            logging.fatal( "Configuration file does not have a section '%s' with a key in it 'vmconfdir'" % (GeneralSection))
+        newConfTemplateXen = config.get(GeneralSection,'xenconftemplate')
+        if len(newConfTemplateXen) == 0:
+            logging.fatal( "Configuration file does not have a section '%s' with a key in it 'xenconftemplate'" % (GeneralSection))
             sys.exit(1)
-        self.xenconftemplate = newxenconftemplate
+        self.ConfTemplateXen = newConfTemplateXen
         
         newXenImageDir = config.get(GeneralSection,'vmimages')
         if len(newXenImageDir) == 0:
@@ -767,7 +924,15 @@ class virtualHostContainer:
         else:            
             self.VmExtractsDir = newVmExtractsDir
         VmMountsBaseDir = config.get(GeneralSection,'mount')
+        ThisKey = 'virthost'
+        if (config.has_option(GeneralSection, ThisKey)):
+            self.VmHostServer = config.get(GeneralSection,ThisKey)
+        else:
+            default = 'qemu:///system'
+            logging.warning("Configuration file does not have a section '%s' with a key in it 'virthost' defaulting to '%s'" % (GeneralSection,default))
+            self.VmHostServer = default
         
+        self.conection = libvirt.open(self.VmHostServer)
         
         if (config.has_option(GeneralSection, "formatFilter")):
             cmdFormatFilter = config.get(GeneralSection,'formatFilter')
@@ -780,65 +945,64 @@ class virtualHostContainer:
                     if (isanImageStr in (["Yes","YES","yes","y","On","on","ON","1"])):
                         isanImage = 1
                 if isanImage > 0:
-                
-                    ThisVirtualHost =  virtualhost()
+                    cfgDict = {}
+                    cfgDict["Connection"] = self.conection
+                    #ThisVirtualHost =  virtualhost()
                     
                     if (config.has_option(cfgSection, "HostName")):
-                        ThisVirtualHost.HostName  = config.get(cfgSection,"HostName")
-                    else:
-                        ThisVirtualHost.HostName = cfgSection
-                    
-                    
-                    
+                        cfgDict["HostName"]  = config.get(cfgSection,"HostName")
                     if (config.has_option(cfgSection, "mac")):
-                        ThisVirtualHost.HostMacAddress  = config.get(cfgSection,"mac")
+                        cfgDict["HostMacAddress"]  = config.get(cfgSection,"mac")
                     if (config.has_option(cfgSection, "ip")):
-                        ThisVirtualHost.HostIp4Address  = config.get(cfgSection,"ip")
+                        cfgDict["HostIp4Address"]  = config.get(cfgSection,"ip")
                 
                     if (config.has_option(cfgSection, "root")):
-                        ThisVirtualHost.HostRootSpace  = config.get(cfgSection,"root")
+                        cfgDict["HostRootSpace"]  = config.get(cfgSection,"root")
                     if (config.has_option(cfgSection, "swap")):
-                        ThisVirtualHost.HostSwapSpace  = config.get(cfgSection,"swap")
+                        cfgDict["HostSwapSpace"]  = config.get(cfgSection,"swap")
                     if (config.has_option(cfgSection, "vmimages")):
-                        ThisVirtualHost.ImageStoreDir  = config.get(cfgSection,"vmimages")
+                        cfgDict["ImageStoreDir"]  = config.get(cfgSection,"vmimages")                
                     else:
-                        ThisVirtualHost.ImageStoreDir = os.path.join(self.XenImageDir , ThisVirtualHost.HostName)
+                        cfgDict["ImageStoreDir"] = os.path.join(self.XenImageDir , ThisVirtualHost.HostName)
                     if (config.has_option(cfgSection, "mount")):
-                        ThisVirtualHost.Mount  = config.get(cfgSection,"mount")
+                        cfgDict["Mount"]  = config.get(cfgSection,"mount")
                     else:
-                        ThisVirtualHost.Mount  = os.path.join(VmMountsBaseDir ,ThisVirtualHost.HostName)
-                    #print "tskjdfhksjldf=%s" % (ThisVirtualHost.Mount)
-                    ThisVirtualHost.VmSlotVarDir = os.path.join(newvmconfdir , ThisVirtualHost.HostName)
+                        cfgDict["Mount"]  = os.path.join(VmMountsBaseDir ,cfgDict["HostName"])
+                    #print "tskjdfhksjldf=%s" % (cfgDict["Mount)
+                    cfgDict["VmSlotVarDir"] = os.path.join(newvmconfdir , cfgDict["HostName"])
                     
-                    ThisVirtualHost.XenCfgFile  =  os.path.join(ThisVirtualHost.VmSlotVarDir , "xen")
+                    cfgDict["XenCfgFile"]  =  os.path.join(cfgDict["VmSlotVarDir"] , "xen")
                     if (config.has_option(cfgSection, "vmcfg")):
-                        ThisVirtualHost.XenCfgFile  = config.get(cfgSection,"vmcfg")
+                        cfgDict["XenCfgFile"]  = config.get(cfgSection,"vmcfg")
                     
-                    ThisVirtualHost.LockFile  = os.path.join( newvmconfdir , ThisVirtualHost.HostName ,"lock")
-                    #print ThisVirtualHost.LockFile
+                    cfgDict["LockFile"]  = os.path.join( newvmconfdir , cfgDict["HostName"] ,"lock")
+                    #print cfgDict["LockFile
                     if (config.has_option(cfgSection, "vmlock")):
                        
-                        ThisVirtualHost.LockFile  = config.get(cfgSection,"vmlock")
+                        cfgDict["LockFile"]  = config.get(cfgSection,"vmlock")
                     
                     if (config.has_option(cfgSection, "vmextracts")):
                        
-                        ThisVirtualHost.VmExtractsDir  = config.get(cfgSection,"vmextracts")
+                        cfgDict["VmExtractsDir"]  = config.get(cfgSection,"vmextracts")
                     else:
-                        ThisVirtualHost.VmExtractsDir = self.VmExtractsDir
+                        cfgDict["VmExtractsDir"] = self.VmExtractsDir
                     
                     
                     
                     if (config.has_option(cfgSection, "formatFilter")):
-                        ThisVirtualHost.cmdFormatFilter  = config.get(cfgSection,"formatFilter")
+                        cfgDict["cmdFormatFilter"]  = config.get(cfgSection,"formatFilter")
                     else:
-                        ThisVirtualHost.cmdFormatFilter = cmdFormatFilter
+                        cfgDict["cmdFormatFilter"] = cmdFormatFilter
                     
-                    if (config.has_option(cfgSection, "xenconftemplate")):
-                        ThisVirtualHost.xenconftemplate  = config.get(cfgSection,"xenconftemplate")
+                    if (config.has_option(cfgSection, "ConfTemplateXen")):
+                        cfgDict["ConfTemplateXen"]  = config.get(cfgSection,"ConfTemplateXen")
                     else:
-                        ThisVirtualHost.xenconftemplate = self.xenconftemplate
-                    self.hostlist.append(ThisVirtualHost)
-
+                        cfgDict["ConfTemplateXen"] = self.ConfTemplateXen
+                    try:      
+                        newhost = virtualhost(cfgDict)
+                        self.hostlist.append(virtualhost(cfgDict))
+                    except InputError, (instance):
+                        print repr(instance.Message)
 
 if __name__ == "__main__":
     #opts = []
