@@ -963,7 +963,7 @@ class virtualHostContainer:
                     if (config.has_option(cfgSection, "vmimages")):
                         cfgDict["ImageStoreDir"]  = config.get(cfgSection,"vmimages")                
                     else:
-                        cfgDict["ImageStoreDir"] = os.path.join(self.XenImageDir , ThisVirtualHost.HostName)
+                        cfgDict["ImageStoreDir"] = os.path.join(self.XenImageDir , cfgDict["HostName"])
                     if (config.has_option(cfgSection, "mount")):
                         cfgDict["Mount"]  = config.get(cfgSection,"mount")
                     else:
@@ -1008,8 +1008,10 @@ if __name__ == "__main__":
     #opts = []
     try:
         opts, args = getopt.getopt(sys.argv[1:], "b:s:r:e:i:c:udlLhvkzypfm", ["box=", "store=","restore=","extract=","insert=","config=","up","down","list-boxes","list-images","help","version","kill","tgz","rsync","print-config","free","locked"])
-    except:
-        pass
+    except :
+        usage()
+        logging.error('Command line option error')
+        sys.exit(1)
     hostName = None
     storeImage = None
     restoreImage = None
