@@ -247,9 +247,9 @@ def VitualHostsList():
 
 
 class VirtualHostDisk():
-    def __init__(self):
+    def __init__(self,properties):
         self.CanMount = False
-
+        
     def MountIs(self):
         # Returns False for not mounted
         # Returns True for device mounted
@@ -278,8 +278,11 @@ class VirtualHostDisk():
         return not self.MountIs()
 
 class VirtualHostDiskPartitionsShared(VirtualHostDisk):
-    def __init__(self):
+    def __init__(self,properties):    
         self.CanMount = True
+        self.HostRootSpace = properties["HostRootSpace"]
+        self.MountPoint = properties["MountPoint"]
+        
     def MountIs(self):
         # Returns False for not mounted
         # Returns True for device mounted
@@ -343,7 +346,7 @@ class VirtualHostDiskPartitionsShared(VirtualHostDisk):
 
 class VirtualHostDiskKpartx(VirtualHostDisk):
     def __init__(self,properties):
-        VirtualHostDisk.__init__(self)
+        self.MountPoint = properties["MountPoint"]
         self.CanMount = True
     def ImageMount(self):
         return False
@@ -378,22 +381,32 @@ class virtualhost(DiscLocking):
         if "HostIp4Address" in properties:
             found = True
             self.HostIp4Address = properties["HostIp4Address"]
+    
         if not found:
             raise InputError("HostMacAddress or HostIp4Address must be set for %s" %  self.HostName)
         
         found = False
+        self.DiskSubsystem = VirtualHostDisk(properties)
+
         if ("HostRootSpace" in properties) and ("HostSwapSpace" in properties):
+            self.DiskSubsystem = VirtualHostDiskPartitionsShared(properties)
             found = True
-            self.HostRootSpace = properties["HostRootSpace"]
-            
         if ("HostDisk" in properties) and ("HostPartition" in properties):
+            self.DiskSubsystem = VirtualHostDiskKpartx(properties)
             found = True
-            self.HostRootSpace = properties["HostRootSpace"]        
-            self.HostDisk = properties["HostDisk"]
+
+        if not found:
+            raise InputError("(HostRootSpace and HostSwapSpace) or (HostPartition and HostDisk) must be set for %s" %  self.HostName)
         if "ConfTemplateXen" in properties:
             self.ConfTemplateXen = properties["ConfTemplateXen"]
-        if not found:
-            raise InputError("(HostRootSpace and HostSwapSpace) or (HostPartition and HostDisk) must be set for %s" %  self.HostName)        
+        if "ImageStoreDir" in properties:
+            self.ImageStoreDir = properties["ImageStoreDir"]
+        else:
+            raise InputError("ImageStoreDir must be set for %s" %  self.HostName)
+        if "FormatFilter" in properties:
+            self.cmdFormatFilter = properties["FormatFilter"]
+        else:
+            self.cmdFormatFilter = 'mkfs.xfs %s'
     def PropertyHostNameSet(self, value):
         self.__HostName = value
         
@@ -533,66 +546,7 @@ class virtualhost(DiscLocking):
     VmSlotVarDir = property(PropertyVmSlotVarDirGet,PropertyVmSlotVarDirSet)
     LockFile = property(PropertyLockFileGet,PropertyLockFileSet)
     
-    def MountStatus(self):
-        # Returns 0 for not mounted
-        # Returns 1 for device mounted
-        result = 0
-        cmd="mount"
-        (rc,cmdoutput) = commands.getstatusoutput(cmd)
-        if rc != 0:
-            logging.error('mount Failed with error code %s and the folleowing error:%s' % (rc,cmdoutput))
-            sys.exit(1)            
-        #print "%s %s" % (self.PropertyHostRootSpaceGet(),self.PropertyMountGet())
-        for mntline in cmdoutput.split("\n"):
-            mntsplit = mntline.split(" ")
-            if len(mntsplit) < 3:
-                print "Error parsing mount command!"   
-            #print mntsplit[2]    
-            if mntsplit[0] == self.HostRootSpace or mntsplit[2] == self.Mount:
-                # Assumes no VM host maps to same directory
-                #print "sdsdSD"
-                result = 1
-        return result
     
-    
-    def MountImage(self):
-        if self.MountStatus() == 1:
-            return
-        if not os.path.isdir(self.Mount):
-            #print "os.makedirs(%s)%s" % (self.Mount,self.HostRootSpace)
-            os.makedirs(self.Mount)
-            logging.info( 'Made Directory %s' % (self.Mount))
-        cmd="mount %s %s" % (self.HostRootSpace,self.Mount)
-        (rc,cmdoutput) = commands.getstatusoutput(cmd)
-        if rc != 0:
-            
-            logging.error('Command "%s" Failed' % (cmd))
-            logging.info( 'rc=%s,output=%s' % (rc,cmdoutput))
-            sys.exit(1)            
-        return
-
-    def UnMount(self):
-        if self.MountStatus() == 0:
-            return
-        if not os.path.isdir(self.Mount):
-            os.makedirs(self.Mount)
-        cmd="umount %s" % (self.HostRootSpace)
-        (rc,cmdoutput) = commands.getstatusoutput(cmd)
-        if rc != 0:
-            logging.error('Command "%s" Failed' % (cmd))
-            logging.info('rc=%s,output=%s' % (rc,cmdoutput))
-            sys.exit(1)            
-        return
-
-    def MountTest(self):
-        logging.debug("MountStatus %s" % (self.MountStatus()))
-        self.Mount()
-        logging.debug("MountStatus %s" % (self.MountStatus()))
-        self.UnMount()
-        logging.debug("MountStatus %s" % (self.MountStatus()))
-        sys.exit(0)    
-    
-
 
         
     def ShutDown(self):
@@ -612,8 +566,7 @@ class virtualhost(DiscLocking):
             domainList = VitualHostsList()
         if domainList.has_key(self.HostName):
             return False
-        self.MountImage()
-	
+        self.DiskSubsystem.ImageMount()
         return True
         
 
@@ -752,6 +705,7 @@ class virtualhost(DiscLocking):
         
         self.StartUp()
     def RestoreHost(self):
+        
         restoreImage = self.PropertyImageRestoreNameGet()
         
         storedir =  self.ImageStoreDir
@@ -772,7 +726,7 @@ class virtualhost(DiscLocking):
         if not self.ShutDown():
             logging.critical('Requesting to restore host when host is not shut down yet.')
             sys.exit(1)
-        if len(self.Mount) == 0 :
+        if len(self.DiskSubsystem.MountPoint) == 0 :
             logging.error('Failed to get mount point aborting "%s"' % (self.PropertyMountGet()))
             sys.exit(1)
         
@@ -781,23 +735,23 @@ class virtualhost(DiscLocking):
         else:
             cmd = ""
             if "tgz" == self.PropertyImageModeGet():
-                self.UnMount()
+                self.DiskSubsystem.ImageUnMount()
                 # Formatting is faster but we have a catch, 
                 # With dcache must give it an option for XFS
                 # cmdFormatFilter="mkfs.xfs %s"
                 
-                cmd=self.cmdFormatFilter % (self.HostRootSpace)
+                cmd=self.cmdFormatFilter % (self.DiskSubsystem.HostRootSpace)
                 (rc,cmdoutput) = commands.getstatusoutput(cmd)
                 if rc != 0:
                     logging.error(cmdoutput)
                     logging.error("command line failed running %s" % (cmd))
                     return -1
-                self.MountImage()
+                self.DiskSubsystem.MountImage()
                 cmd = "rm -rf %s" % (self.Mount)
                 (rc,cmdoutput) = commands.getstatusoutput(cmd)
-                cmd = "tar -zxf %s --exclude=lost+found   -C %s" % (ImageName,self.Mount)
+                cmd = "tar -zxf %s --exclude=lost+found   -C %s" % (ImageName,self.DiskSubsystem.MountPoint)
             if "rsync" == self.PropertyImageModeGet():
-                cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,self.Mount)
+                cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,self.DiskSubsystem.MountPoint)
             #print cmd
             (rc,cmdoutput) = commands.getstatusoutput(cmd)
             if rc != 0:
@@ -960,14 +914,19 @@ class virtualHostContainer:
                         cfgDict["HostRootSpace"]  = config.get(cfgSection,"root")
                     if (config.has_option(cfgSection, "swap")):
                         cfgDict["HostSwapSpace"]  = config.get(cfgSection,"swap")
+                    if (config.has_option(cfgSection, "disk")):
+                        cfgDict["HostDisk"]  = config.get(cfgSection,"disk")
+                    if (config.has_option(cfgSection, "partition")):
+                        cfgDict["HostPartition"]  = config.get(cfgSection,"partition")
+                    
                     if (config.has_option(cfgSection, "vmimages")):
                         cfgDict["ImageStoreDir"]  = config.get(cfgSection,"vmimages")                
                     else:
                         cfgDict["ImageStoreDir"] = os.path.join(self.XenImageDir , cfgDict["HostName"])
                     if (config.has_option(cfgSection, "mount")):
-                        cfgDict["Mount"]  = config.get(cfgSection,"mount")
+                        cfgDict["MountPoint"]  = config.get(cfgSection,"mount")
                     else:
-                        cfgDict["Mount"]  = os.path.join(VmMountsBaseDir ,cfgDict["HostName"])
+                        cfgDict["MountPoint"]  = os.path.join(VmMountsBaseDir ,cfgDict["HostName"])
                     #print "tskjdfhksjldf=%s" % (cfgDict["Mount)
                     cfgDict["VmSlotVarDir"] = os.path.join(newvmconfdir , cfgDict["HostName"])
                     
@@ -1188,7 +1147,7 @@ if __name__ == "__main__":
             usage()
             sys.exit(1)
         extractionsDict[compdecp[0]] = compdecp[1]
-    #print "extractionsDict=%s" % (extractionsDict)
+        #print "extractionsDict=%s" % (extractionsDict)
     insertionsDict = {}
     for component in insertions:
         compdecp = component.split(':')
@@ -1200,7 +1159,7 @@ if __name__ == "__main__":
     for box in processingBoxes:
         box.PropertyExtractionsSet(extractionsDict)
         box.PropertyInsertionsSet(insertionsDict)        
-    #print "avirtualHost.PropertyExtractionsGet=%s" % (avirtualHost.PropertyExtractionsGet())
+        #print "avirtualHost.PropertyExtractionsGet=%s" % (avirtualHost.PropertyExtractionsGet())
         if ParsedImage != None:
             box.PropertyImageModeSet(ParsedImage)
     
