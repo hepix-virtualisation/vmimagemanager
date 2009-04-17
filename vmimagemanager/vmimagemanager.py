@@ -265,7 +265,7 @@ class VirtualHostDisk():
             if len(mntsplit) < 3:
                 print "Error parsing mount command!"   
             #print mntsplit[2]    
-            if mntsplit[2] == self.Mount:
+            if mntsplit[2] == self.MountPoint:
                 # Assumes no VM host maps to same directory
                 #print "sdsdSD"
                 result = True
@@ -347,11 +347,141 @@ class VirtualHostDiskPartitionsShared(VirtualHostDisk):
 class VirtualHostDiskKpartx(VirtualHostDisk):
     def __init__(self,properties):
         self.MountPoint = properties["MountPoint"]
+        self.HostPartition = int(properties["HostPartition"])
+        self.HostDisk = properties["HostDisk"]
         self.CanMount = True
+    
+    
+    def Lock(self):
+        if self.MountIs():
+            return True
+        cmd = 'kpartx -p vmim -al %s' % (self.HostDisk)
+        (rc,cmdoutput) = commands.getstatusoutput(cmd)
+        if rc != 0:
+            logging.error('Failed "%s"' % (cmd))
+            logging.error(cmdoutput)
+            logging.error('Return Code=%s' % (rc))
+            sys.exit(1)
+        if "" == cmdoutput:
+            logging.error('The Disk "%s" has no partitons' % (self.HostDisk))
+            sys.exit(1)
+        DiskPartitions = cmdoutput.split("\n")
+        print len(DiskPartitions)
+        if len(DiskPartitions) < self.HostPartition:
+            logging.error('Partiton  "%s" is greater than "%s" the number of avilaable partitons' % (self.HostPartition,len(DiskPartitions) ))
+            logging.error(cmdoutput)
+            sys.exit(1)
+        print DiskPartitions
+        PartitonLine = DiskPartitions[self.HostPartition].split(":")
+        logging.error("PartitonLine=%s" % (PartitonLine))
+        self.__HostRootSpace = PartitonLine[0]
+        return True
+    def UnLock(self):
+        if not hasattr(self,"__HostRootSpace" ):
+            return True
+        if self.MountIs():
+            return False
+        del self.__HostRootSpace
+        cmd = 'kpartx -p vmim -d %s' % ( self.HostDisk)
+        (rc,cmdoutput) = commands.getstatusoutput(cmd)
+        if rc != 0:
+            logging.error('Failed "%s"' % (cmd))
+            logging.error(cmdoutput)
+            logging.error('Return Code=%s' % (rc))
+            sys.exit(1)
+        return True
+    def PropertyHostRootSpaceGet(self):
+        return self.__HostRootSpace   
+       
     def ImageMount(self):
+    
         return False
     def ImageUnMount(self):
         return False
+    HostRootSpace = property(PropertyHostRootSpaceGet, "I'm the HostRootSpace property.")
+
+class vmControlXen():
+    def StartUp(self):
+        self.DiskSubsystem.ImageUnMount()
+        self.DiskSubsystem.UnLock()
+        if not os.access(self.XenCfgFile,os.R_OK):
+            d = dict(
+                DomainRootDev=self.HostRootSpace,
+                DomainIp4Address=self.HostIp4Address,
+                DomainName=self.HostName,
+                DomainSwapDev=self.HostSwapSpace,
+                DomainMac=self.HostMacAddress
+            )
+            directory = os.path.dirname( self.XenCfgFile)
+            if not os.path.isdir(directory):
+                try:
+                    os.makedirs(directory)
+                except:
+                    logging.error("could not create directory '%s'" %(directory))
+                    sys.exit(1)
+            fpxenconftemp = open(self.ConfTemplateXen,'r')
+            newconfig = open(self.XenCfgFile,'w')
+            for line in fpxenconftemp:
+                subline = line
+                #print line
+                try:
+                    newconfig.write(string.Template(line).safe_substitute(d))
+                except:
+                    for key in d.keys():
+                        subline = subline.replace("${%s}" % (key), d[key])
+                    newconfig.write(subline)
+            newconfig.close()
+            fpxenconftemp.close()
+                                    
+        domainList = VitualHostsList()
+        if not domainList.has_key(self.HostName):
+            cmd = "xm create %s  %s" % (self.HostName,self.XenCfgFile)
+            (rc,cmdoutput) = commands.getstatusoutput(cmd)
+            if rc != 0:
+                logging.error("Failed to start up '%s'" % self.HostName)
+                logging.warning(cmdoutput)
+            else:
+                for n in range(60):
+                    time.sleep(1)
+                    domainList = VitualHostsList()
+                    if domainList.has_key(self.HostName):
+                        break
+            domainList = VitualHostsList()
+        if not domainList.has_key(self.HostName):
+            return False
+        return True
+    def ShutDown(self):
+        domainList = VitualHostsList()
+        if domainList.has_key(self.HostName):
+            cmd = "xm shutdown %s" % self.HostName
+            (rc,cmdoutput) = commands.getstatusoutput(cmd)
+            if rc != 0:
+                logging.error("Failed to shut down '%s'" % self.HostName)
+            else:
+                for n in range(60):
+                    time.sleep(1)
+                    domainList = VitualHostsList()
+                    #print domainList
+                    if not domainList.has_key(self.HostName):
+                        break
+            domainList = VitualHostsList()
+        if domainList.has_key(self.HostName):
+            return False
+        self.DiskSubsystem.ImageMount()
+        return True
+        
+
+    def Kill(self):
+        self.ShutDown()
+        if domainList.has_key(self.HostName):
+            cmd = "xm destroy %s" % (self.HostName)
+            (rc,cmdoutput) = commands.getstatusoutput(cmd)
+            if rc != 0:
+                logging.error("Failed to shut down or kill '%s'" % self.HostName)
+                logging.info(cmdoutput)
+            return False
+        return True
+
         
 class virtualhost(DiscLocking):
     def __init__(self):
@@ -548,39 +678,27 @@ class virtualhost(DiscLocking):
     
     
 
-        
+    def StartUp(self):
+        rc = self.libvirtObj.create()
+        print rc 
+        print dir(self.libvirtObj)
     def ShutDown(self):
-        domainList = VitualHostsList()
-        if domainList.has_key(self.HostName):
-            cmd = "xm shutdown %s" % self.HostName
-            (rc,cmdoutput) = commands.getstatusoutput(cmd)
-            if rc != 0:
-                logging.error("Failed to shut down '%s'" % self.HostName)
-            else:
-                for n in range(60):
-                    time.sleep(1)
-                    domainList = VitualHostsList()
-                    #print domainList
-                    if not domainList.has_key(self.HostName):
-                        break
-            domainList = VitualHostsList()
-        if domainList.has_key(self.HostName):
-            return False
-        self.DiskSubsystem.ImageMount()
-        return True
-        
-
-    def Kill(self):
-        self.ShutDown()
-        if domainList.has_key(self.HostName):
-            cmd = "xm destroy %s" % (self.HostName)
-            (rc,cmdoutput) = commands.getstatusoutput(cmd)
-            if rc != 0:
-                logging.error("Failed to shut down or kill '%s'" % self.HostName)
-                logging.info(cmdoutput)
-            return False
-        return True
-    
+        (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
+        print "state %s" %( state)
+        #VIR_DOMAIN_NOSTATE= 0: no state
+        #VIR_DOMAIN_RUNNING= 1: the domain is running
+        #VIR_DOMAIN_BLOCKED= 2: the domain is blocked on resource
+        #VIR_DOMAIN_PAUSED= 3: the domain is paused by user
+        #VIR_DOMAIN_SHUTDOWN= 4: the domain is being shut down
+        #VIR_DOMAIN_SHUTOFF= 5: the domain is shut off
+        #VIR_DOMAIN_CRASHED= 6: the domain is crashed
+        while state in (1,2,3):
+            rc = self.libvirtObj.shutdown()
+            time.sleep(1)
+            (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
+            #print "state %s" %( state)
+        self.DiskSubsystem.ImageMount()   
+            
     def StorageDir(self):
         return self.ImageStoreDir
         
@@ -623,54 +741,6 @@ class virtualhost(DiscLocking):
         return output
 
 
-    def StartUp(self):
-        self.UnMount()
-        if not os.access(self.XenCfgFile,os.R_OK):
-            d = dict(
-                DomainRootDev=self.HostRootSpace,
-                DomainIp4Address=self.HostIp4Address,
-                DomainName=self.HostName,
-                DomainSwapDev=self.HostSwapSpace,
-                DomainMac=self.HostMacAddress
-            )
-            directory = os.path.dirname( self.XenCfgFile)
-            if not os.path.isdir(directory):
-                try:
-                    os.makedirs(directory)
-                except:
-                    logging.error("could not create directory '%s'" %(directory))
-                    sys.exit(1)
-            fpxenconftemp = open(self.ConfTemplateXen,'r')
-            newconfig = open(self.XenCfgFile,'w')
-            for line in fpxenconftemp:
-                subline = line
-                #print line
-                try:
-                    newconfig.write(string.Template(line).safe_substitute(d))
-                except:
-                    for key in d.keys():
-                        subline = subline.replace("${%s}" % (key), d[key])
-                    newconfig.write(subline)
-            newconfig.close()
-            fpxenconftemp.close()
-                                    
-        domainList = VitualHostsList()
-        if not domainList.has_key(self.HostName):
-            cmd = "xm create %s  %s" % (self.HostName,self.XenCfgFile)
-            (rc,cmdoutput) = commands.getstatusoutput(cmd)
-            if rc != 0:
-                logging.error("Failed to start up '%s'" % self.HostName)
-                logging.warning(cmdoutput)
-            else:
-                for n in range(60):
-                    time.sleep(1)
-                    domainList = VitualHostsList()
-                    if domainList.has_key(self.HostName):
-                        break
-            domainList = VitualHostsList()
-        if not domainList.has_key(self.HostName):
-            return False
-        return True
     def Restart(self):
         self.ShutDown()
         self.StartUp()
@@ -726,10 +796,11 @@ class virtualhost(DiscLocking):
         if not self.ShutDown():
             logging.critical('Requesting to restore host when host is not shut down yet.')
             sys.exit(1)
+        
         if len(self.DiskSubsystem.MountPoint) == 0 :
             logging.error('Failed to get mount point aborting "%s"' % (self.PropertyMountGet()))
             sys.exit(1)
-        
+        self.DiskSubsystem.DiskLock()
         if self.PropertyImageModeGet() == None:
             logging.warning("Warning: Could not find image type")
         else:
@@ -752,7 +823,6 @@ class virtualhost(DiscLocking):
                 cmd = "tar -zxf %s --exclude=lost+found   -C %s" % (ImageName,self.DiskSubsystem.MountPoint)
             if "rsync" == self.PropertyImageModeGet():
                 cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,self.DiskSubsystem.MountPoint)
-            #print cmd
             (rc,cmdoutput) = commands.getstatusoutput(cmd)
             if rc != 0:
                 logging.error('Failed "%s"' % (cmd))
@@ -818,7 +888,66 @@ class virtualhost(DiscLocking):
                 logging.error(cmdoutput)
                 logging.error('Return Code=%s' % (rc))
         return 0        
-            
+    def genXml(self):
+        xml = """<domain type='kvm'>
+  <name>${DomainName}</name>
+  <memory>2097152</memory>
+  <currentMemory>2097152</currentMemory>
+  <vcpu>1</vcpu>
+  <os>
+    <type arch='x86_64' machine='pc'>hvm</type>
+    <boot dev='hd'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <clock offset='utc'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <emulator>/usr/bin/kvm</emulator>
+    <disk type='block' device='disk'>
+      <source dev='${DomainDev}'/>
+      <target dev='hda' bus='ide'/>
+    </disk>
+    <disk type='file' device='cdrom'>
+      <target dev='hdc' bus='ide'/>
+      <readonly/>
+    </disk>
+    <interface type='bridge'>
+      <mac address='${DomainMac}'/>
+      <source bridge='br0'/>
+    </interface>
+    <serial type='pty'>
+      <target port='0'/>
+    </serial>
+    <console type='pty'>
+      <target port='0'/>
+    </console>
+    <input type='mouse' bus='ps2'/>
+    <graphics type='vnc' port='-1' autoport='yes' keymap='en-us'/>
+    <sound model='es1370'/>
+  </devices>
+</domain>
+        """
+        try:
+            d = dict(
+                DomainDev=self.DiskSubsystem.HostDisk,
+                DomainRootDev="",
+                DomainIp4Address="",
+                DomainName=self.HostName,
+                DomainSwapDev="",
+                DomainMac=self.HostMacAddress
+            )
+            for key in d.keys():
+                xml = xml.replace("${%s}" % (key), d[key])
+        except:
+            xml = ""
+        return xml
+        
     
 class virtualHostContainer:
     
@@ -959,10 +1088,31 @@ class virtualHostContainer:
                         cfgDict["ConfTemplateXen"] = self.ConfTemplateXen
                     try:      
                         newhost = virtualhost(cfgDict)
-                        self.hostlist.append(virtualhost(cfgDict))
+                        newhost.Container = self
+                        self.hostlist.append(newhost)
                     except InputError, (instance):
                         print repr(instance.Message)
-
+        KnownHosts = []
+        for libVritId in self.conection.listDomainsID():
+            dom=self.conection.lookupByID(libVritId)
+            HostName = dom.name()
+            for x in range (0 , len(self.hostlist)):
+                if self.hostlist[x].HostName == HostName:
+                    self.hostlist[x].libvirtObj = dom
+            KnownHosts.append(dom.name())
+        print len(self.hostlist)
+        for x in range (0 , len(self.hostlist)):
+            print self.hostlist[x].HostName
+            if not self.hostlist[x].HostName in KnownHosts:
+                host = self.hostlist[x]
+                generatorXml = host.genXml()
+                if generatorXml != "":
+                    host.libvirtObj = self.conection.defineXML(generatorXml)
+                    self.hostlist[x] = host
+                    print dir(self.hostlist[x])
+        print len(self.hostlist)
+                    
+                    
 if __name__ == "__main__":
     #opts = []
     try:
