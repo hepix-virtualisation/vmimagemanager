@@ -272,7 +272,8 @@ class VirtualHostDisk():
         return result
 
 
-    def ImageMount():
+    def ImageMount(self):
+        print "sdfsdsssssssssssssssssf"
         return False
     def ImageUnMount(self):
         return not self.MountIs()
@@ -306,13 +307,14 @@ class VirtualHostDiskPartitionsShared(VirtualHostDisk):
     
     
     def ImageMount(self):
-        if self.MountStatus() == 1:
+        if self.MountIs() == True:
             return
-        if not os.path.isdir(self.Mount):
+        print "fsdfsdfddddddddddddddddd"
+        if not os.path.isdir(self.MountPoint):
             #print "os.makedirs(%s)%s" % (self.Mount,self.HostRootSpace)
-            os.makedirs(self.Mount)
-            logging.info( 'Made Directory %s' % (self.Mount))
-        cmd="mount %s %s" % (self.HostRootSpace,self.Mount)
+            os.makedirs(self.MountPoint)
+            logging.info( 'Made Directory %s' % (self.MountPoint))
+        cmd="mount %s %s" % (self.HostRootSpace,self.MountPoint)
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             
@@ -344,18 +346,37 @@ class VirtualHostDiskPartitionsShared(VirtualHostDisk):
     
    
 
-class VirtualHostDiskKpartx(VirtualHostDisk):
+class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
     def __init__(self,properties):
         self.MountPoint = properties["MountPoint"]
         self.HostPartition = int(properties["HostPartition"])
         self.HostDisk = properties["HostDisk"]
         self.CanMount = True
-    
+    def MountIs(self):
+        # Returns False for not mounted
+        # Returns True for device mounted
+        result = False
+        cmd="mount"
+        (rc,cmdoutput) = commands.getstatusoutput(cmd)
+        if rc != 0:
+            logging.error('mount Failed with error code %s and the folleowing error:%s' % (rc,cmdoutput))
+            sys.exit(1)            
+        #print "%s %s" % (self.PropertyHostRootSpaceGet(),self.PropertyMountGet())
+        for mntline in cmdoutput.split("\n"):
+            mntsplit = mntline.split(" ")
+            if len(mntsplit) < 3:
+                print "Error parsing mount command!"   
+            #print mntsplit[2]    
+            if mntsplit[2] == self.MountPoint:
+                # Assumes no VM host maps to same directory
+                #print "sdsdSD"
+                result = True
+        return result   
     
     def Lock(self):
         if self.MountIs():
             return True
-        cmd = 'kpartx -p vmim -al %s' % (self.HostDisk)
+        cmd = 'kpartx -p vmim -av %s' % (self.HostDisk)
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             logging.error('Failed "%s"' % (cmd))
@@ -367,21 +388,23 @@ class VirtualHostDiskKpartx(VirtualHostDisk):
             sys.exit(1)
         DiskPartitions = cmdoutput.split("\n")
         print len(DiskPartitions)
-        if len(DiskPartitions) < self.HostPartition:
+        if len(DiskPartitions) <= self.HostPartition -1:
             logging.error('Partiton  "%s" is greater than "%s" the number of avilaable partitons' % (self.HostPartition,len(DiskPartitions) ))
             logging.error(cmdoutput)
             sys.exit(1)
         print DiskPartitions
-        PartitonLine = DiskPartitions[self.HostPartition].split(":")
-        logging.error("PartitonLine=%s" % (PartitonLine))
-        self.__HostRootSpace = PartitonLine[0]
+        PartitonLine = DiskPartitions[self.HostPartition -1].split(" ")
+        logging.error("PartitonLine=%s" % (PartitonLine))        
+        self.HostRootSpace = "/dev/mapper/" + PartitonLine[2]
         return True
     def UnLock(self):
-        if not hasattr(self,"__HostRootSpace" ):
+        if not hasattr(self,"HostRootSpace" ):
             return True
         if self.MountIs():
-            return False
-        del self.__HostRootSpace
+            rec = self.ImageUnMount()
+            if not rec:
+                return rec
+        del self.HostRootSpace
         cmd = 'kpartx -p vmim -d %s' % ( self.HostDisk)
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
@@ -390,16 +413,14 @@ class VirtualHostDiskKpartx(VirtualHostDisk):
             logging.error('Return Code=%s' % (rc))
             sys.exit(1)
         return True
-    def PropertyHostRootSpaceGet(self):
-        return self.__HostRootSpace   
-       
-    def ImageMount(self):
     
-        return False
+       
+#    def ImageMount(self):
+#        print "sdfdsfsdf"
+#        return False
     def ImageUnMount(self):
         return False
-    HostRootSpace = property(PropertyHostRootSpaceGet, "I'm the HostRootSpace property.")
-
+    
 class vmControlXen():
     def StartUp(self):
         self.DiskSubsystem.ImageUnMount()
@@ -679,12 +700,15 @@ class virtualhost(DiscLocking):
     
 
     def StartUp(self):
-        rc = self.libvirtObj.create()
-        print rc 
-        print dir(self.libvirtObj)
-    def ShutDown(self):
         (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
-        print "state %s" %( state)
+        while state not in (1,2,3):
+            rc = self.libvirtObj.create()
+            time.sleep(1)
+            (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
+        return True
+    def ShutDown(self):
+        counter = 0
+        (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
         #VIR_DOMAIN_NOSTATE= 0: no state
         #VIR_DOMAIN_RUNNING= 1: the domain is running
         #VIR_DOMAIN_BLOCKED= 2: the domain is blocked on resource
@@ -693,11 +717,21 @@ class virtualhost(DiscLocking):
         #VIR_DOMAIN_SHUTOFF= 5: the domain is shut off
         #VIR_DOMAIN_CRASHED= 6: the domain is crashed
         while state in (1,2,3):
-            rc = self.libvirtObj.shutdown()
+            counter += 1
+            if counter < 180:
+                rc = self.libvirtObj.shutdown()
+            else:
+                counter = 0
+                rc = self.libvirtObj.destroy()
             time.sleep(1)
             (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
             #print "state %s" %( state)
-        self.DiskSubsystem.ImageMount()   
+        print "fing"
+        if not self.DiskSubsystem.Lock():
+            return False
+        self.DiskSubsystem.ImageMount()
+        print "sdfsdf"
+        return True
             
     def StorageDir(self):
         return self.ImageStoreDir
@@ -1100,17 +1134,17 @@ class virtualHostContainer:
                 if self.hostlist[x].HostName == HostName:
                     self.hostlist[x].libvirtObj = dom
             KnownHosts.append(dom.name())
-        print len(self.hostlist)
+        #print len(self.hostlist)
         for x in range (0 , len(self.hostlist)):
-            print self.hostlist[x].HostName
+            #print self.hostlist[x].HostName
             if not self.hostlist[x].HostName in KnownHosts:
                 host = self.hostlist[x]
                 generatorXml = host.genXml()
                 if generatorXml != "":
                     host.libvirtObj = self.conection.defineXML(generatorXml)
                     self.hostlist[x] = host
-                    print dir(self.hostlist[x])
-        print len(self.hostlist)
+                    #print dir(self.hostlist[x])
+        #print len(self.hostlist)
                     
                     
 if __name__ == "__main__":
