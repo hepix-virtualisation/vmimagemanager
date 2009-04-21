@@ -299,7 +299,7 @@ class VirtualHostDiskPartitionsShared(VirtualHostDisk):
             if len(mntsplit) < 3:
                 print "Error parsing mount command!"   
             #print mntsplit[2]    
-            if mntsplit[0] == self.HostRootSpace or mntsplit[2] == self.Mount:
+            if mntsplit[0] == self.HostRootSpace or mntsplit[2] == self.MountPoint:
                 # Assumes no VM host maps to same directory
                 #print "sdsdSD"
                 result = 1
@@ -326,8 +326,8 @@ class VirtualHostDiskPartitionsShared(VirtualHostDisk):
     def ImageUnMount(self):
         if self.MountStatus() == 0:
             return
-        if not os.path.isdir(self.Mount):
-            os.makedirs(self.Mount)
+        if not os.path.isdir(self.MountPoint):
+            os.makedirs(self.MountPoint)
         cmd="umount %s" % (self.HostRootSpace)
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
@@ -578,6 +578,8 @@ class virtualhost(DiscLocking):
             self.cmdFormatFilter = properties["FormatFilter"]
         else:
             self.cmdFormatFilter = 'mkfs.xfs %s'
+        self.PropertyImageModeSet("rsync")
+        
     def PropertyHostNameSet(self, value):
         self.__HostName = value
         
@@ -627,10 +629,10 @@ class virtualhost(DiscLocking):
             return ""
 
     def PropertyImageModeSet(self, value):
-        self.ImageMode = value
+        self.__ImageMode = value
         
     def PropertyImageModeGet(self):
-        return self.ImageMode
+        return self.__ImageMode
 
     def PropertyExtensionModeSet(self, value):
         self.__ExtensionMode = value
@@ -803,7 +805,7 @@ class virtualhost(DiscLocking):
         if not self.ShutDown():
             logging.critical('Requesting to store host wher Running Programming error')
             sys.exit(1)
-        self.MountImage()
+        self.DiskSubsystem.ImageMount()
         cmd = ""
         storedir =  os.path.normpath(self.ImageStoreDir)
         if not os.path.isdir(storedir):
@@ -811,14 +813,14 @@ class virtualhost(DiscLocking):
         if os.path.isdir('%s/%s' % (storedir,ImageName)):
             self.PropertyImageModeSet("rsync")
         if "tgz" == self.PropertyImageModeGet():
-            cmd = "tar -zcsf %s/%s --exclude=lost+found -C %s ." % (storedir,ImageName,self.Mount)
+            cmd = "tar -zcsf %s/%s --exclude=lost+found -C %s ." % (storedir,ImageName,self.DiskSubsystem.MountPoint)
         if "rsync" == self.PropertyImageModeGet():
-            cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/%s/" % (self.Mount,storedir,ImageName)
+            cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/%s/" % (self.DiskSubsystem.MountPoint,storedir,ImageName)
         if cmd == "":
             logging.error( "Error: Failing to store images")
             sys.exit(1)
             
-        #print "command='%s'" % (cmd)
+        print "command='%s'" % (cmd)
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             message = 'The command failed "%s"\n' % (cmd)
@@ -853,7 +855,7 @@ class virtualhost(DiscLocking):
         if len(self.DiskSubsystem.MountPoint) == 0 :
             logging.error('Failed to get mount point aborting "%s"' % (self.PropertyMountGet()))
             sys.exit(1)
-        self.DiskSubsystem.DiskLock()
+        self.Lock()
         if self.PropertyImageModeGet() == None:
             logging.warning("Warning: Could not find image type")
         else:
@@ -871,22 +873,24 @@ class virtualhost(DiscLocking):
                     logging.error("command line failed running %s" % (cmd))
                     return -1
                 self.DiskSubsystem.MountImage()
-                cmd = "rm -rf %s" % (self.Mount)
+                cmd = "rm -rf %s" % (self.DiskSubsystem.MountPoint)
                 (rc,cmdoutput) = commands.getstatusoutput(cmd)
                 cmd = "tar -zxf %s --exclude=lost+found   -C %s" % (ImageName,self.DiskSubsystem.MountPoint)
             if "rsync" == self.PropertyImageModeGet():
                 cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,self.DiskSubsystem.MountPoint)
+                logging.debug('Running command "%s".' % (cmd))
             (rc,cmdoutput) = commands.getstatusoutput(cmd)
             if rc != 0:
                 logging.error('Failed "%s"' % (cmd))
                 logging.error(cmdoutput)
                 logging.error('Return Code=%s' % (rc))
                 return rc
-        filename="%s/sourceimage" % (self.Mount)
+        filename="%s/sourceimage" % (self.DiskSubsystem.MountPoint)
         fpvmconftemp = open(filename,'w+')
         fpvmconftemp.write("%s\n" % (ImageName))
         fpvmconftemp.close()
-        
+        logging.debug("Wrote '%s' with content '%s'." % (filename,ImageName))
+        return 0
         
 
     def Extract(self):
@@ -905,6 +909,8 @@ class virtualhost(DiscLocking):
             logging.error('Failed "%s"' % (cmd))
             logging.error(cmdoutput)
             logging.error('Return Code=%s' % (rc))
+        return 0
+        
             
     def Insert(self):
         #print "Debug: PropertyInsertionsGet=%s" % (self.PropertyInsertionsGet())
