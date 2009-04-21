@@ -820,7 +820,7 @@ class virtualhost(DiscLocking):
             logging.error( "Error: Failing to store images")
             sys.exit(1)
             
-        print "command='%s'" % (cmd)
+        logging.debug("command='%s'" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             message = 'The command failed "%s"\n' % (cmd)
