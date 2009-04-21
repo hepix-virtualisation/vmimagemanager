@@ -1151,9 +1151,9 @@ class virtualHostContainer:
                     
                     
                     if (config.has_option(cfgSection, "formatFilter")):
-                        cfgDict["cmdFormatFilter"]  = config.get(cfgSection,"formatFilter")
+                        cfgDict["FormatFilter"]  = config.get(cfgSection,"formatFilter")
                     else:
-                        cfgDict["cmdFormatFilter"] = cmdFormatFilter
+                        cfgDict["FormatFilter"] = cmdFormatFilter
                     
                     if (config.has_option(cfgSection, "ConfTemplateXen")):
                         cfgDict["ConfTemplateXen"]  = config.get(cfgSection,"ConfTemplateXen")
