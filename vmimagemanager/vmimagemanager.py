@@ -70,7 +70,6 @@ def usage():
     print ' -L, --list-images                 List Virtual Box Images'
     print ' -k, --kill                        Kill Virtual Box'
     print ' -z, --tgz                         tar.gz Virtual Box Image'
-    print ' -o, --overwrite                   Overwrite the xen config file for a box'
     print ' -m, --locked                      List Locked slots'
     print ' -f, --free                        List Free slots.'
     print ' -U, --used                        List Used slots'
@@ -375,10 +374,7 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
                 result = True
         return result   
 
-        
-    def ImageMount(self):
-        if self.MountIs():
-            return True
+    def PartitionsOpen(self):
         cmd = 'kpartx -p vmim -av %s' % (self.HostDisk)
         logging.debug("Running command %s" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
@@ -398,8 +394,11 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
         PartitonLine = DiskPartitions[self.HostPartition -1].split(" ")
         #logging.debug("PartitonLine=%s" % (PartitonLine))        
         self.HostRootSpace = "/dev/mapper/" + PartitonLine[2]
-        if self.MountIs() == True:
-            return
+        return True
+    def ImageMount(self):
+        if self.MountIs():
+            return True
+        self.PartitionsOpen()
         if not os.path.isdir(self.MountPoint):
             #print "os.makedirs(%s)%s" % (self.Mount,self.HostRootSpace)
             os.makedirs(self.MountPoint)
@@ -425,6 +424,9 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
             logging.error('Command "%s" Failed' % (cmd))
             logging.info('rc=%s,output=%s' % (rc,cmdoutput))
             sys.exit(1)       
+        
+        return True
+    def PartitionsClose(self):
         cmd = 'kpartx -p vmim -d %s' % ( self.HostDisk)
         logging.debug("Running command %s" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
@@ -433,11 +435,9 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
             logging.error(cmdoutput)
             logging.error('Return Code=%s' % (rc))
             sys.exit(1)
-        if not self.MountIs():
-            return True
-        del self.HostRootSpace
+        if hasattr(self,"HostRootSpace"):
+           del self.HostRootSpace
         return True
-        
         
         
     
@@ -508,6 +508,7 @@ class vmControlXen():
             domainList = VitualHostsList()
         if domainList.has_key(self.HostName):
             return False
+        self.DiskSubsystem.PartitionsOpen()
         self.DiskSubsystem.ImageMount()
         return True
         
@@ -577,7 +578,7 @@ class virtualhost(DiscLocking):
         if "FormatFilter" in properties:
             self.cmdFormatFilter = properties["FormatFilter"]
         else:
-            self.cmdFormatFilter = 'mkfs.xfs %s'
+            self.cmdFormatFilter = 'mkfs.ext3 -L / %s'
         self.PropertyImageModeSet("rsync")
         
     def PropertyHostNameSet(self, value):
@@ -723,7 +724,10 @@ class virtualhost(DiscLocking):
 
     def StartUp(self):
         if not self.DiskSubsystem.ImageUnMount():
-            print "Failed unmount"
+            print "Failed unmount A"
+            sys.exit(1)
+        if not self.DiskSubsystem.PartitionsClose():
+            print "Failed unmount B"
             sys.exit(1)
         (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
         while state not in (1,2,3):
@@ -744,13 +748,17 @@ class virtualhost(DiscLocking):
         while state in (1,2,3):
             counter += 1
             if counter < 180:
-                rc = self.libvirtObj.shutdown()
+                try:
+                    rc = self.libvirtObj.shutdown()
+                except:
+                    pass
             else:
                 counter = 0
                 rc = self.libvirtObj.destroy()
             time.sleep(1)
             (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
             #print "state %s" %( state)
+        self.DiskSubsystem.PartitionsOpen()
         self.DiskSubsystem.ImageMount()
         return True
             
@@ -805,6 +813,7 @@ class virtualhost(DiscLocking):
         if not self.ShutDown():
             logging.critical('Requesting to store host wher Running Programming error')
             sys.exit(1)
+        self.DiskSubsystem.PartitionsOpen()
         self.DiskSubsystem.ImageMount()
         cmd = ""
         storedir =  os.path.normpath(self.ImageStoreDir)
@@ -865,14 +874,19 @@ class virtualhost(DiscLocking):
                 # Formatting is faster but we have a catch, 
                 # With dcache must give it an option for XFS
                 # cmdFormatFilter="mkfs.xfs %s"
-                
+                if not self.DiskSubsystem.PartitionsOpen():
+                    print "Failed Partition Open"
+                    sys.exit(1)
                 cmd=self.cmdFormatFilter % (self.DiskSubsystem.HostRootSpace)
                 (rc,cmdoutput) = commands.getstatusoutput(cmd)
                 if rc != 0:
                     logging.error(cmdoutput)
                     logging.error("command line failed running %s" % (cmd))
                     return -1
-                self.DiskSubsystem.MountImage()
+                self.DiskSubsystem.ImageMount()
+                if len(self.DiskSubsystem.MountPoint) == 0:
+                    logging.error("Mount Point Undefined ")
+                    sys.exit(1)                    
                 cmd = "rm -rf %s" % (self.DiskSubsystem.MountPoint)
                 (rc,cmdoutput) = commands.getstatusoutput(cmd)
                 cmd = "tar -zxf %s --exclude=lost+found   -C %s" % (ImageName,self.DiskSubsystem.MountPoint)
@@ -1028,7 +1042,7 @@ class virtualHostContainer:
         #RequiredSections = [GeneralSection,HostListSection]
         self.hostlist = []
         config = ConfigParser.ConfigParser()
-        cmdFormatFilter = "mkfs.ext3 %s"
+        cmdFormatFilter = "mkfs.ext3 -L / %s"
         config.readfp(open(fileName,'r'))
         #logging.warning( config.sections()
         configurationSections = config.sections()
