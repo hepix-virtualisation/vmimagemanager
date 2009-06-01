@@ -14,6 +14,7 @@ import ConfigParser, os
 import random
 import shutil
 import libvirt
+import xml.dom.minidom 
 
 class Error(Exception):
     """Base class for exceptions in this module."""
@@ -541,6 +542,9 @@ class virtualhost(DiscLocking):
         self.ImageMode = "rsync"
         DiscLocking.__init__(self)
         self.LockFileFixed = False
+        
+        
+        
     def __init__(self,properties):
         if not "HostName" in properties:
             raise InputError("No HostName Spcified for virtualhost")
@@ -580,6 +584,10 @@ class virtualhost(DiscLocking):
         else:
             self.cmdFormatFilter = 'mkfs.ext3 -L / %s'
         self.PropertyImageModeSet("rsync")
+        
+        self.memory = 2097152
+        self.currentMemory = 2097152
+        self.vcpu = 1
         
     def PropertyHostNameSet(self, value):
         self.__HostName = value
@@ -729,9 +737,9 @@ class virtualhost(DiscLocking):
         if not self.DiskSubsystem.PartitionsClose():
             print "Failed unmount B"
             sys.exit(1)
+        rc = self.libvirtObj.create()
         (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
         while state not in (1,2,3):
-            rc = self.libvirtObj.create()
             time.sleep(1)
             (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
         return True
@@ -962,7 +970,8 @@ class virtualhost(DiscLocking):
                 logging.error('Return Code=%s' % (rc))
         return 0        
     def genXml(self):
-        xml = """<domain type='kvm'>
+        rawxml = """<?xml version="1.0" ?>
+        <domain type='kvm'>
   <name>${DomainName}</name>
   <memory>2097152</memory>
   <currentMemory>2097152</currentMemory>
@@ -1016,10 +1025,112 @@ class virtualhost(DiscLocking):
                 DomainMac=self.HostMacAddress
             )
             for key in d.keys():
-                xml = xml.replace("${%s}" % (key), d[key])
+                rawxml = rawxml.replace("${%s}" % (key), d[key])
         except:
-            xml = ""
-        return xml
+            rawxml = ""
+        impl = xml.dom.minidom.getDOMImplementation()
+        newdoc = impl.createDocument(None, "domain", None)
+        top_element = newdoc.documentElement
+        a= newdoc.createAttribute("type")
+        a.nodeValue = "kvm"
+        top_element.setAttributeNode(a)
+        name_element = newdoc.createElement("name")
+        text = newdoc.createTextNode(self.HostName)
+        name_element.appendChild(text)
+        top_element.appendChild(name_element)
+        memory_element = newdoc.createElement("memory")
+        text = newdoc.createTextNode(str(self.memory))
+        memory_element.appendChild(text)
+        top_element.appendChild(memory_element)
+        currentMemory_element = newdoc.createElement("currentMemory")
+        text = newdoc.createTextNode(str(self.currentMemory))
+        currentMemory_element.appendChild(text)
+        top_element.appendChild(currentMemory_element)
+        vcpu_element = newdoc.createElement("vcpu")
+        text = newdoc.createTextNode(str(self.vcpu))
+        vcpu_element.appendChild(text)
+        top_element.appendChild(vcpu_element)
+        os_element = newdoc.createElement("os")
+        type_element = newdoc.createElement("type")
+        a= newdoc.createAttribute("arch")
+        a.nodeValue = "x86_64"
+        type_element.setAttributeNode(a)
+        a = newdoc.createAttribute("machine")
+        a.nodeValue = "pc"
+        type_element.setAttributeNode(a)
+        text = newdoc.createTextNode("hvm")
+        os_element.appendChild(type_element)
+        boot_element =newdoc.createElement("boot")
+        a = newdoc.createAttribute("dev")
+        a.nodeValue = "hd"
+        boot_element.setAttributeNode(a)
+        os_element.appendChild(boot_element)
+        top_element.appendChild(os_element)
+        features_element =newdoc.createElement("features")
+        acpi_element =newdoc.createElement("acpi")
+        features_element.appendChild(acpi_element)
+        apic_element =newdoc.createElement("apic")
+        features_element.appendChild(apic_element)
+        pae_element =newdoc.createElement("pae")
+        features_element.appendChild(pae_element)
+        top_element.appendChild(features_element)        
+        
+        clock_element =newdoc.createElement("clock")
+        a= newdoc.createAttribute("offset")
+        a.nodeValue = "utc"
+        clock_element.setAttributeNode(a)
+        top_element.appendChild(clock_element)        
+        on_poweroff_element =newdoc.createElement("on_poweroff")
+        text = newdoc.createTextNode("destroy")
+        on_poweroff_element.appendChild(text)
+        top_element.appendChild(on_poweroff_element) 
+        
+        on_reboot_element =newdoc.createElement("on_reboot")
+        text = newdoc.createTextNode("destroy")
+        on_reboot_element.appendChild(text)
+        top_element.appendChild(on_reboot_element) 
+        
+        on_crash_element =newdoc.createElement("on_crash")
+        text = newdoc.createTextNode("destroy")
+        on_crash_element.appendChild(text)
+        top_element.appendChild(on_crash_element) 
+        devices_element =newdoc.createElement("devices")
+        emulator_element =newdoc.createElement("emulator")
+        text = newdoc.createTextNode("/usr/bin/kvm")
+        emulator_element.appendChild(text) 
+        devices_element.appendChild(emulator_element) 
+        disk_element =newdoc.createElement("disk")
+        a= newdoc.createAttribute("type")
+        a.nodeValue = "block"
+        disk_element.setAttributeNode(a)
+        a= newdoc.createAttribute("device")
+        a.nodeValue = "disk"
+        disk_element.setAttributeNode(a)
+        source_element =newdoc.createElement("source")
+        try:
+            a= newdoc.createAttribute("dev")
+            a.nodeValue = self.DiskSubsystem.HostDisk
+            source_element.setAttributeNode(a)
+            disk_element.appendChild(source_element)
+        except:
+            pass
+        target_element =newdoc.createElement("target")
+        a= newdoc.createAttribute("dev")
+        a.nodeValue = "hda"
+        
+        target_element.setAttributeNode(a)
+        a= newdoc.createAttribute("bus")
+        a.nodeValue = "ide"
+        target_element.setAttributeNode(a)
+        
+        disk_element.appendChild(target_element)
+        devices_element.appendChild(disk_element)
+        top_element.appendChild(devices_element)
+        
+
+        #thisdata = xml.dom.minidom.parseString(rawxml)
+        print newdoc.toxml()
+        return rawxml
         
     
 class virtualHostContainer:
