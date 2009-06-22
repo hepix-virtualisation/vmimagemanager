@@ -1,6 +1,8 @@
 #!/usr/bin/python
 #import ConfigParser
-import logging
+
+import logging, logging.config
+
 
 import os
 import os.path
@@ -51,7 +53,7 @@ if len(ConfigFile) == 0:
     
 
 # Add lines to import a namespace and add it to the list of namespaces used
-import logging, logging.handlers
+
 
 #config = ConfigParser.ConfigParser()
 #config.read(['vmimagemanager.cfg', os.path.expanduser('~/.vmimagemanager.cfg'),InstallPrefix + '/etc/vmimagemanager.cfg'])
@@ -95,7 +97,7 @@ class DiscLocking:
         if not self.IsLocked():
             return []
         fi  = open(self.LockFile, 'r')
-        foundPids= [];
+        foundPids = []
         for line in fi:
             messgDict = {}
             splitline = line.split(" ")
@@ -107,7 +109,7 @@ class DiscLocking:
         fi.close()
         if (foundPids == []):
             os.remove(self.LockFile)
-        logging.debug("DiscLocking foundPids=%s" % (foundPids))
+        self.logger.debug("DiscLocking foundPids=%s" % (foundPids))
         return foundPids
     def Lock(self):
         
@@ -121,7 +123,7 @@ class DiscLocking:
                 return True
             #print "heher"
             return False
-        #print "can lock %s" % ( self.LockFile)
+        #self.logger.error "can lock %s" % ( self.LockFile)
         lockfiledir = os.path.dirname(self.LockFile)
         if not os.path.isdir(lockfiledir):
             os.makedirs(lockfiledir)
@@ -249,6 +251,7 @@ def VitualHostsList():
 
 class VirtualHostDisk():
     def __init__(self,properties):
+        self.logger = logging.getLogger("vmimagemanager.VirtualHostDisk") 
         self.CanMount = False
     def MountIs(self):
         return False
@@ -275,6 +278,7 @@ class VirtualHostDisk():
 
 
     def ImageMount(self):
+        self.logger.debug("ImageMount")
         return False
     def ImageUnMount(self):
         return True
@@ -284,9 +288,18 @@ class VirtualHostDisk():
     def PartitionsOpen(self):
         return True
 
+    def LibVirtXmlTreeGenerate(self,devices):    
+        pass
+        #self.logger.debug("LibVirtXmlTreeGenerate")
+        #disk = SubElement(devices, "disk",device="disk")
+        #self.logger.debug(tostring(disk))
+
+
+
 
 class VirtualHostDiskPartitionsShared(VirtualHostDisk):
-    def __init__(self,properties):    
+    def __init__(self,properties):   
+        self.logger = logging.getLogger("vmimagemanager.VirtualHostDiskPartitionsShared") 
         self.CanMount = True
         self.HostRootSpace = properties["HostRootSpace"]
         self.MountPoint = properties["MountPoint"]
@@ -298,7 +311,7 @@ class VirtualHostDiskPartitionsShared(VirtualHostDisk):
         cmd="mount"
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
-            logging.error('mount Failed with error code %s and the folleowing error:%s' % (rc,cmdoutput))
+            self.logging.error('mount Failed with error code %s and the folleowing error:%s' % (rc,cmdoutput))
             sys.exit(1)            
         #print "%s %s" % (self.PropertyHostRootSpaceGet(),self.PropertyMountGet())
         for mntline in cmdoutput.split("\n"):
@@ -314,18 +327,20 @@ class VirtualHostDiskPartitionsShared(VirtualHostDisk):
     
     
     def ImageMount(self):
+
         if self.MountIs() == True:
             return True
         #print "fsdfsdfddddddddddddddddd"
         if not os.path.isdir(self.MountPoint):
             #print "os.makedirs(%s)%s" % (self.Mount,self.HostRootSpace)
             os.makedirs(self.MountPoint)
-            logging.info( 'Made Directory %s' % (self.MountPoint))
+            self.logger.info( 'Made Directory %s' % (self.MountPoint))
         cmd="mount %s %s" % (self.HostRootSpace,self.MountPoint)
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
-            logging.error('Command "%s" Failed' % (cmd))
-            logging.info( 'rc=%s,output=%s' % (rc,cmdoutput))
+            self.logger.debug( 'self=%s,self.HostRootSpace=%s,self.MountPoint=%s' % (self,self.HostRootSpace,self.MountPoint))
+            self.logging.error('Command "%s" Failed' % (cmd))
+            self.self.logger.info( 'rc=%s,output=%s' % (rc,cmdoutput))
             return False          
         return True
 
@@ -337,23 +352,35 @@ class VirtualHostDiskPartitionsShared(VirtualHostDisk):
         cmd="umount %s" % (self.HostRootSpace)
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
-            logging.error('Command "%s" Failed' % (cmd))
-            logging.info('rc=%s,output=%s' % (rc,cmdoutput))
+            self.logging.error('Command "%s" Failed' % (cmd))
+            self.logger.info('rc=%s,output=%s' % (rc,cmdoutput))
             return False          
         return True
 
     def MountTest(self):
-        logging.debug("MountStatus %s" % (self.MountIs()))
+        self.logger.debug("MountStatus %s" % (self.MountIs()))
         self.Mount()
-        logging.debug("MountStatus %s" % (self.MountIs()))
+        self.logger.debug("MountStatus %s" % (self.MountIs()))
         self.UnMount()
-        logging.debug("MountStatus %s" % (self.MountIs()))
+        self.logger.debug("MountStatus %s" % (self.MountIs()))
         sys.exit(0)    
+    def LibVirtXmlTreeGenerate(self,devices):    
+        self.logger.debug("LibVirtXmlTreeGenerate")
+        disk = SubElement(devices, "disk",device="disk")
+        disk.set('type', "block")
+        source = SubElement(disk, "source")
+        try:
+            source.set('dev', self.HostDisk)
+        except:
+            source.set('dev', "/dev/mapper/d430-sysVm002")
+        target = SubElement(disk, "target",dev="hda",bus="ide")
+        serial = SubElement(devices, "serial")
     
 
 
 class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
     def __init__(self,properties):
+        self.logger = logging.getLogger("vmimagemanager.VirtualHostDiskKpartx")
         self.MountPoint = properties["MountPoint"]
         self.HostPartition = int(properties["HostPartition"])
         self.HostDisk = properties["HostDisk"]
@@ -364,16 +391,16 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
         # Returns True for device mounted
         result = False
         cmd="mount"
-        logging.debug("Running command %s" % (cmd))
+        self.logger.debug("Running command %s" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
-            logging.error('mount Failed with error code %s and the folleowing error:%s' % (rc,cmdoutput))
+            self.logging.error('mount Failed with error code %s and the folleowing error:%s' % (rc,cmdoutput))
             sys.exit(1)            
         #print "%s %s" % (self.PropertyHostRootSpaceGet(),self.PropertyMountGet())
         for mntline in cmdoutput.split("\n"):
             mntsplit = mntline.split(" ")
             if len(mntsplit) < 3:
-                logging.error("Error parsing mount command!")
+                self.logging.error("Error parsing mount command!")
             #print mntsplit[2]    
             if mntsplit[2] == self.MountPoint:
                 # Assumes no VM host maps to same directory
@@ -383,23 +410,23 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
 
     def PartitionsOpen(self):
         cmd = 'kpartx -p vmim -av %s' % (self.HostDisk)
-        logging.debug("Running command %s" % (cmd))
+        self.logger.debug("Running command %s" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
-            logging.error('Failed "%s"' % (cmd))
-            logging.error(cmdoutput)
-            logging.error('Return Code=%s' % (rc))
+            self.logger.error('Failed "%s"' % (cmd))
+            self.logger.error(cmdoutput)
+            self.logger.error('Return Code=%s' % (rc))
             sys.exit(1)
         if "" == cmdoutput:
-            logging.error('The Disk "%s" has no partitons' % (self.HostDisk))
+            self.logger.error('The Disk "%s" has no partitons' % (self.HostDisk))
             sys.exit(1)
         DiskPartitions = cmdoutput.split("\n")
         if len(DiskPartitions) <= self.HostPartition -1:
-            logging.error('Partiton  "%s" is greater than "%s" the number of avilaable partitons' % (self.HostPartition,len(DiskPartitions) ))
-            logging.error(cmdoutput)
+            self.logger.error('Partiton  "%s" is greater than "%s" the number of avilaable partitons' % (self.HostPartition,len(DiskPartitions) ))
+            self.logger.error(cmdoutput)
             sys.exit(1)
         PartitonLine = DiskPartitions[self.HostPartition -1].split(" ")
-        #logging.debug("PartitonLine=%s" % (PartitonLine))        
+        #self.logger.debug("PartitonLine=%s" % (PartitonLine))        
         self.HostRootSpace = "/dev/mapper/" + PartitonLine[2]
         return True
     def ImageMount(self):
@@ -407,47 +434,57 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
             return True
         self.PartitionsOpen()
         if not os.path.isdir(self.MountPoint):
-            #print "os.makedirs(%s)%s" % (self.Mount,self.HostRootSpace)
+            self.logger.info("os.makedirs(%s)%s" % (self.Mount,self.HostRootSpace))
             os.makedirs(self.MountPoint)
-            logging.info( 'Made Directory %s' % (self.MountPoint))
+            self.logger.info( 'Made Directory %s' % (self.MountPoint))
         cmd="mount %s %s" % (self.HostRootSpace,self.MountPoint)
-        logging.debug("Running command %s" % (cmd))
+        self.logger.debug("Running command %s" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
-            
-            logging.error('Command "%s" Failed' % (cmd))
-            logging.info( 'rc=%s,output=%s' % (rc,cmdoutput))
+            self.logger.debug( 'self=%s,self.HostRootSpace=%s,self.MountPoint=%s' % (self,self.HostRootSpace,self.MountPoint))
+            self.logger.error('Command "%s" Failed' % (cmd))
+            self.logger.info( 'rc=%s,output=%s' % (rc,cmdoutput))
             sys.exit(1)            
         return    
 
     def ImageUnMount(self):
         if not self.MountIs():
-            logging.debug("Not Mounted")
+            self.logger.debug("Not Mounted")
             return True
         cmd="umount %s" % (self.HostRootSpace)
-        logging.debug("Running command %s" % (cmd))
+        self.logger.debug("Running command %s" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
-            logging.error('Command "%s" Failed' % (cmd))
-            logging.info('rc=%s,output=%s' % (rc,cmdoutput))
+            self.logger.error('Command "%s" Failed' % (cmd))
+            self.logger.info('rc=%s,output=%s' % (rc,cmdoutput))
             sys.exit(1)       
         
         return True
     def PartitionsClose(self):
         cmd = 'kpartx -p vmim -d %s' % ( self.HostDisk)
-        logging.debug("Running command %s" % (cmd))
+        self.logger.debug("Running command %s" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
-            logging.error('Failed "%s"' % (cmd))
-            logging.error(cmdoutput)
-            logging.error('Return Code=%s' % (rc))
+            self.logger.error('Failed "%s"' % (cmd))
+            self.logger.error(cmdoutput)
+            self.logger.error('Return Code=%s' % (rc))
             sys.exit(1)
         if hasattr(self,"HostRootSpace"):
            del self.HostRootSpace
         return True
-        
-        
-    
+    def LibVirtXmlTreeGenerate(self,devices):    
+        disk = SubElement(devices, "disk",device="disk")
+        disk.set('type', "block")
+        source = SubElement(disk, "source")
+        try:
+            source.set('dev', self.HostDisk)
+        except:
+            source.set('dev', "/dev/mapper/d430-sysVm002")
+        target = SubElement(disk, "target",dev="hda",bus="ide")
+        serial = SubElement(devices, "serial")
+
+
+
 class vmControlXen():
     def StartUp(self):
         self.DiskSubsystem.ImageUnMount()
@@ -527,7 +564,7 @@ class vmControlXen():
             (rc,cmdoutput) = commands.getstatusoutput(cmd)
             if rc != 0:
                 logging.error("Failed to shut down or kill '%s'" % self.HostName)
-                logging.info(cmdoutput)
+                self.logger.info(cmdoutput)
             return False
         return True
 
@@ -546,63 +583,83 @@ class virtualhost(DiscLocking):
         self.PropertyImageStoreNameSet("")
         self.ImageStoreDir = ""
         self.ImageMode = "rsync"
-        DiscLocking.__init__(self)
-        self.LockFileFixed = False
         
+        self.LockFileFixed = False
+        self.DcgDict = {}
         
         
     def __init__(self,properties):
-        self.loadCfg(properties)
-        
+        self.logger = logging.getLogger("vmimagemanager.virtualhost")
+        self.DcgDict = {}
     def loadCfg(self,properties):
+        #print "Loaded config"
+        for prop in properties.keys():
+            #print prop
+            if not prop in self.DcgDict.keys():
+                self.DcgDict[prop] = properties[prop]
+                
         
+        #print "dsfdsF"
+    def cfgApply(self):
         
+        self.logger.debug( self.DcgDict)
+        if "HostName" in self.DcgDict.keys():
+            self.HostName = self.DcgDict["HostName"]
+            
+            self.logger.debug("setting " + self.HostName)
+        if "LockFile" in self.DcgDict.keys():
+            self.LockFile = self.DcgDict["LockFile"]
+            DiscLocking.__init__(self,self.DcgDict["LockFile"])
         
-        if not "HostName" in properties:
-            raise InputError("No HostName Spcified for virtualhost")
-        self.HostName = properties["HostName"]
-        #print "setting " + self.HostName
-        if "LockFile" in properties:
-            DiscLocking.__init__(self,properties["LockFile"])
-        
-        if "HostMacAddress" in properties:
+        if "HostMacAddress" in self.DcgDict.keys():
             found = True
-            self.HostMacAddress = properties["HostMacAddress"]
-        if "HostIp4Address" in properties:
+            self.HostMacAddress = self.DcgDict["HostMacAddress"]
+        if "HostIp4Address" in self.DcgDict.keys():
             found = True
-            self.HostIp4Address = properties["HostIp4Address"]
+            self.HostIp4Address = self.DcgDict["HostIp4Address"]
     
         #if not found:
         #    raise InputError("HostMacAddress or HostIp4Address must be set for %s" %  self.HostName)
         
         found = False
-        self.DiskSubsystem = VirtualHostDisk(properties)
-
-        if ("HostRootSpace" in properties) and ("HostSwapSpace" in properties):
-            self.DiskSubsystem = VirtualHostDiskPartitionsShared(properties)
+        #self.DiskSubsystem = VirtualHostDisk(self.DcgDict)
+        
+        if ("HostRootSpace" in self.DcgDict.keys()) and ("HostSwapSpace" in self.DcgDict.keys()):
+            self.DiskSubsystem = VirtualHostDiskPartitionsShared(self.DcgDict)
             found = True
-        if ("HostDisk" in properties) and ("HostPartition" in properties):
-            self.DiskSubsystem = VirtualHostDiskKpartx(properties)
+            self.logger.debug("adding  self.DiskSubsystem %s to VirtualHostDiskPartitionsShared" % self.HostName)
+        if ("HostDisk" in self.DcgDict.keys()) and ("HostPartition" in self.DcgDict.keys()):
+            self.DiskSubsystem = VirtualHostDiskKpartx(self.DcgDict)
             found = True
-
+            self.logger.debug("adding  self.DiskSubsystem %s to VirtualHostDiskKpartx" % self.HostName)        
+        if not found:
+            self.logger.debug("self.HostName %s"% self.HostName)
+            self.logger.debug("adding  self.DiskSubsystem %s to VirtualHostDiskKpartx" % self.HostName)
+            self.DiskSubsystem = VirtualHostDisk(self.DcgDict)
         #if not found:
         #    raise InputError("(HostRootSpace and HostSwapSpace) or (HostPartition and HostDisk) must be set for %s" %  self.HostName)
-        if "ConfTemplateXen" in properties:
-            self.ConfTemplateXen = properties["ConfTemplateXen"]
-        if "ImageStoreDir" in properties:
-            self.ImageStoreDir = properties["ImageStoreDir"]
+        if "ConfTemplateXen" in self.DcgDict.keys():
+            self.ConfTemplateXen = self.DcgDict["ConfTemplateXen"]
+        if "ImageStoreDir" in self.DcgDict.keys():
+            self.ImageStoreDir = self.DcgDict["ImageStoreDir"]
         else:
             pass
             #raise InputError("ImageStoreDir must be set for %s" %  self.HostName)
-        if "FormatFilter" in properties:
+        if "FormatFilter" in self.DcgDict.keys():
             self.cmdFormatFilter = properties["FormatFilter"]
         else:
             self.cmdFormatFilter = 'mkfs.ext3 -L / %s'
         self.PropertyImageModeSet("rsync")
-        
-        self.memory = 2097152
-        self.currentMemory = 2097152
-        self.vcpu = 1
+        if "memory" in self.DcgDict.keys():
+            self.memory = self.DcgDict["memory"]
+        else:
+            self.memory = 2097152
+        if "currentMemory" in self.DcgDict.keys():
+            self.currentMemory = self.DcgDict["currentMemory"]
+        else:
+            self.currentMemory = 2097152
+        if not "vcpu" in self.DcgDict.keys():
+            self.DcgDict["vcpu"] = "1"
         
     def PropertyHostNameSet(self, value):
         self.__HostName = value
@@ -799,7 +856,11 @@ class virtualhost(DiscLocking):
             #print dir(self.libvirtObj)
             #print self.libvirtObj.destroy()
         self.DiskSubsystem.PartitionsOpen()
+        self.logger.debug("sdsd %s " %(self.DiskSubsystem))
+        
         self.DiskSubsystem.ImageMount()
+        self.logger.debug("sdsd")
+        
         return True
             
     def StorageDir(self):
@@ -869,7 +930,7 @@ class virtualhost(DiscLocking):
             logging.error( "Error: Failing to store images")
             sys.exit(1)
             
-        logging.debug("command='%s'" % (cmd))
+        self.logger.debug("command='%s'" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             message = 'The command failed "%s"\n' % (cmd)
@@ -915,35 +976,35 @@ class virtualhost(DiscLocking):
                 # With dcache must give it an option for XFS
                 # cmdFormatFilter="mkfs.xfs %s"
                 if not self.DiskSubsystem.PartitionsOpen():
-                    print "Failed Partition Open"
+                    self.logger.error("Failed Partition Open")
                     sys.exit(1)
                 cmd=self.cmdFormatFilter % (self.DiskSubsystem.HostRootSpace)
                 (rc,cmdoutput) = commands.getstatusoutput(cmd)
                 if rc != 0:
-                    logging.error(cmdoutput)
-                    logging.error("command line failed running %s" % (cmd))
+                    self.logger.error(cmdoutput)
+                    self.logger.error("command line failed running %s" % (cmd))
                     return -1
                 self.DiskSubsystem.ImageMount()
                 if len(self.DiskSubsystem.MountPoint) == 0:
-                    logging.error("Mount Point Undefined ")
+                    self.logger.error("Mount Point Undefined ")
                     sys.exit(1)                    
                 cmd = "rm -rf %s" % (self.DiskSubsystem.MountPoint)
                 (rc,cmdoutput) = commands.getstatusoutput(cmd)
                 cmd = "tar -zxf %s --exclude=lost+found   -C %s" % (ImageName,self.DiskSubsystem.MountPoint)
             if "rsync" == self.PropertyImageModeGet():
                 cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,self.DiskSubsystem.MountPoint)
-                logging.debug('Running command "%s".' % (cmd))
+                self.logger.debug('Running command "%s".' % (cmd))
             (rc,cmdoutput) = commands.getstatusoutput(cmd)
             if rc != 0:
-                logging.error('Failed "%s"' % (cmd))
-                logging.error(cmdoutput)
-                logging.error('Return Code=%s' % (rc))
+                self.logger.error('Failed "%s"' % (cmd))
+                self.logger.error(cmdoutput)
+                self.logger.error('Return Code=%s' % (rc))
                 return rc
         filename="%s/sourceimage" % (self.DiskSubsystem.MountPoint)
         fpvmconftemp = open(filename,'w+')
         fpvmconftemp.write("%s\n" % (ImageName))
         fpvmconftemp.close()
-        logging.debug("Wrote '%s' with content '%s'." % (filename,ImageName))
+        self.logger.debug("Wrote '%s' with content '%s'." % (filename,ImageName))
         return 0
         
 
@@ -972,7 +1033,7 @@ class virtualhost(DiscLocking):
         #print "Debug: MountDir=%s" % (self.PropertyMountGet())
         #print "Debug: PropertyImageModeGet=%s" % (self.PropertyImageModeGet())
         if not os.path.isdir(self.ExtractDir()):
-            logging.error("Error: Directory %s is not found" % (self.ExtractDir()))
+            self.logger.error("Error: Directory %s is not found" % (self.ExtractDir()))
             sys.exit(1)
         for ext in self.PropertyInsertionsGet().keys():
             #ImageName = "%s/%s" % (self.ExtractDir(),ext)
@@ -1007,11 +1068,11 @@ class virtualhost(DiscLocking):
         name = SubElement(domain, "name",)
         name.text = self.HostName
         memory = SubElement(domain, "memory")
-        memory.text = str(self.memory)
+        memory.text = str(self.DcgDict["memory"])
         cmemory = SubElement(domain, "currentMemory")
-        cmemory.text = str(self.currentMemory)
+        cmemory.text = str(self.DcgDict["currentMemory"])
         vcpu = SubElement(domain, "vcpu")
-        vcpu.text = str(self.vcpu)
+        vcpu.text = str(self.DcgDict["vcpu"])
         os = SubElement(domain, "os")
         os_type = SubElement(os, "type",arch="x86_64",machine="pc")
         os_type.text = str("hvm")
@@ -1031,14 +1092,8 @@ class virtualhost(DiscLocking):
         devices = SubElement(domain, "devices")
         emulator = SubElement(devices, "emulator")
         emulator.text = "/usr/bin/kvm"
-        disk = SubElement(devices, "disk",device="disk")
-        disk.set('type', "block")
-        source = SubElement(disk, "source")
-        try:
-            source.set('dev', self.DiskSubsystem.HostDisk)
-        except:
-            source.set('dev', "/dev/mapper/d430-sysVm002")
-        target = SubElement(disk, "target",dev="hda",bus="ide")
+        self.DiskSubsystem.LibVirtXmlTreeGenerate(devices)
+        self.logger.debug("DiskSubsystem %s" %(self.DiskSubsystem))
         serial = SubElement(devices, "serial")
         serial.set('type', "pty")
         serial_target  = SubElement(serial, "target",port="0")
@@ -1048,192 +1103,24 @@ class virtualhost(DiscLocking):
         
         #print "self.genXml=" + self.genXml()
         #print "genXmlShouldExist=" + text
+        text = tostring(domain)
+        #self.logger.debug(text)
         return text
 
  
 
 
-
-    def genXml(self):
-        rawxml = """<?xml version="1.0" ?>
-        <domain type='kvm'>
-  <name>${DomainName}</name>
-  <memory>2097152</memory>
-  <currentMemory>2097152</currentMemory>
-  <vcpu>1</vcpu>
-  <os>
-    <type arch='x86_64' machine='pc'>hvm</type>
-    <boot dev='hd'/>
-  </os>
-  <features>
-    <acpi/>
-    <apic/>
-    <pae/>
-  </features>
-  <clock offset='utc'/>
-  <on_poweroff>destroy</on_poweroff>
-  <on_reboot>restart</on_reboot>
-  <on_crash>restart</on_crash>
-  <devices>
-    <emulator>/usr/bin/kvm</emulator>
-    <disk type='block' device='disk'>
-      <source dev='${DomainDev}'/>
-      <target dev='hda' bus='ide'/>
-    </disk>
-    <disk type='file' device='cdrom'>
-      <target dev='hdc' bus='ide'/>
-      <readonly/>
-    </disk>
-    <interface type='bridge'>
-      <mac address='${DomainMac}'/>
-      <source bridge='br0'/>
-    </interface>
-    <serial type='pty'>
-      <target port='0'/>
-    </serial>
-    <console type='pty'>
-      <target port='0'/>
-    </console>
-    <input type='mouse' bus='ps2'/>
-    <graphics type='vnc' port='-1' autoport='yes' keymap='en-us'/>
-    <sound model='es1370'/>
-  </devices>
-</domain>
-        """
-        try:
-            d = dict(
-                DomainDev=self.DiskSubsystem.HostDisk,
-                DomainRootDev="",
-                DomainIp4Address="",
-                DomainName=self.HostName,
-                DomainSwapDev="",
-                DomainMac=self.HostMacAddress
-            )
-            for key in d.keys():
-                rawxml = rawxml.replace("${%s}" % (key), d[key])
-        except:
-            rawxml = ""
-        impl = xml.dom.minidom.getDOMImplementation()
-        newdoc = impl.createDocument(None, "domain", None)
-        top_element = newdoc.documentElement
-        a= newdoc.createAttribute("type")
-        a.nodeValue = "kvm"
-        top_element.setAttributeNode(a)
-        name_element = newdoc.createElement("name")
-        text = newdoc.createTextNode(self.HostName)
-        name_element.appendChild(text)
-        top_element.appendChild(name_element)
-        memory_element = newdoc.createElement("memory")
-        text = newdoc.createTextNode(str(self.memory))
-        memory_element.appendChild(text)
-        top_element.appendChild(memory_element)
-        currentMemory_element = newdoc.createElement("currentMemory")
-        text = newdoc.createTextNode(str(self.currentMemory))
-        currentMemory_element.appendChild(text)
-        top_element.appendChild(currentMemory_element)
-        vcpu_element = newdoc.createElement("vcpu")
-        text = newdoc.createTextNode(str(self.vcpu))
-        vcpu_element.appendChild(text)
-        top_element.appendChild(vcpu_element)
-        os_element = newdoc.createElement("os")
-        type_element = newdoc.createElement("type")
-        a= newdoc.createAttribute("arch")
-        a.nodeValue = "x86_64"
-        type_element.setAttributeNode(a)
-        a = newdoc.createAttribute("machine")
-        a.nodeValue = "pc"
-        type_element.setAttributeNode(a)
-        text = newdoc.createTextNode("hvm")
-        type_element.appendChild(text)
-        os_element.appendChild(type_element)
-        boot_element =newdoc.createElement("boot")
-        a = newdoc.createAttribute("dev")
-        a.nodeValue = "hd"
-        boot_element.setAttributeNode(a)
-        os_element.appendChild(boot_element)
-        top_element.appendChild(os_element)
-        features_element =newdoc.createElement("features")
-        acpi_element =newdoc.createElement("acpi")
-        features_element.appendChild(acpi_element)
-        apic_element =newdoc.createElement("apic")
-        features_element.appendChild(apic_element)
-        pae_element =newdoc.createElement("pae")
-        features_element.appendChild(pae_element)
-        top_element.appendChild(features_element)        
-        
-        clock_element =newdoc.createElement("clock")
-        a= newdoc.createAttribute("offset")
-        a.nodeValue = "utc"
-        clock_element.setAttributeNode(a)
-        top_element.appendChild(clock_element)        
-        on_poweroff_element =newdoc.createElement("on_poweroff")
-        text = newdoc.createTextNode("destroy")
-        on_poweroff_element.appendChild(text)
-        top_element.appendChild(on_poweroff_element) 
-        
-        on_reboot_element =newdoc.createElement("on_reboot")
-        text = newdoc.createTextNode("destroy")
-        on_reboot_element.appendChild(text)
-        top_element.appendChild(on_reboot_element) 
-        
-        on_crash_element =newdoc.createElement("on_crash")
-        text = newdoc.createTextNode("destroy")
-        on_crash_element.appendChild(text)
-        top_element.appendChild(on_crash_element) 
-        devices_element =newdoc.createElement("devices")
-        emulator_element =newdoc.createElement("emulator")
-        text = newdoc.createTextNode("/usr/bin/kvm")
-        emulator_element.appendChild(text) 
-        devices_element.appendChild(emulator_element) 
-        disk_element =newdoc.createElement("disk")
-        a= newdoc.createAttribute("type")
-        a.nodeValue = "block"
-        disk_element.setAttributeNode(a)
-        a= newdoc.createAttribute("device")
-        a.nodeValue = "disk"
-        disk_element.setAttributeNode(a)
-        source_element =newdoc.createElement("source")
-        
-        
-        a= newdoc.createAttribute("dev")
-        
-        try:
-            a.nodeValue = self.DiskSubsystem.HostDisk
-            source_element.setAttributeNode(a)
-        except:
-            #raise 
-            pass
-        disk_element.appendChild(source_element)
-        try:
-            a= newdoc.createAttribute("dev")
-            a.nodeValue = self.DiskSubsystem.HostDisk
-            source_element.setAttributeNode(a)
-            disk_element.appendChild(source_element)
-        except:
-            pass
-        target_element =newdoc.createElement("target")
-        a= newdoc.createAttribute("dev")
-        a.nodeValue = "hda"
-        target_element.setAttributeNode(a)
-        a= newdoc.createAttribute("bus")
-        a.nodeValue = "ide"
-        target_element.setAttributeNode(a)
-        
-        disk_element.appendChild(target_element)
-        devices_element.appendChild(disk_element)
-        top_element.appendChild(devices_element)
-        
-
-        #thisdata = xml.dom.minidom.parseString(rawxml)
-        rawxml =  newdoc.toxml()
-        print "pawxml="+ rawxml
-        return rawxml
         
     
 class virtualHostContainer:
     
     def __init__(self):
         self.hostlist = []
+        self.cfgDefault = {}
+        
+        self.logger = logging.getLogger("vmimagemanager.virtualHostContainer") 
+        
+        
     def PropertyVmSlotVarDirSet(self, value):
         for aHost in self.hostlist:
             aHost.VmSlotVarDir = value
@@ -1263,8 +1150,9 @@ class virtualHostContainer:
                 libvirtdConnection = self.conection.lookupByName(Name)
                 cfgDict["HostDisk"]  = "Not Known"
                 cfgDict["HostName"]  = Name
-                cfgDict["LockFile"]  = "/tmp/lockfile.remorem"
-                    
+                cfgDict["LockFile"]  = str("/tmp/lockfile.remorem%s" % (Name) )
+                
+                self.logger.error("sdsdSD")
                 fred =  self.virtualHostGenerator(cfgDict)
                 #print fred
                 #Host.libvirtObj = libvirt.open(self.VmHostServer)
@@ -1286,7 +1174,7 @@ class virtualHostContainer:
         for ASection in RequiredSections:
             if not ASection in configurationSections:
                 logging.fatal( "Configuration file does not have a section '%s'"  % (ASection))
-                sys.exit(1)
+                return False
         
         self.cfgHosts = self.config.sections()
         
@@ -1294,14 +1182,14 @@ class virtualHostContainer:
         self.newvmconfdir = self.config.get(GeneralSection,'vmconfdir')
         if len(self.newvmconfdir) == 0:
             logging.fatal( "Configuration file does not have a section '%s' with a key in it 'vmconfdir'" % (GeneralSection))
-            sys.exit(1)
+            return False
         ##self.VmSlotVarDir = newvmconfdir
         self.PropertyVmSlotVarDirSet(self.newvmconfdir)
         #logging.warning( self.__VmSlotVarDir
         newConfTemplateXen = self.config.get(GeneralSection,'xenconftemplate')
         if len(newConfTemplateXen) == 0:
             logging.fatal( "Configuration file does not have a section '%s' with a key in it 'xenconftemplate'" % (GeneralSection))
-            sys.exit(1)
+            return False
         self.ConfTemplateXen = newConfTemplateXen
         
         newXenImageDir = self.config.get(GeneralSection,'vmimages')
@@ -1329,6 +1217,20 @@ class virtualHostContainer:
         if (self.config.has_option(GeneralSection, "formatFilter")):
             cmdFormatFilter = self.config.get(GeneralSection,'formatFilter')
         
+        if (self.config.has_option(GeneralSection, "vAlocatedMemory")):
+            self.cfgDefault["memory"] = self.config.get(GeneralSection,'vAlocatedMemory')
+        else:
+            default = 2097152
+            self.logger.warning("Configuration file does not have a section '%s' with a key in it 'vAlocatedMemory' defaulting to '%s'" % (GeneralSection,default))
+            self.cfgDefault["memory"] = default
+        
+        if (self.config.has_option(GeneralSection, "cAlocatedMemory")):
+            self.cfgDefault["currentMemory"] = self.config.get(GeneralSection,'cAlocatedMemory')
+        else:
+            default = 2097152
+            self.logger.warning("Configuration file does not have a section '%s' with a key in it 'cAlocatedMemory' defaulting to '%s'" % (GeneralSection,default))
+            self.cfgDefault["currentMemory"] = default
+        self.cfgDefault["vcpu"] = 1
         
     def importCfg(Self):
         pass
@@ -1342,8 +1244,11 @@ class virtualHostContainer:
                index= x 
         if index == -1:
             #print "creating %s as not in %s" % (self.hostlist,index)
+            self.logger.debug(cfg)
             newhost = virtualhost(cfg)
+            newhost.loadCfg(self.cfgDefault)
             newhost.Container = self
+            newhost.HostName = hostName
             self.hostlist.append(newhost)
             return newhost
         else:
@@ -1388,6 +1293,18 @@ class virtualHostContainer:
                         cfgDict["MountPoint"]  = self.config.get(cfgSection,"mount")
                     else:
                         cfgDict["MountPoint"]  = os.path.join(VmMountsBaseDir ,cfgDict["HostName"])
+                    
+                    
+                    if (self.config.has_option(cfgSection, "memory")):
+                        cfgDict["memory"]  = self.config.get(cfgSection,"memory")
+                    else:
+                        cfgDict["memory"]  = self.cfgDefault["memory"]
+                    
+                   
+                    if (self.config.has_option(cfgSection, "currentMemory")):
+                        cfgDict["currentMemory"]  = self.config.get(cfgSection,"currentMemory")
+                    else:
+                        cfgDict["currentMemory"]  = self.cfgDefault["currentMemory"]
                     #print "tskjdfhksjldf=%s" % (cfgDict["Mount)
                     cfgDict["VmSlotVarDir"] = os.path.join(self.newvmconfdir , cfgDict["HostName"])
                     
@@ -1430,22 +1347,27 @@ class virtualHostContainer:
         
     def peanuts(self):
         hostNames = []
+        libVirtNames = self.conection.listDefinedDomains()
         for x in range (0 , len(self.hostlist)):
             try:
-                self.hostlist[x].libvirtObj = self.conection.lookupByName(self.hostlist[x].HostName)
+                if not hasattr(self.hostlist[x],"libvirtObj"):
+                    self.hostlist[x].libvirtObj = self.conection.lookupByName(self.hostlist[x].HostName)
             except libvirt.libvirtError, e:
                 #print "errot=%s" %(e)
                 if (e.get_error_code() == 42):
                     #print "sdfDSF"
-                    
+                    self.hostlist[x].cfgApply()
                     generatorXml = self.hostlist[x].genXmlShouldExist()
                     if generatorXml != "":
                         try:
+                            
                             self.hostlist[x].libvirtObj = self.conection.defineXML(generatorXml)
                         except libvirt.libvirtError, e:
                             #print KnownHosts
-                            print "Exception Generating " + self.hostlist[x].HostName
-                            
+                            #print "Exception Generating " + self.hostlist[x].HostName
+                            self.logger.debug("generatorXml=%s" % (generatorXml))
+                            self.logger.error("Exception Generating " + self.hostlist[x].HostName)
+                            self.logger.debug(e)
                             #print dir(e)
                             #print e.get_error_level()
                             #print e
@@ -1455,11 +1377,17 @@ class virtualHostContainer:
                     
 if __name__ == "__main__":
     #opts = []
+    
+
+    
+    #
+    logger = logging.getLogger("vmimagemanager")
+    logging.config.fileConfig("logging.conf")
     try:
         opts, args = getopt.getopt(sys.argv[1:], "b:s:r:e:i:c:udlLhvkzypfm", ["box=", "store=","restore=","extract=","insert=","config=","up","down","list-boxes","list-images","help","version","kill","tgz","rsync","print-config","free","locked"])
     except :
         usage()
-        logging.error('Command line option error')
+        self.logger.error('Command line option error')
         sys.exit(1)
     hostName = None
     storeImage = None
@@ -1474,6 +1402,7 @@ if __name__ == "__main__":
     boxlist = []
     ParsedImage = None
     ParsedConfigFile = ""
+    logger.error('Passed application defaults')
     for o, a in opts:
         if o in ("-h", "--help"):
             usage()
@@ -1538,9 +1467,12 @@ if __name__ == "__main__":
     
     
     if os.path.isfile(ConfigFile):
-        HostContainer.LoadConfigFile(ConfigFile)
+        lcfg2c = HostContainer.LoadConfigFile(ConfigFile)
+        if False == lcfg2c:
+            sys.exit(1)
+        
     else:
-        logging.fatal("Error: Configuration File '%s' not found" % (ConfigFile))
+        self.logger.fatal("Error: Configuration File '%s' not found" % (ConfigFile))
         sys.exit(1)
     HostContainer.libvirtImport()
     HostContainer.libvirtExport()
@@ -1554,13 +1486,37 @@ if __name__ == "__main__":
     if ParsedImage != None:
         HostContainer.ImageMode = ParsedImage
     processingBoxes = []
+    pbindex = []
     if len(boxlist) >0:       
         notfound = False
         for box in boxlist:
             found = False
+            for x in range (0 , len(HostContainer.hostlist)):
+                logger.debug("ahostsdebug=%s" % (HostContainer.hostlist[x].DcgDict))
+                if HostContainer.hostlist[x].HostName == box:
+                    found = True
+            if found:
+                pbindex.append(x)
+    #print pbindex
+    for index in pbindex:
+        #print index
+        #print HostContainer.hostlist
+        logger.debug("asdsshostsdebug=%s" % (HostContainer.hostlist[index].DcgDict))
+        #HostContainer.hostlist[index].cfgApply()
+        logger.debug("asssshostsdebug=%s" % (HostContainer.hostlist[index].DcgDict))
+        Lockfile = HostContainer.hostlist[index].DcgDict["LockFile"]
+        #HostContainer.hostlist[index].Lock()
+        DiscLocking.__init__(HostContainer.hostlist[index],Lockfile)
+        HostContainer.hostlist[index].Lock()
+    if len(boxlist) >0:       
+        notfound = False
+        for box in boxlist:
+            found = False            
             for ahost in HostContainer.hostlist:
                 if ahost.HostName == box:
                     found = True
+                    logger.debug("sebug=%s" % (ahost.DcgDict))
+                    ahost.cfgApply()
                     ahost.Lock()
                     processingBoxes.append(ahost)
             if found == False:
