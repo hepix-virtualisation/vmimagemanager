@@ -37,20 +37,6 @@ class InputError(Error):
 
 #for line in file('vmimagemanager.dict'):
 #    cfg = eval(line)
-InstallPrefix="/"
-
-ConfigFile = ""
-
-Fillocations = ['vmimagemanager.cfg', os.path.expanduser('~/.vmimagemanager.cfg'),InstallPrefix + '/etc/vmimagemanager/vmimagemanager.cfg']
-
-for fileName in Fillocations:
-    if True == os.path.isfile(fileName):
-        ConfigFile = fileName
-        break
-
-if len(ConfigFile) == 0:
-    ConfigFile = '/etc/vmimagemanager/vmimagemanager.cfg'
-    
 
 # Add lines to import a namespace and add it to the list of namespaces used
 
@@ -382,6 +368,7 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
     def __init__(self,properties):
         self.logger = logging.getLogger("vmimagemanager.VirtualHostDiskKpartx")
         self.MountPoint = properties["MountPoint"]
+        self.logger.debug("properties['HostPartition'] %s" % (properties["HostPartition"]))
         self.HostPartition = int(properties["HostPartition"])
         self.HostDisk = properties["HostDisk"]
         self.CanMount = True
@@ -409,6 +396,7 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
         return result   
 
     def PartitionsOpen(self):
+        self.logger.debug("HostPartition=%s" % (self.HostPartition))
         cmd = 'kpartx -p vmim -av %s' % (self.HostDisk)
         self.logger.debug("Running command %s" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
@@ -425,14 +413,17 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
             self.logger.error('Partiton  "%s" is greater than "%s" the number of avilaable partitons' % (self.HostPartition,len(DiskPartitions) ))
             self.logger.error(cmdoutput)
             sys.exit(1)
+        
         PartitonLine = DiskPartitions[self.HostPartition -1].split(" ")
-        #self.logger.debug("PartitonLine=%s" % (PartitonLine))        
-        self.HostRootSpace = "/dev/mapper/" + PartitonLine[2]
+        self.logger.debug("PartitonLine=%s" % (PartitonLine))        
+        
+        self.HostRootSpace = "/dev/mapper/" + PartitonLine[self.HostPartition]
         return True
     def ImageMount(self):
         if self.MountIs():
             return True
-        self.PartitionsOpen()
+        if not self.PartitionsOpen():
+            raise "error"
         if not os.path.isdir(self.MountPoint):
             self.logger.info("os.makedirs(%s)%s" % (self.Mount,self.HostRootSpace))
             os.makedirs(self.MountPoint)
@@ -441,7 +432,7 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
         self.logger.debug("Running command %s" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
-            self.logger.debug( 'self=%s,self.HostRootSpace=%s,self.MountPoint=%s' % (self,self.HostRootSpace,self.MountPoint))
+            self.logger.debug( 'gggggggggggself=%s,self.HostRootSpace=%s,self.MountPoint=%s' % (self,self.HostRootSpace,self.MountPoint))
             self.logger.error('Command "%s" Failed' % (cmd))
             self.logger.info( 'rc=%s,output=%s' % (rc,cmdoutput))
             sys.exit(1)            
@@ -591,11 +582,14 @@ class virtualhost(DiscLocking):
     def __init__(self,properties):
         self.logger = logging.getLogger("vmimagemanager.virtualhost")
         self.DcgDict = {}
+        self.loadCfg(properties)
+        
     def loadCfg(self,properties):
         #print "Loaded config"
         for prop in properties.keys():
-            #print prop
+            #for each property
             if not prop in self.DcgDict.keys():
+                # if the property is not in the keys
                 self.DcgDict[prop] = properties[prop]
                 
         
@@ -628,13 +622,14 @@ class virtualhost(DiscLocking):
             self.DiskSubsystem = VirtualHostDiskPartitionsShared(self.DcgDict)
             found = True
             self.logger.debug("adding  self.DiskSubsystem %s to VirtualHostDiskPartitionsShared" % self.HostName)
+            
         if ("HostDisk" in self.DcgDict.keys()) and ("HostPartition" in self.DcgDict.keys()):
             self.DiskSubsystem = VirtualHostDiskKpartx(self.DcgDict)
             found = True
-            self.logger.debug("adding  self.DiskSubsystem %s to VirtualHostDiskKpartx" % self.HostName)        
+            self.logger.debug("adding  self.DiskSubsystem %s to " % self.HostName)        
         if not found:
             self.logger.debug("self.HostName %s"% self.HostName)
-            self.logger.debug("adding  self.DiskSubsystem %s to VirtualHostDiskKpartx" % self.HostName)
+            self.logger.debug("adding  self.DiskSubsystem %s to " % self.HostName)
             self.DiskSubsystem = VirtualHostDisk(self.DcgDict)
         #if not found:
         #    raise InputError("(HostRootSpace and HostSwapSpace) or (HostPartition and HostDisk) must be set for %s" %  self.HostName)
@@ -839,27 +834,31 @@ class virtualhost(DiscLocking):
         #VIR_DOMAIN_SHUTDOWN= 4: the domain is being shut down
         #VIR_DOMAIN_SHUTOFF= 5: the domain is shut off
         #VIR_DOMAIN_CRASHED= 6: the domain is crashed
+        timeout = 30
         while state in (1,2,3):
             counter += 1
-            if counter < 180:
+            if counter < timeout:
                 try:
                     rc = self.libvirtObj.shutdown()
                 except :
                     print "exception thrown"
             else:
+                self.logger.warning("Timed out shutting down domain")
                 counter = 0
                 #print "timed Out"
                 rc = self.libvirtObj.destroy()
             time.sleep(1)
             (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
-            #print "state %s" %( state)
+            self.logger.debug("state %s" %( state))
+            self.logger.debug("timeout in %s" %(timeout-  counter))
+            
             #print dir(self.libvirtObj)
             #print self.libvirtObj.destroy()
         self.DiskSubsystem.PartitionsOpen()
-        self.logger.debug("sdsd %s " %(self.DiskSubsystem))
+        self.logger.debug("self.DiskSubsystem %s " %(self.DiskSubsystem))
         
         self.DiskSubsystem.ImageMount()
-        self.logger.debug("sdsd")
+        
         
         return True
             
@@ -1148,11 +1147,7 @@ class virtualHostContainer:
                 #if has(libVritId
                 #sif not libVritId
                 libvirtdConnection = self.conection.lookupByName(Name)
-                cfgDict["HostDisk"]  = "Not Known"
                 cfgDict["HostName"]  = Name
-                cfgDict["LockFile"]  = str("/tmp/lockfile.remorem%s" % (Name) )
-                
-                self.logger.error("sdsdSD")
                 fred =  self.virtualHostGenerator(cfgDict)
                 #print fred
                 #Host.libvirtObj = libvirt.open(self.VmHostServer)
@@ -1241,12 +1236,14 @@ class virtualHostContainer:
         for x in range (0 , len(self.hostlist)):
            
             if str(self.hostlist[x].HostName) == hostName:
-               index= x 
+               index= x
+               break
+            print self.hostlist[x].HostName
         if index == -1:
-            #print "creating %s as not in %s" % (self.hostlist,index)
+            print "creating %s as not in %s" % (self.hostlist,index)
             self.logger.debug(cfg)
             newhost = virtualhost(cfg)
-            newhost.loadCfg(self.cfgDefault)
+            #newhost.loadCfg(self.cfgDefault)
             newhost.Container = self
             newhost.HostName = hostName
             self.hostlist.append(newhost)
@@ -1284,7 +1281,7 @@ class virtualHostContainer:
                         cfgDict["HostDisk"]  = self.config.get(cfgSection,"disk")
                     if (self.config.has_option(cfgSection, "partition")):
                         cfgDict["HostPartition"]  = self.config.get(cfgSection,"partition")
-                    
+                        print "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXX %s,%s" %(cfgDict["HostName"],cfgDict["HostPartition"] )
                     if (self.config.has_option(cfgSection, "vmimages")):
                         cfgDict["ImageStoreDir"]  = self.config.get(cfgSection,"vmimages")                
                     else:
@@ -1376,11 +1373,20 @@ class virtualHostContainer:
                 
                     
 if __name__ == "__main__":
-    #opts = []
-    
 
-    
-    #
+
+    InstallPrefix="/"
+
+    ConfigFile = ""
+
+    Fillocations = ['vmimagemanager.cfg', os.path.expanduser('~/.vmimagemanager.cfg'),InstallPrefix + '/etc/vmimagemanager/vmimagemanager.cfg']
+
+    for fileName in Fillocations:
+	    if True == os.path.isfile(fileName):
+		    ConfigFile = fileName
+		    break
+    if len(ConfigFile) == 0:
+	    ConfigFile = '/etc/vmimagemanager/vmimagemanager.cfg'
     logger = logging.getLogger("vmimagemanager")
     logging.config.fileConfig("logging.conf")
     try:
@@ -1492,7 +1498,7 @@ if __name__ == "__main__":
         for box in boxlist:
             found = False
             for x in range (0 , len(HostContainer.hostlist)):
-                logger.debug("ahostsdebug=%s" % (HostContainer.hostlist[x].DcgDict))
+                logger.debug("boxy=%s ahostsdebug=%s" % (box ,HostContainer.hostlist[x].DcgDict))
                 if HostContainer.hostlist[x].HostName == box:
                     found = True
             if found:
@@ -1504,10 +1510,9 @@ if __name__ == "__main__":
         logger.debug("asdsshostsdebug=%s" % (HostContainer.hostlist[index].DcgDict))
         #HostContainer.hostlist[index].cfgApply()
         logger.debug("asssshostsdebug=%s" % (HostContainer.hostlist[index].DcgDict))
-        Lockfile = HostContainer.hostlist[index].DcgDict["LockFile"]
-        #HostContainer.hostlist[index].Lock()
-        DiscLocking.__init__(HostContainer.hostlist[index],Lockfile)
-        HostContainer.hostlist[index].Lock()
+        #Lockfile = HostContainer.hostlist[index].DcgDict["LockFile"]
+        #DiscLocking.__init__(HostContainer.hostlist[index],Lockfile)
+        
     if len(boxlist) >0:       
         notfound = False
         for box in boxlist:
