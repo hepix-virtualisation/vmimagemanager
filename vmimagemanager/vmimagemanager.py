@@ -241,27 +241,6 @@ class VirtualHostDisk():
         self.CanMount = False
     def MountIs(self):
         return False
-    def MountIsOld(self):
-        # Returns False for not mounted
-        # Returns True for device mounted
-        result = False
-        cmd="mount"
-        (rc,cmdoutput) = commands.getstatusoutput(cmd)
-        if rc != 0:
-            logging.error('mount Failed with error code %s and the folleowing error:%s' % (rc,cmdoutput))
-            sys.exit(1)            
-        #print "%s %s" % (self.PropertyHostRootSpaceGet(),self.PropertyMountGet())
-        for mntline in cmdoutput.split("\n"):
-            mntsplit = mntline.split(" ")
-            if len(mntsplit) < 3:
-                print "Error parsing mount command!"   
-            #print mntsplit[2]    
-            if mntsplit[2] == self.MountPoint:
-                # Assumes no VM host maps to same directory
-                #print "sdsdSD"
-                result = True
-        return result
-
 
     def ImageMount(self):
         self.logger.debug("ImageMount")
@@ -368,11 +347,12 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
     def __init__(self,properties):
         self.logger = logging.getLogger("vmimagemanager.VirtualHostDiskKpartx")
         self.MountPoint = properties["MountPoint"]
-        self.logger.debug("properties['HostPartition'] %s" % (properties["HostPartition"]))
+        #self.logger.debug("properties['HostPartition'] %s" % (properties["HostPartition"]))
         self.HostPartition = int(properties["HostPartition"])
         self.HostDisk = properties["HostDisk"]
         self.CanMount = True
-
+    def GetPartitionList(self):
+        pass
     def MountIs(self):
         # Returns False for not mounted
         # Returns True for device mounted
@@ -394,10 +374,8 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
                 self.HostRootSpace = mntsplit[0]
                 result = True
         return result   
-
-    def PartitionsOpen(self):
-        self.logger.debug("HostPartition=%s" % (self.HostPartition))
-        cmd = 'kpartx -p vmim -av %s' % (self.HostDisk)
+    def PartitionsCheck(self):
+        cmd = 'kpartx -p vmim -lv %s' % (self.HostDisk)
         self.logger.debug("Running command %s" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
@@ -408,17 +386,59 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
         if "" == cmdoutput:
             self.logger.error('The Disk "%s" has no partitons' % (self.HostDisk))
             sys.exit(1)
+        
+        rootStripLen = None
+        DiskPartitionD = []
         DiskPartitions = cmdoutput.split("\n")
-        if len(DiskPartitions) <= self.HostPartition -1:
-            self.logger.error('Partiton  "%s" is greater than "%s" the number of avilaable partitons' % (self.HostPartition,len(DiskPartitions) ))
-            self.logger.error(cmdoutput)
+        
+        for PartitionLine in cmdoutput.split("\n"):
+            
+            
+                
+            PartitionLineSplit = PartitionLine.split(" ")
+            #self.logger.debug("PartitionLineSplit=%s" % (PartitionLineSplit))     
+            if len(PartitionLineSplit) > 3:
+                Partition = {}
+                Partition['Line'] = PartitionLine
+                Partition['Path'] = PartitionLineSplit[0]
+                if None == rootStripLen:
+                    rootStrip = len(string.rstrip(Partition['Path'],string.digits))
+                    if rootStrip > 0:
+                        rootStripLen = rootStrip
+                Partition['Number'] = int(PartitionLineSplit[0][(rootStripLen):])
+                #self.logger.debug("Partition=%s" % (Partition))
+                DiskPartitionD.append(Partition)
+        
+        correct = None  
+        for item in DiskPartitionD:
+            if item['Number'] == self.HostPartition:
+                
+                correct = item
+        if correct == None:
+            partitionList = []
+            self.logger.error('Partiton  "%s" does not exist.' % (self.HostPartition))
+            for item in DiskPartitionD:
+                print "%s" % (item['Number'])
+            self.logger.debug(cmdoutput)
             sys.exit(1)
         
-        PartitonLine = DiskPartitions[self.HostPartition -1].split(" ")
-        self.logger.debug("PartitonLine=%s" % (PartitonLine))        
+        #print correct
         
-        self.HostRootSpace = "/dev/mapper/" + PartitonLine[self.HostPartition]
+        
+        self.HostRootSpace = "/dev/mapper/" + correct['Path']
         return True
+    def PartitionsOpen(self):
+        self.logger.debug("HostPartition=%s" % (self.HostPartition))
+        cmd = 'kpartx -p vmim -av %s' % (self.HostDisk)
+        self.logger.debug("Running command %s" % (cmd))
+        (rc,cmdoutput) = commands.getstatusoutput(cmd)
+        if rc != 0:
+            self.logger.error('Failed "%s"' % (cmd))
+            self.logger.error(cmdoutput)
+            self.logger.error('Return Code=%s' % (rc))
+            sys.exit(1)
+        return True
+    
     def ImageMount(self):
         if self.MountIs():
             return True
@@ -463,6 +483,7 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
         if hasattr(self,"HostRootSpace"):
            del self.HostRootSpace
         return True
+        
     def LibVirtXmlTreeGenerate(self,devices):    
         disk = SubElement(devices, "disk",device="disk")
         disk.set('type', "block")
@@ -592,15 +613,37 @@ class virtualhost(DiscLocking):
                 # if the property is not in the keys
                 self.DcgDict[prop] = properties[prop]
                 
-        
+    def RealiseDevice(self):
+        found = False
+        if ("HostRootSpace" in self.DcgDict.keys()) and ("HostSwapSpace" in self.DcgDict.keys()):
+            self.logger.debug("sebug=%s" % (ahost.DcgDict))
+            self.DiskSubsystem = VirtualHostDiskPartitionsShared(self.DcgDict)
+            found = True
+            #self.logger.debug("setting  self.DiskSubsystem %s to VirtualHostDiskPartitionsShared" % self.HostName)
+            
+        if ("HostDisk" in self.DcgDict.keys()) and ("HostPartition" in self.DcgDict.keys()):
+            self.DiskSubsystem = VirtualHostDiskKpartx(self.DcgDict)
+            found = True
+            #self.logger.debug("setting  self.DiskSubsystem %s to " % self.HostName)        
+        if not found:
+            self.logger.error("No DiskSubsystem found using base Object To Avoid Errors please set %s to Null driver" % self.HostName)
+            self.logger.debug("self.config %s"% self.DcgDict)
+            self.logger.debug("adding  self.DiskSubsystem %s to " % self.HostName)
+            self.DiskSubsystem = VirtualHostDisk(self.DcgDict)
+            return False
+        if not self.DiskSubsystem.PartitionsCheck():
+            self.logger.debug("Disk subsystem incorectly set up %s"% self.DcgDict)
+            return False
+        return True
         #print "dsfdsF"
     def cfgApply(self):
         
-        self.logger.debug( self.DcgDict)
+        found = False
+        #self.logger.debug("cfgApply:dict:%s" % (self.DcgDict))
         if "HostName" in self.DcgDict.keys():
             self.HostName = self.DcgDict["HostName"]
             
-            self.logger.debug("setting " + self.HostName)
+            #self.logger.debug("setting HostName" + self.HostName)
         if "LockFile" in self.DcgDict.keys():
             self.LockFile = self.DcgDict["LockFile"]
             DiscLocking.__init__(self,self.DcgDict["LockFile"])
@@ -618,19 +661,6 @@ class virtualhost(DiscLocking):
         found = False
         #self.DiskSubsystem = VirtualHostDisk(self.DcgDict)
         
-        if ("HostRootSpace" in self.DcgDict.keys()) and ("HostSwapSpace" in self.DcgDict.keys()):
-            self.DiskSubsystem = VirtualHostDiskPartitionsShared(self.DcgDict)
-            found = True
-            self.logger.debug("adding  self.DiskSubsystem %s to VirtualHostDiskPartitionsShared" % self.HostName)
-            
-        if ("HostDisk" in self.DcgDict.keys()) and ("HostPartition" in self.DcgDict.keys()):
-            self.DiskSubsystem = VirtualHostDiskKpartx(self.DcgDict)
-            found = True
-            self.logger.debug("adding  self.DiskSubsystem %s to " % self.HostName)        
-        if not found:
-            self.logger.debug("self.HostName %s"% self.HostName)
-            self.logger.debug("adding  self.DiskSubsystem %s to " % self.HostName)
-            self.DiskSubsystem = VirtualHostDisk(self.DcgDict)
         #if not found:
         #    raise InputError("(HostRootSpace and HostSwapSpace) or (HostPartition and HostDisk) must be set for %s" %  self.HostName)
         if "ConfTemplateXen" in self.DcgDict.keys():
@@ -801,6 +831,7 @@ class virtualhost(DiscLocking):
         (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
         if state in (1,2,3):
             return True
+        self.RealiseDevice()
         if not self.DiskSubsystem.ImageUnMount():
             print "Failed unmount A"
             sys.exit(1)
@@ -854,9 +885,9 @@ class virtualhost(DiscLocking):
             
             #print dir(self.libvirtObj)
             #print self.libvirtObj.destroy()
+        self.RealiseDevice()
         self.DiskSubsystem.PartitionsOpen()
-        self.logger.debug("self.DiskSubsystem %s " %(self.DiskSubsystem))
-        
+        #self.logger.debug("self.DiskSubsystem %s " %(self.DiskSubsystem))
         self.DiskSubsystem.ImageMount()
         
         
@@ -929,9 +960,10 @@ class virtualhost(DiscLocking):
             logging.error( "Error: Failing to store images")
             sys.exit(1)
             
-        self.logger.debug("command='%s'" % (cmd))
+        
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
+            self.logger.debug("command='%s'" % (cmd))
             message = 'The command failed "%s"\n' % (cmd)
             message += cmdoutput + '\nReturn Code=%s' % (rc)
             logging.error(message)
@@ -995,7 +1027,7 @@ class virtualhost(DiscLocking):
                 self.logger.debug('Running command "%s".' % (cmd))
             (rc,cmdoutput) = commands.getstatusoutput(cmd)
             if rc != 0:
-                self.logger.error('Failed "%s"' % (cmd))
+                self.logger.error('Failed Running command "%s"' % (cmd))
                 self.logger.error(cmdoutput)
                 self.logger.error('Return Code=%s' % (rc))
                 return rc
@@ -1091,6 +1123,7 @@ class virtualhost(DiscLocking):
         devices = SubElement(domain, "devices")
         emulator = SubElement(devices, "emulator")
         emulator.text = "/usr/bin/kvm"
+        RealiseDevice(self)
         self.DiskSubsystem.LibVirtXmlTreeGenerate(devices)
         self.logger.debug("DiskSubsystem %s" %(self.DiskSubsystem))
         serial = SubElement(devices, "serial")
@@ -1238,10 +1271,10 @@ class virtualHostContainer:
             if str(self.hostlist[x].HostName) == hostName:
                index= x
                break
-            print self.hostlist[x].HostName
+            #print self.hostlist[x].HostName
         if index == -1:
-            print "creating %s as not in %s" % (self.hostlist,index)
-            self.logger.debug(cfg)
+            #self.logger.debug("creating %s as index= %s" % (self.hostlist,index))
+            #self.logger.debug("cfg=%s" % (cfg))
             newhost = virtualhost(cfg)
             #newhost.loadCfg(self.cfgDefault)
             newhost.Container = self
@@ -1277,11 +1310,11 @@ class virtualHostContainer:
                         cfgDict["HostRootSpace"]  = self.config.get(cfgSection,"root")
                     if (self.config.has_option(cfgSection, "swap")):
                         cfgDict["HostSwapSpace"]  = self.config.get(cfgSection,"swap")
-                    if (self.config.has_option(cfgSection, "disk")):
-                        cfgDict["HostDisk"]  = self.config.get(cfgSection,"disk")
+                    if (self.config.has_option(cfgSection, "hostdisk")):
+                        cfgDict["HostDisk"]  = self.config.get(cfgSection,"hostdisk")
                     if (self.config.has_option(cfgSection, "partition")):
                         cfgDict["HostPartition"]  = self.config.get(cfgSection,"partition")
-                        print "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXX %s,%s" %(cfgDict["HostName"],cfgDict["HostPartition"] )
+                        #print "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXX %s,%s" %(cfgDict["HostName"],cfgDict["HostPartition"] )
                     if (self.config.has_option(cfgSection, "vmimages")):
                         cfgDict["ImageStoreDir"]  = self.config.get(cfgSection,"vmimages")                
                     else:
@@ -1408,7 +1441,6 @@ if __name__ == "__main__":
     boxlist = []
     ParsedImage = None
     ParsedConfigFile = ""
-    logger.error('Passed application defaults')
     for o, a in opts:
         if o in ("-h", "--help"):
             usage()
@@ -1498,18 +1530,18 @@ if __name__ == "__main__":
         for box in boxlist:
             found = False
             for x in range (0 , len(HostContainer.hostlist)):
-                logger.debug("boxy=%s ahostsdebug=%s" % (box ,HostContainer.hostlist[x].DcgDict))
+                #logger.debug("boxy=%s ahostsdebug=%s" % (box ,HostContainer.hostlist[x].DcgDict))
                 if HostContainer.hostlist[x].HostName == box:
                     found = True
             if found:
                 pbindex.append(x)
     #print pbindex
-    for index in pbindex:
+    #for index in pbindex:
         #print index
         #print HostContainer.hostlist
-        logger.debug("asdsshostsdebug=%s" % (HostContainer.hostlist[index].DcgDict))
+        #logger.debug("asdsshostsdebug=%s" % (HostContainer.hostlist[index].DcgDict))
         #HostContainer.hostlist[index].cfgApply()
-        logger.debug("asssshostsdebug=%s" % (HostContainer.hostlist[index].DcgDict))
+        #logger.debug("asssshostsdebug=%s" % (HostContainer.hostlist[index].DcgDict))
         #Lockfile = HostContainer.hostlist[index].DcgDict["LockFile"]
         #DiscLocking.__init__(HostContainer.hostlist[index],Lockfile)
         
@@ -1520,7 +1552,7 @@ if __name__ == "__main__":
             for ahost in HostContainer.hostlist:
                 if ahost.HostName == box:
                     found = True
-                    logger.debug("sebug=%s" % (ahost.DcgDict))
+        
                     ahost.cfgApply()
                     ahost.Lock()
                     processingBoxes.append(ahost)
@@ -1666,7 +1698,7 @@ if __name__ == "__main__":
                     if abox.Lock():
                         HaveToCheckBoxes.append(abox)
                 else:
-                    logging.error("In Use")
+                    logging.error("Host %s is nn Use")
                 
     
     if (len(HaveToCheckBoxes) > 0):
