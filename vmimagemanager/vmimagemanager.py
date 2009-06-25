@@ -261,8 +261,11 @@ class VirtualHostDisk():
 
 
 
+class VirtualHostDiskPartiions(VirtualHostDisk):
+    def PartitionsCheck(self):
+        return True
 
-class VirtualHostDiskPartitionsShared(VirtualHostDisk):
+class VirtualHostDiskPartitionsShared(VirtualHostDiskPartiions):
     def __init__(self,properties):   
         self.logger = logging.getLogger("vmimagemanager.VirtualHostDiskPartitionsShared") 
         self.CanMount = True
@@ -616,8 +619,9 @@ class virtualhost(DiscLocking):
     def RealiseDevice(self):
         found = False
         if ("HostRootSpace" in self.DcgDict.keys()) and ("HostSwapSpace" in self.DcgDict.keys()):
-            self.logger.debug("sebug=%s" % (ahost.DcgDict))
+            self.logger.debug("sebug=%s" % (self.DcgDict))
             self.DiskSubsystem = VirtualHostDiskPartitionsShared(self.DcgDict)
+            
             found = True
             #self.logger.debug("setting  self.DiskSubsystem %s to VirtualHostDiskPartitionsShared" % self.HostName)
             
@@ -626,7 +630,27 @@ class virtualhost(DiscLocking):
             found = True
             #self.logger.debug("setting  self.DiskSubsystem %s to " % self.HostName)        
         if not found:
-            self.logger.error("No DiskSubsystem found using base Object To Avoid Errors please set %s to Null driver" % self.HostName)
+            RequiredFields = ["HostRootSpace","HostSwapSpace","HostDisk","HostPartition"]
+            FoundFields = []
+            for Field in RequiredFields:
+                if Field in self.DcgDict.keys():
+                    FoundFields.append(Field)
+            if len(FoundFields) == 0:
+                self.logger.debug("%s has teh following fields set %s" % (self.DcgDict["HostName"]),FoundFields)
+            for Field in FoundFields:
+                if ("HostRootSpace" in self.DcgDict.keys()):
+                    self.logger.warning("%s has incomplete disk settings."% (self.DcgDict["HostName"]))
+                    self.logger.warning("HostRootSpace is set, but not HostSwapSpace.")
+                if ( "HostSwapSpace" in self.DcgDict.keys()):
+                    self.logger.warning("%s has incomplete disk settings."% (self.DcgDict["HostName"]))
+                    self.logger.warning("HostSwapSpace is set, but not HostSwapSpace.")
+                if ( "HostDisk" in self.DcgDict.keys()):
+                    self.logger.warning("%s has incomplete disk settings."% (self.DcgDict["HostName"]))
+                    self.logger.warning("HostDisk is set, but not HostPartition.")
+                if ( "HostPartition" in self.DcgDict.keys()):
+                    self.logger.warning("%s has incomplete disk settings."% (self.DcgDict["HostName"]))
+                    self.logger.warning("HostPartition is set, but not HostDisk.")
+            self.logger.info("No DiskSubsystem found using base Object To Avoid Errors please set %s to Null driver" % self.HostName)
             self.logger.debug("self.config %s"% self.DcgDict)
             self.logger.debug("adding  self.DiskSubsystem %s to " % self.HostName)
             self.DiskSubsystem = VirtualHostDisk(self.DcgDict)
@@ -865,7 +889,7 @@ class virtualhost(DiscLocking):
         #VIR_DOMAIN_SHUTDOWN= 4: the domain is being shut down
         #VIR_DOMAIN_SHUTOFF= 5: the domain is shut off
         #VIR_DOMAIN_CRASHED= 6: the domain is crashed
-        timeout = 30
+        timeout = 180
         while state in (1,2,3):
             counter += 1
             if counter < timeout:
@@ -880,8 +904,7 @@ class virtualhost(DiscLocking):
                 rc = self.libvirtObj.destroy()
             time.sleep(1)
             (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
-            self.logger.debug("state %s" %( state))
-            self.logger.debug("timeout in %s" %(timeout-  counter))
+            self.logger.debug("state=%s, timeout in %s" %( state, timeout-  counter))
             
             #print dir(self.libvirtObj)
             #print self.libvirtObj.destroy()
@@ -1123,7 +1146,8 @@ class virtualhost(DiscLocking):
         devices = SubElement(domain, "devices")
         emulator = SubElement(devices, "emulator")
         emulator.text = "/usr/bin/kvm"
-        RealiseDevice(self)
+        
+        self.RealiseDevice()
         self.DiskSubsystem.LibVirtXmlTreeGenerate(devices)
         self.logger.debug("DiskSubsystem %s" %(self.DiskSubsystem))
         serial = SubElement(devices, "serial")
@@ -1140,8 +1164,9 @@ class virtualhost(DiscLocking):
         return text
 
  
-
-
+    def LoadCfg(self,Config,Defaults):
+        
+        pass
         
     
 class virtualHostContainer:
@@ -1260,9 +1285,6 @@ class virtualHostContainer:
             self.cfgDefault["currentMemory"] = default
         self.cfgDefault["vcpu"] = 1
         
-    def importCfg(Self):
-        pass
-        
     def virtualHostGenerator(self,cfg):
         hostName = str(cfg["HostName"])
         index = -1
@@ -1285,7 +1307,7 @@ class virtualHostContainer:
             self.hostlist[x].loadCfg(cfg)
             return self.hostlist[x]
                     
-    def libvirtExport(self):
+    def cfgHostsLoad(self):
         
         for cfgSection in self.cfgHosts:
                 #print cfgSection
@@ -1375,7 +1397,7 @@ class virtualHostContainer:
                     except InputError, (instance):
                         print repr(instance.Message)
         
-    def peanuts(self):
+    def libVirtExport(self):
         hostNames = []
         libVirtNames = self.conection.listDefinedDomains()
         for x in range (0 , len(self.hostlist)):
@@ -1387,6 +1409,8 @@ class virtualHostContainer:
                 if (e.get_error_code() == 42):
                     #print "sdfDSF"
                     self.hostlist[x].cfgApply()
+                    self.hostlist[x].RealiseDevice()
+                    
                     generatorXml = self.hostlist[x].genXmlShouldExist()
                     if generatorXml != "":
                         try:
@@ -1513,8 +1537,8 @@ if __name__ == "__main__":
         self.logger.fatal("Error: Configuration File '%s' not found" % (ConfigFile))
         sys.exit(1)
     HostContainer.libvirtImport()
-    HostContainer.libvirtExport()
-    HostContainer.peanuts()
+    HostContainer.cfgHostsLoad()
+    HostContainer.libVirtExport()
     #print "scxxC"
     
     
@@ -1588,10 +1612,9 @@ if __name__ == "__main__":
         #        print "vmextracts=%s" % (cfg["general"]["vmextracts"])
         sys.exit(0)
     if "free" in actionList:
-        domainList = gsList()
         potentiallyFree = []
         for ahost in HostContainer.hostlist:
-            if not domainList.has_key(ahost.HostName):
+            if ahost.isRunning():
                 potentiallyFree.append(ahost)
         couldbeLocked = []
         for ahost in potentiallyFree:
