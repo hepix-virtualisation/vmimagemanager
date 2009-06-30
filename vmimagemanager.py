@@ -1445,7 +1445,7 @@ if __name__ == "__main__":
     if len(ConfigFile) == 0:
 	    ConfigFile = '/etc/vmimagemanager/vmimagemanager.cfg'
     logger = logging.getLogger("vmimagemanager")
-    logging.config.fileConfig("logging.conf")
+    #logging.config.fileConfig("logging.conf")
     try:
         opts, args = getopt.getopt(sys.argv[1:], "b:s:r:e:i:c:udlLhvkzypfm", ["box=", "store=","restore=","extract=","insert=","config=","up","down","list-boxes","list-images","help","version","kill","tgz","rsync","print-config","free","locked"])
     except :
