@@ -1186,7 +1186,7 @@ class virtualHostContainer:
         self.__VmSlotVarDir = value
     def libvirtImport(self):
         self.VmHostServer
-        self.conection = libvirt.open(self.VmHostServer)
+        self.conection = libvirt.open(str(self.VmHostServer))
         #print "libvirtImport" + str(dir(self.conection))
         #print self.conection.listDevices()
         #print self.conection.listDomainsID()
@@ -1260,7 +1260,7 @@ class virtualHostContainer:
         VmMountsBaseDir = self.config.get(GeneralSection,'mount')
         ThisKey = 'virthost'
         if (self.config.has_option(GeneralSection, ThisKey)):
-            self.VmHostServer = self.config.get(GeneralSection,ThisKey)
+            self.VmHostServer = str(self.config.get(GeneralSection,ThisKey))
         else:
             default = 'qemu:///system'
             logging.warning("Configuration file does not have a section '%s' with a key in it 'virthost' defaulting to '%s'" % (GeneralSection,default))
@@ -1450,7 +1450,7 @@ if __name__ == "__main__":
         opts, args = getopt.getopt(sys.argv[1:], "b:s:r:e:i:c:udlLhvkzypfm", ["box=", "store=","restore=","extract=","insert=","config=","up","down","list-boxes","list-images","help","version","kill","tgz","rsync","print-config","free","locked"])
     except :
         usage()
-        self.logger.error('Command line option error')
+        logger.error('Command line option error')
         sys.exit(1)
     hostName = None
     storeImage = None
