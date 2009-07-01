@@ -279,7 +279,7 @@ class VirtualHostDiskPartitionsShared(VirtualHostDiskPartiions):
         cmd="mount"
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
-            self.logging.error('mount Failed with error code %s and the folleowing error:%s' % (rc,cmdoutput))
+            self.loggererror('mount Failed with error code %s and the folleowing error:%s' % (rc,cmdoutput))
             sys.exit(1)            
         #print "%s %s" % (self.PropertyHostRootSpaceGet(),self.PropertyMountGet())
         for mntline in cmdoutput.split("\n"):
@@ -307,8 +307,8 @@ class VirtualHostDiskPartitionsShared(VirtualHostDiskPartiions):
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             self.logger.debug( 'self=%s,self.HostRootSpace=%s,self.MountPoint=%s' % (self,self.HostRootSpace,self.MountPoint))
-            self.logging.error('Command "%s" Failed' % (cmd))
-            self.self.logger.info( 'rc=%s,output=%s' % (rc,cmdoutput))
+            self.logger.error('Command "%s" Failed' % (cmd))
+            self.logger.info( 'rc=%s,output=%s' % (rc,cmdoutput))
             return False          
         return True
 
@@ -320,7 +320,7 @@ class VirtualHostDiskPartitionsShared(VirtualHostDiskPartiions):
         cmd="umount %s" % (self.HostRootSpace)
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
-            self.logging.error('Command "%s" Failed' % (cmd))
+            self.logger.error('Command "%s" Failed' % (cmd))
             self.logger.info('rc=%s,output=%s' % (rc,cmdoutput))
             return False          
         return True
