@@ -387,8 +387,8 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
             self.logger.error('Return Code=%s' % (rc))
             sys.exit(1)
         if "" == cmdoutput:
-            self.logger.error('The Disk "%s" has no partitons' % (self.HostDisk))
-            sys.exit(1)
+            self.logger.warning(' Cant mount The Disk "%s" has no partitons' % (self.HostDisk))
+            return False
         
         rootStripLen = None
         DiskPartitionD = []
@@ -709,7 +709,13 @@ class virtualhost(DiscLocking):
             self.currentMemory = 2097152
         if not "vcpu" in self.DcgDict.keys():
             self.DcgDict["vcpu"] = "1"
-        
+    
+    def isRunning(self):
+        (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
+        if state in (1,2,3):
+            return True
+        self.logger.warning("isRunning is unimplemented %s,%s,%s,%s,%s" % (state,maxMem,memory,nrVirtCpu,cpuTime))
+        return False    
     def PropertyHostNameSet(self, value):
         self.__HostName = value
         
@@ -1230,8 +1236,14 @@ class virtualHostContainer:
                 return False
         
         self.cfgHosts = self.config.sections()
-        
-        
+        self.sharedImageStoreDir = True
+        newVmExtractsDir = self.config.get(GeneralSection,'vmextracts')
+        if len(newVmExtractsDir) == 0:
+            self.VmExtractsDir = newXenImageDir
+            logging.warning("Configuration file does not have a section '%s' with a key in it 'vmextracts' defaulting to '%s'" % (GeneralSection,GeneralSection))
+        else:            
+            self.VmExtractsDir = newVmExtractsDir
+	
         self.newvmconfdir = self.config.get(GeneralSection,'vmconfdir')
         if len(self.newvmconfdir) == 0:
             logging.fatal( "Configuration file does not have a section '%s' with a key in it 'vmconfdir'" % (GeneralSection))
@@ -1246,18 +1258,18 @@ class virtualHostContainer:
         self.ConfTemplateXen = newConfTemplateXen
         
         newXenImageDir = self.config.get(GeneralSection,'vmimages')
-        if len(newXenImageDir) == 0:
+        if len(newXenImageDir) >= 0:
+            self.XenImageDir = newXenImageDir
+        else:
             logging.fatal( "Configuration file does not have a section '%s' with a key in it 'vmimages'" % (GeneralSection))
-            sys.exit(1)
-        self.XenImageDir = newXenImageDir
-        self.VmExtractsDir = newXenImageDir
+            
         
         newVmExtractsDir = self.config.get(GeneralSection,'vmextracts')
         if len(newVmExtractsDir) == 0:
+            self.VmExtractsDir = newXenImageDir
             logging.warning("Configuration file does not have a section '%s' with a key in it 'vmextracts' defaulting to '%s'" % (GeneralSection,GeneralSection))
         else:            
             self.VmExtractsDir = newVmExtractsDir
-	VmMountsBaseDir = "/mnt/vmimagemanager/"
 	
         VmMountsBaseDir = self.config.get(GeneralSection,'mount')
 	
@@ -1344,7 +1356,12 @@ class virtualHostContainer:
                     if (self.config.has_option(cfgSection, "vmimages")):
                         cfgDict["ImageStoreDir"]  = self.config.get(cfgSection,"vmimages")                
                     else:
-                        cfgDict["ImageStoreDir"] = os.path.join(self.XenImageDir , cfgDict["HostName"])
+                        if self.sharedImageStoreDir:
+                            cfgDict["ImageStoreDir"] = self.XenImageDir
+                        else:
+                            #"XenImageDir"):
+                            cfgDict["ImageStoreDir"] = os.path.join(self.XenImageDir , cfgDict["HostName"])
+                        
                     if (self.config.has_option(cfgSection, "mount")):
                         cfgDict["MountPoint"]  = self.config.get(cfgSection,"mount")
                     else:
@@ -1455,7 +1472,7 @@ if __name__ == "__main__":
     
     ch.setFormatter(formatter)
 #add ch to logger
-    logger.addHandler(ch)
+    #logger.addHandler(ch)
 
     #create formatter
     
@@ -1563,6 +1580,7 @@ if __name__ == "__main__":
         HostContainer.ImageMode = ParsedImage
     processingBoxes = []
     pbindex = []
+    notfoundllist = []
     if len(boxlist) >0:       
         notfound = False
         for box in boxlist:
@@ -1573,8 +1591,12 @@ if __name__ == "__main__":
                     found = True
             if found:
                 pbindex.append(x)
-    #print pbindex
-    #for index in pbindex:
+            else:
+                notfoundllist.append(x)
+    
+    
+        
+        #for index in pbindex:
         #print index
         #print HostContainer.hostlist
         #logger.debug("asdsshostsdebug=%s" % (HostContainer.hostlist[index].DcgDict))
@@ -1582,36 +1604,24 @@ if __name__ == "__main__":
         #logger.debug("asssshostsdebug=%s" % (HostContainer.hostlist[index].DcgDict))
         #Lockfile = HostContainer.hostlist[index].DcgDict["LockFile"]
         #DiscLocking.__init__(HostContainer.hostlist[index],Lockfile)
-        
-    if len(boxlist) >0:       
-        notfound = False
-        for box in boxlist:
-            found = False            
-            for ahost in HostContainer.hostlist:
-                if ahost.HostName == box:
-                    found = True
-        
-                    ahost.cfgApply()
-                    ahost.Lock()
-                    processingBoxes.append(ahost)
-            if found == False:
-               notfound = True 
-        if (notfound):
-            message = None
-            hostlist = HostContainer.hostlist
-            if len (hostlist) == 0:
-                message = "No bokes Configured Please Check your configuration"
-            else:
-                message = "box slot '%s' not found! The following Host slots exist." % (box)
-                for ahost in HostContainer.hostlist:
-                    message += '\n' + ahost.HostName
-            logging.error(message)
-            sys.exit(1) 
+
+    for x in pbindex:
+        HostContainer.hostlist[x].cfgApply()
+        HostContainer.hostlist[x].Lock()
     #print "dslkjsdljsdlkjsd"
+    
+    if (len(notfoundllist) != 0):
+        message = ""
+        message += "The following hosts where not found:"
+        for i in notfoundllist:
+            message += HostContainer.hostlist[i].HostName + " "
+        message += "\nNo Configured boxes please check your configuration"
+        logging.error(message)
+        
     if "list-boxes" in actionList:
         #print  HostContainer.hostlist
-        for ahost in HostContainer.hostlist:
-            print ahost.HostName
+        for x in pbindex:
+            print HostContainer.hostlist[x].HostName
         sys.exit(0)
     if "print-config" in actionList:
         #if cfg.has_key("hosts"):
@@ -1627,32 +1637,31 @@ if __name__ == "__main__":
         sys.exit(0)
     if "free" in actionList:
         potentiallyFree = []
-        for ahost in HostContainer.hostlist:
-            if ahost.isRunning():
-                potentiallyFree.append(ahost)
+        for x in range (0 , len(HostContainer.hostlist)):
+            print "checking %s" % (HostContainer.hostlist[x].HostName)
+            if not HostContainer.hostlist[x].isRunning():
+                potentiallyFree.append(x)
         couldbeLocked = []
-        for ahost in potentiallyFree:
-            if not ahost.IsLocked():
-                couldbeLocked.append(ahost)
-        for ahost in couldbeLocked:
-            print ahost.HostName
+        for x in potentiallyFree:
+            if not HostContainer.hostlist[x].IsLocked():
+                couldbeLocked.append(x)
+        for x in couldbeLocked:
+            print HostContainer.hostlist[x].HostName
         sys.exit(0)       
     if "locked" in actionList:
         domainList = VitualHostsList()
         potentiallyFree = []
-        for ahost in HostContainer.hostlist:
-            if not domainList.has_key(ahost.HostName):
-                potentiallyFree.append(ahost)
+        for x in range (0 , len(HostContainer.hostlist)):
+            if not domainList.has_key(HostContainer.hostlist[x].HostName):
+                potentiallyFree.append(x)
         definatelyIsLocked = []
-        for ahost in potentiallyFree:
-            if ahost.IsLocked():
-                definatelyIsLocked.append(ahost)
+        for x in potentiallyFree:
+            if HostContainer.hostlist[x].IsLocked():
+                definatelyIsLocked.append(x)
         for ahost in definatelyIsLocked:
             print ahost.HostName
         sys.exit(0)     
-    if len(processingBoxes) == 0:
-        logging.error("No Valid 'boxes' not stated on command line.")
-        sys.exit(1)
+    
     
     if len(actionList) == 0:
         logging.error("Error: No task selected")
@@ -1666,8 +1675,13 @@ if __name__ == "__main__":
             for image in box.AvailableImageListGet():
                 print image
         sys.exit(0)
-
-
+    
+    if len(pbindex) == 0:
+        message = "No slot selected. The following Host slots exist:"
+        logging.error(message)
+        for x in range (0 , len(HostContainer.hostlist)):
+            print HostContainer.hostlist[x].HostName
+        sys.exit(1) 
 
     extractionsDict = {}
     for component in extractions:
@@ -1686,22 +1700,22 @@ if __name__ == "__main__":
             usage()
             sys.exit(1)
         insertionsDict[compdecp[0]] = compdecp[1]
-    for box in processingBoxes:
-        box.PropertyExtractionsSet(extractionsDict)
-        box.PropertyInsertionsSet(insertionsDict)        
+    for x in pbindex:
+        HostContainer.hostlist[x].PropertyExtractionsSet(extractionsDict)
+        HostContainer.hostlist[x].PropertyInsertionsSet(insertionsDict)        
         #print "avirtualHost.PropertyExtractionsGet=%s" % (avirtualHost.PropertyExtractionsGet())
         if ParsedImage != None:
-            box.PropertyImageModeSet(ParsedImage)
+            HostContainer.hostlist[x].PropertyImageModeSet(ParsedImage)
     
-        box.PropertyImageRestoreNameSet(restoreImage)
-        box.PropertyImageStoreNameSet(storeImage)
+        HostContainer.hostlist[x].PropertyImageRestoreNameSet(restoreImage)
+        HostContainer.hostlist[x].PropertyImageStoreNameSet(storeImage)
         #print restoreImage
         imageList = []
         if "restore" in actionList:
-            if not box.AvailableImage():
-                mesage = "Image '%s' not found in directory '%s'" % (restoreImage,box.ImageStoreDir)
+            if not HostContainer.hostlist[x].AvailableImage():
+                mesage = "Image '%s' not found in directory '%s'" % (restoreImage,HostContainer.hostlist[x].ImageStoreDir)
                 logging.error(mesage)
-                AvailableImageList = box.AvailableImageListGet()
+                AvailableImageList = HostContainer.hostlist[x].AvailableImageListGet()
                 if len(AvailableImageList) > 0:
                     mesage = "The following images where found:"
                     for item in AvailableImageList:
@@ -1710,76 +1724,73 @@ if __name__ == "__main__":
                 sys.exit(1)
             
         if "insert" in actionList:
-            if not box.AvailableExtract():
-                insertions = box.PropertyInsertionsGet()
-                for ext in box.PropertyInsertionsGet().keys():
-                    ImageName = "%s/%s" % (box.ExtractDir(),ext)
+            if not HostContainer.hostlist[x].AvailableExtract():
+                insertions = HostContainer.hostlist[x].PropertyInsertionsGet()
+                for ext in HostContainer.hostlist[x].PropertyInsertionsGet().keys():
+                    ImageName = "%s/%s" % (HostContainer.hostlist[x].ExtractDir(),ext)
                     if False == os.path.isfile(ImageName) and False == os.path.isdir(ImageName):
                         logging.error("Error: Insert '%s' not found in directory '%s'" % (ext,box.ExtractDir()))
                 sys.exit(1)
     HaveToCheckBoxes = []
     lockedBoxes = []
-    for abox in processingBoxes:
+    for x in pbindex:
         #print abox.HostName
-        if abox.IsLockedByMe():
+        if HostContainer.hostlist[x].IsLockedByMe():
             #print "dabox.HostName"
-            lockedBoxes.append(abox)
+            lockedBoxes.append(x)
         else:
             #print "dabox.fffffffffHostName"
-            if abox.Lock():
-                HaveToCheckBoxes.append(abox)
+            if HostContainer.hostlist[x].Lock():
+                HaveToCheckBoxes.append(x)
             else:
                 #print "Locked %s" % (abox)
-                if not abox.IsLockedStill():
+                if not HostContainer.hostlist[x].IsLockedStill():
                     #print "foor %s,%s,%s" % (abox.IsLockedByMe(),abox.IsLockedStill(),abox.IsLocked())
-                    if abox.Lock():
-                        HaveToCheckBoxes.append(abox)
+                    if HostContainer.hostlist[x].Lock():
+                        HaveToCheckBoxes.append(x)
                 else:
                     logging.error("Host %s is nn Use")
                 
     
     if (len(HaveToCheckBoxes) > 0):
         time.sleep(1)
-        for abox in HaveToCheckBoxes:
-            if abox.IsLockedByMe():
-                lockedBoxes.append(abox)
+        for x in HaveToCheckBoxes:
+            if HostContainer.hostlist[x].IsLockedByMe():
+                lockedBoxes.append(x)
                 
-    for abox in lockedBoxes:
-        box = processingBoxes.pop()
-        boxLocked = box.Lock()
-        #print boxLocked 
+    for x in lockedBoxes:
         
                 
         for command in actionList:
             if command in ["kill"]:
-                box.Kill()
+                HostContainer.hostlist[x].Kill()
         for command in actionList:
             if command in ["extract","insert","store","restore","down"]:
-                box.ShutDown()
+                HostContainer.hostlist[x].ShutDown()
         for command in actionList:
             if command in ["extract"]:
-                box.Extract()
+                HostContainer.hostlist[x].Extract()
         for command in actionList:
             if command in ["store"]:
-                box.StoreHost()
+                HostContainer.hostlist[x].StoreHost()
         for command in actionList:
             if command in ["restore"]:
-                box.RestoreHost()
+                HostContainer.hostlist[x].RestoreHost()
         for command in actionList:
             if command in ["insert"]:
-                box.Insert()
+                HostContainer.hostlist[x].Insert()
         for command in actionList:
             if command in ["extract","insert","store","restore","up"]:
-                box.StartUp()
+                HostContainer.hostlist[x].StartUp()
        
-        box.Unlock()
+        HostContainer.hostlist[x].Unlock()
     FoundLockedBox = False
     
     for abox in processingBoxes:
         #print abox.HostName
         if not abox in lockedBoxes:
             logging.error("Slot '%s' was locked when it was attempted to be used" % (abox.HostName))
-            abox.Unlock()
+            HostContainer.hostlist[x].Unlock()
             FoundLockedBox = True
     if FoundLockedBox:
         sys.exit(100)
