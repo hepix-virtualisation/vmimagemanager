@@ -1257,7 +1257,10 @@ class virtualHostContainer:
             logging.warning("Configuration file does not have a section '%s' with a key in it 'vmextracts' defaulting to '%s'" % (GeneralSection,GeneralSection))
         else:            
             self.VmExtractsDir = newVmExtractsDir
+	VmMountsBaseDir = "/mnt/vmimagemanager/"
+	
         VmMountsBaseDir = self.config.get(GeneralSection,'mount')
+	
         ThisKey = 'virthost'
         if (self.config.has_option(GeneralSection, ThisKey)):
             self.VmHostServer = str(self.config.get(GeneralSection,ThisKey))
@@ -1312,6 +1315,7 @@ class virtualHostContainer:
         for cfgSection in self.cfgHosts:
                 #print cfgSection
                 isanImage = 0
+		VmMountsBaseDir = "/tmp/vmimagemanager"
                 if (self.config.has_option(cfgSection, "vm_slot_enabled")):
                     isanImageStr = self.config.get(cfgSection,"vm_slot_enabled")
                     if (isanImageStr in (["Yes","YES","yes","y","On","on","ON","1"])):
@@ -1445,6 +1449,16 @@ if __name__ == "__main__":
     if len(ConfigFile) == 0:
 	    ConfigFile = '/etc/vmimagemanager/vmimagemanager.cfg'
     logger = logging.getLogger("vmimagemanager")
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    
+    ch.setFormatter(formatter)
+#add ch to logger
+    logger.addHandler(ch)
+
+    #create formatter
+    
     #logging.config.fileConfig("logging.conf")
     try:
         opts, args = getopt.getopt(sys.argv[1:], "b:s:r:e:i:c:udlLhvkzypfm", ["box=", "store=","restore=","extract=","insert=","config=","up","down","list-boxes","list-images","help","version","kill","tgz","rsync","print-config","free","locked"])
@@ -1534,7 +1548,7 @@ if __name__ == "__main__":
             sys.exit(1)
         
     else:
-        self.logger.fatal("Error: Configuration File '%s' not found" % (ConfigFile))
+        logger.fatal("Error: Configuration File '%s' not found" % (ConfigFile))
         sys.exit(1)
     HostContainer.libvirtImport()
     HostContainer.cfgHostsLoad()
