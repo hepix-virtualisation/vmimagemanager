@@ -16,7 +16,6 @@ import ConfigParser, os
 import random
 import shutil
 import libvirt
-import xml.dom.minidom 
 from xml.etree.ElementTree import Element, SubElement, dump,tostring
 
 class Error(Exception):
@@ -1156,6 +1155,14 @@ class virtualhost(DiscLocking):
         self.RealiseDevice()
         self.DiskSubsystem.LibVirtXmlTreeGenerate(devices)
         self.logger.debug("DiskSubsystem %s" %(self.DiskSubsystem))
+        self.Bridge = "br0"
+        if hasattr(self,"Bridge"):
+             interface = SubElement(devices, "interface")
+             interface.set('type', "bridge")
+             mac_address = SubElement(interface, "mac",address='%s' % (self.HostMacAddress))
+             source = SubElement(interface, "source",bridge='br0')
+             target = SubElement(interface, "target",dev='vnet1')
+             
         serial = SubElement(devices, "serial")
         serial.set('type', "pty")
         serial_target  = SubElement(serial, "target",port="0")
@@ -1166,7 +1173,7 @@ class virtualhost(DiscLocking):
         #print "self.genXml=" + self.genXml()
         #print "genXmlShouldExist=" + text
         text = tostring(domain)
-        #self.logger.debug(text)
+        self.logger.debug(text)
         return text
 
  
@@ -1440,7 +1447,7 @@ class virtualHostContainer:
                         except libvirt.libvirtError, e:
                             #print KnownHosts
                             #print "Exception Generating " + self.hostlist[x].HostName
-                            self.logger.debug("generatorXml=%s" % (generatorXml))
+                            self.logger.error("generatorXml=%s" % (generatorXml))
                             self.logger.error("Exception Generating " + self.hostlist[x].HostName)
                             self.logger.debug(e)
                             #print dir(e)
@@ -1478,7 +1485,7 @@ if __name__ == "__main__":
     
     #logging.config.fileConfig("logging.conf")
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "b:s:r:e:i:c:udlLhvkzypfm", ["box=", "store=","restore=","extract=","insert=","config=","up","down","list-boxes","list-images","help","version","kill","tgz","rsync","print-config","free","locked"])
+        opts, args = getopt.getopt(sys.argv[1:], "b:s:r:e:i:c:D:udlLhvkzypfm", ["box=", "store=","restore=","extract=","insert=","config=","up","down","list-boxes","list-images","help","version","kill","tgz","rsync","print-config","free","locked"])
     except :
         usage()
         logger.error('Command line option error')
@@ -1525,6 +1532,9 @@ if __name__ == "__main__":
         
         if o in ("-c", "--config"):
             ParsedConfigFile = a
+        if o in ("-D", "--debug"):
+            debugLevel = a
+            ch.setLevel(logging.DEBUG)
         if o in ("-u", "--up"):
             actionList.append("up")
             start = True
