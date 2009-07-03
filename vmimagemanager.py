@@ -1156,7 +1156,7 @@ class virtualhost(DiscLocking):
         self.DiskSubsystem.LibVirtXmlTreeGenerate(devices)
         self.logger.debug("DiskSubsystem %s" %(self.DiskSubsystem))
         self.Bridge = "br0"
-        if hasattr(self,"Bridge"):
+        if hasattr(self,"Bridge") and hasattr(self,"HostMacAddress"):
              interface = SubElement(devices, "interface")
              interface.set('type', "bridge")
              mac_address = SubElement(interface, "mac",address='%s' % (self.HostMacAddress))
