@@ -713,7 +713,7 @@ class virtualhost(DiscLocking):
         (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
         if state in (1,2,3):
             return True
-        self.logger.warning("isRunning is unimplemented %s,%s,%s,%s,%s" % (state,maxMem,memory,nrVirtCpu,cpuTime))
+        self.logger.debug("isRunning libvirt state=%s,maxMem=%s,memory=%s,nrVirtCpu=%s,cpuTime=%s" % (state,maxMem,memory,nrVirtCpu,cpuTime))
         return False    
     def PropertyHostNameSet(self, value):
         self.__HostName = value
@@ -857,8 +857,17 @@ class virtualhost(DiscLocking):
     
 
     def StartUp(self):
+        self.logger.debug( "starting up method %s" % (self.HostName))
         (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
-        if state in (1,2,3):
+        #VIR_DOMAIN_EVENT_DEFINED	 = 	0
+        #VIR_DOMAIN_EVENT_UNDEFINED	= 	1
+        #VIR_DOMAIN_EVENT_STARTED	= 	2
+        #VIR_DOMAIN_EVENT_SUSPENDED	= 	3
+        #VIR_DOMAIN_EVENT_RESUMED	= 	4
+        #VIR_DOMAIN_EVENT_STOPPED	= 	5
+        #print "exiting here %s" % (state)
+        if state in [1,2]:
+            
             return True
         self.RealiseDevice()
         if not self.DiskSubsystem.ImageUnMount():
@@ -878,6 +887,7 @@ class virtualhost(DiscLocking):
 #            test = "startep bad for %s" % (self.HostName)
 #            print test
 #            raise InputError(test)
+        
         rc = self.libvirtObj.create()
         (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
         while state not in (1,2,3):
@@ -900,6 +910,7 @@ class virtualhost(DiscLocking):
             if counter < timeout:
                 try:
                     rc = self.libvirtObj.shutdown()
+                    #print rc
                 except :
                     print "exception thrown"
             else:
@@ -907,9 +918,10 @@ class virtualhost(DiscLocking):
                 counter = 0
                 #print "timed Out"
                 rc = self.libvirtObj.destroy()
+                #print rc
             time.sleep(1)
             (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
-            self.logger.debug("state=%s, timeout in %s" %( state, timeout-  counter))
+            self.logger.info("state=%s, timeout in %s" %( state, timeout-  counter))
             
             #print dir(self.libvirtObj)
             #print self.libvirtObj.destroy()
@@ -920,7 +932,11 @@ class virtualhost(DiscLocking):
         
         
         return True
-            
+        
+    def Kill(self):
+        if self.isRunning():
+            self.libvirtObj.destroy()
+        return True 
     def StorageDir(self):
         return self.ImageStoreDir
         
@@ -1423,7 +1439,7 @@ class virtualHostContainer:
                         newhost = self.virtualHostGenerator(cfgDict)
                         
                     except InputError, (instance):
-                        print repr(instance.Message)
+                        print "Input Error %s"  % (repr(instance.Message))
         
     def libVirtExport(self):
         hostNames = []
@@ -1482,7 +1498,7 @@ if __name__ == "__main__":
     #logger.addHandler(ch)
 
     #create formatter
-    
+    debugFileName = None
     #logging.config.fileConfig("logging.conf")
     try:
         opts, args = getopt.getopt(sys.argv[1:], "b:s:r:e:i:c:D:udlLhvkzypfm", ["box=", "store=","restore=","extract=","insert=","config=","up","down","list-boxes","list-images","help","version","kill","tgz","rsync","print-config","free","locked"])
@@ -1533,8 +1549,8 @@ if __name__ == "__main__":
         if o in ("-c", "--config"):
             ParsedConfigFile = a
         if o in ("-D", "--debug"):
-            debugLevel = a
-            ch.setLevel(logging.DEBUG)
+            debugFileName  = str(a)
+            
         if o in ("-u", "--up"):
             actionList.append("up")
             start = True
@@ -1567,7 +1583,8 @@ if __name__ == "__main__":
     if ParsedConfigFile != "":
         #print "foof"
         ConfigFile = ParsedConfigFile
-    
+    if debugFileName != None:
+        logging.config.fileConfig(debugFileName)
     
     if os.path.isfile(ConfigFile):
         lcfg2c = HostContainer.LoadConfigFile(ConfigFile)
@@ -1593,16 +1610,18 @@ if __name__ == "__main__":
     notfoundllist = []
     if len(boxlist) >0:       
         notfound = False
+        foundindex = -1
         for box in boxlist:
             found = False
             for x in range (0 , len(HostContainer.hostlist)):
                 #logger.debug("boxy=%s ahostsdebug=%s" % (box ,HostContainer.hostlist[x].DcgDict))
                 if HostContainer.hostlist[x].HostName == box:
                     found = True
+                    foundindex = x
             if found:
-                pbindex.append(x)
+                pbindex.append(foundindex)
             else:
-                notfoundllist.append(x)
+                notfoundllist.append(box)
     
     
         
@@ -1624,13 +1643,12 @@ if __name__ == "__main__":
         message = ""
         message += "The following hosts where not found:"
         for i in notfoundllist:
-            message += HostContainer.hostlist[i].HostName + " "
-        message += "\nNo Configured boxes please check your configuration"
+            message += str(i + ", ")
         logging.error(message)
-        
+        actionList.append("list-boxes")
     if "list-boxes" in actionList:
         #print  HostContainer.hostlist
-        for x in pbindex:
+        for x in range (0 , len(HostContainer.hostlist)):
             print HostContainer.hostlist[x].HostName
         sys.exit(0)
     if "print-config" in actionList:
@@ -1648,7 +1666,7 @@ if __name__ == "__main__":
     if "free" in actionList:
         potentiallyFree = []
         for x in range (0 , len(HostContainer.hostlist)):
-            print "checking %s" % (HostContainer.hostlist[x].HostName)
+            logger.debug( "checking %s" % (HostContainer.hostlist[x].HostName))
             if not HostContainer.hostlist[x].isRunning():
                 potentiallyFree.append(x)
         couldbeLocked = []
@@ -1744,10 +1762,11 @@ if __name__ == "__main__":
     HaveToCheckBoxes = []
     lockedBoxes = []
     for x in pbindex:
-        #print abox.HostName
+        logging.debug("Processing=%s" % (HostContainer.hostlist[x].HostName))
         if HostContainer.hostlist[x].IsLockedByMe():
             #print "dabox.HostName"
             lockedBoxes.append(x)
+            logging.debug("IsLockedByMe x=%s,hostnam=%s" % (x,HostContainer.hostlist[x].HostName))
         else:
             #print "dabox.fffffffffHostName"
             if HostContainer.hostlist[x].Lock():
@@ -1767,7 +1786,9 @@ if __name__ == "__main__":
         for x in HaveToCheckBoxes:
             if HostContainer.hostlist[x].IsLockedByMe():
                 lockedBoxes.append(x)
-                
+    logging.debug("lockedBoxes=%s" % (lockedBoxes) )
+    logging.debug( "pbindex=%s" % (pbindex) )
+    #logging.debug(  HostContainer.hostlist[3].HostName)
     for x in lockedBoxes:
         
                 
@@ -1792,7 +1813,7 @@ if __name__ == "__main__":
         for command in actionList:
             if command in ["extract","insert","store","restore","up"]:
                 HostContainer.hostlist[x].StartUp()
-       
+                #print "called startup here"
         HostContainer.hostlist[x].Unlock()
     FoundLockedBox = False
     
