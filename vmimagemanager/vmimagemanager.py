@@ -1173,12 +1173,14 @@ class virtualhost(DiscLocking):
         self.logger.debug("DiskSubsystem %s" %(self.DiskSubsystem))
         self.Bridge = "br0"
         if hasattr(self,"Bridge") and hasattr(self,"HostMacAddress"):
+             
              interface = SubElement(devices, "interface")
              interface.set('type', "bridge")
              mac_address = SubElement(interface, "mac",address='%s' % (self.HostMacAddress))
              source = SubElement(interface, "source",bridge='br0')
              target = SubElement(interface, "target",dev='vnet1')
-             
+        else:
+            self.logger.debug("Has no mac address")
         serial = SubElement(devices, "serial")
         serial.set('type', "pty")
         serial_target  = SubElement(serial, "target",port="0")
