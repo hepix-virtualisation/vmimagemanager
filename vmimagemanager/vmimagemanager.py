@@ -953,6 +953,7 @@ class virtualhost(DiscLocking):
         return False
         
     def AvailableImageListGet(self):
+        
         output = []
         if os.path.isdir(self.ImageStoreDir):
             for filename in os.listdir(self.ImageStoreDir):
@@ -1212,7 +1213,7 @@ class virtualHostContainer:
     def PropertyVmSlotVarDirSet(self, value):
         for aHost in self.hostlist:
             aHost.VmSlotVarDir = value
-            logging.error("aHost.VmSlotVarDir=%s" % (aHost.VmSlotVarDir))
+            self.logger.error("aHost.VmSlotVarDir=%s" % (aHost.VmSlotVarDir))
             aHost.PropertyVmSlotVarDirSet(value)
         self.__VmSlotVarDir = value
     def libvirtImport(self):
@@ -1253,11 +1254,11 @@ class virtualHostContainer:
         self.config = ConfigParser.ConfigParser()
         cmdFormatFilter = "mkfs.ext3 -L / %s"
         self.config.readfp(open(fileName,'r'))
-        #logging.warning( config.sections()
+        #self.logger.warning( config.sections()
         configurationSections = self.config.sections()
         for ASection in RequiredSections:
             if not ASection in configurationSections:
-                logging.fatal( "Configuration file does not have a section '%s'"  % (ASection))
+                self.logger.fatal( "Configuration file does not have a section '%s'"  % (ASection))
                 return False
         
         self.cfgHosts = self.config.sections()
@@ -1265,20 +1266,20 @@ class virtualHostContainer:
         newVmExtractsDir = self.config.get(GeneralSection,'vmextracts')
         if len(newVmExtractsDir) == 0:
             self.VmExtractsDir = newXenImageDir
-            logging.warning("Configuration file does not have a section '%s' with a key in it 'vmextracts' defaulting to '%s'" % (GeneralSection,GeneralSection))
+            self.logger.warning("Configuration file does not have a section '%s' with a key in it 'vmextracts' defaulting to '%s'" % (GeneralSection,GeneralSection))
         else:            
             self.VmExtractsDir = newVmExtractsDir
 	
         self.newvmconfdir = self.config.get(GeneralSection,'vmconfdir')
         if len(self.newvmconfdir) == 0:
-            logging.fatal( "Configuration file does not have a section '%s' with a key in it 'vmconfdir'" % (GeneralSection))
+            self.logger.fatal( "Configuration file does not have a section '%s' with a key in it 'vmconfdir'" % (GeneralSection))
             return False
         ##self.VmSlotVarDir = newvmconfdir
         self.PropertyVmSlotVarDirSet(self.newvmconfdir)
         #logging.warning( self.__VmSlotVarDir
         newConfTemplateXen = self.config.get(GeneralSection,'xenconftemplate')
         if len(newConfTemplateXen) == 0:
-            logging.fatal( "Configuration file does not have a section '%s' with a key in it 'xenconftemplate'" % (GeneralSection))
+            self.logger.fatal( "Configuration file does not have a section '%s' with a key in it 'xenconftemplate'" % (GeneralSection))
             return False
         self.ConfTemplateXen = newConfTemplateXen
         
@@ -1286,7 +1287,7 @@ class virtualHostContainer:
         if len(newXenImageDir) >= 0:
             self.XenImageDir = newXenImageDir
         else:
-            logging.fatal( "Configuration file does not have a section '%s' with a key in it 'vmimages'" % (GeneralSection))
+            self.logger.fatal( "Configuration file does not have a section '%s' with a key in it 'vmimages'" % (GeneralSection))
             
         
         newVmExtractsDir = self.config.get(GeneralSection,'vmextracts')
@@ -1580,14 +1581,15 @@ if __name__ == "__main__":
         
     
     #print "foof",ParsedConfigFile,"fd"
-    HostContainer = virtualHostContainer()
+    
     #hostlist = makeConfig()
-    if ParsedConfigFile != "":
-        #print "foof"
-        ConfigFile = ParsedConfigFile
+    
     if debugFileName != None:
         logging.config.fileConfig(debugFileName)
-    
+    HostContainer = virtualHostContainer()
+    logger.debug('actionList=%s' % (actionList))
+    if ParsedConfigFile != "":
+        ConfigFile = ParsedConfigFile
     if os.path.isfile(ConfigFile):
         lcfg2c = HostContainer.LoadConfigFile(ConfigFile)
         if False == lcfg2c:
@@ -1698,21 +1700,18 @@ if __name__ == "__main__":
         usage()
         sys.exit(1)
         
-    
-    if "list-images" in actionList:
-        for box in processingBoxes:
-            #print dir(box)
-            for image in box.AvailableImageListGet():
-                print image
-        sys.exit(0)
-    
     if len(pbindex) == 0:
         message = "No slot selected. The following Host slots exist:"
         logging.error(message)
         for x in range (0 , len(HostContainer.hostlist)):
             print HostContainer.hostlist[x].HostName
         sys.exit(1) 
-
+    if "list-images" in actionList:
+        for x in pbindex:
+            #print dir(box)
+            for image in HostContainer.hostlist[x].AvailableImageListGet():
+                print image
+        sys.exit(0)
     extractionsDict = {}
     for component in extractions:
         compdecp = component.split(':')
