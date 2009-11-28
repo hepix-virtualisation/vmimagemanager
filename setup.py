@@ -19,5 +19,6 @@ setup(name='vmimagemanager',
 'docs/examples/vmimagemanager-example-whitehouse.cfg',
 'docs/examples/vmimagemanager-xen-example.template',
 'docs/examples/xen.template',
-'docs/examples/xen.template.example.full.virtualisation'])]
+'docs/examples/xen.template.example.full.virtualisation',
+'docs/examples/logging.conf'])]
 )
