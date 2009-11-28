@@ -8,6 +8,7 @@ include docs/examples/vmimagemanager-example-whitehouse.cfg
 include docs/examples/vmimagemanager-xen-example.template
 include docs/examples/xen.template
 include docs/examples/xen.template.example.full.virtualisation
+include docs/examples/logging.conf
 include docs/pics
 include docs/pics/Makefile
 include docs/pics/SGE_WN.txt
