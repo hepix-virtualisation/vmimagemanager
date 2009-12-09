@@ -17,7 +17,7 @@ from xml.etree.ElementTree import Element, SubElement, dump,tostring
 
 
 
-class vmControlXen():
+class vmControlXen:
     def StartUp(self):
         self.DiskSubsystem.ImageUnMount()
         self.DiskSubsystem.UnLock()

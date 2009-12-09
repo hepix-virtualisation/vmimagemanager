@@ -34,7 +34,7 @@ def VitualHostsList():
 
 
 
-class VirtualHostDisk():
+class VirtualHostDisk:
     def __init__(self,properties):
         self.logger = logging.getLogger("vmimagemanager.VirtualHostDisk") 
         self.CanMount = False
