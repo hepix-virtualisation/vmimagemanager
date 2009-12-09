@@ -19,7 +19,11 @@ import sys
 import getopt
 import time
 import re
-from xml.etree.ElementTree import Element, SubElement, dump,tostring
+try:
+    from xml.etree.ElementTree import Element, SubElement, dump,tostring
+except ImportError:
+    from elementtree.ElementTree  import Element, SubElement, dump,tostring
+
 import cvirthost
 
 class virtualhostKvm(cvirthost.virtualhost):
