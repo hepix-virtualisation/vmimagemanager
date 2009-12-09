@@ -12,7 +12,10 @@ import commands
 import time
 import re
 
-from xml.etree.ElementTree import Element, SubElement, dump,tostring
+try:
+    from xml.etree.ElementTree import Element, SubElement, dump,tostring
+except ImportError:
+    from elementtree.ElementTree  import Element, SubElement, dump,tostring
 
 # Note this methos may not be needed    
 def VitualHostsList():

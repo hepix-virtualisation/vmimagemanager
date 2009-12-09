@@ -18,6 +18,17 @@ Features
     * Manages mounting domains when then Vm is down and un-mounting when the domain is launched.
     * Manages exporting images in tar.gz format.
 
+Dependacies
+
+Based upon python and elementtree, lxml. These are packaged as standard in 
+debain.
+
+In Redhat the following packages are needed.
+
+python - Available in standard RHEL
+python-elementtree - Available in standard RHEL
+python-lxml - available from DAG.
+
 
 Limitations
 
