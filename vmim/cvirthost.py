@@ -53,7 +53,7 @@ class virtualhost(clock.DiscLocking):
         found = False
         if ("HostRootSpace" in self.DcgDict.keys()) and ("HostSwapSpace" in self.DcgDict.keys()):
             self.logger.debug("sebug=%s" % (self.DcgDict))
-            self.DiskSubsystem = VirtualHostDiskPartitionsShared(self.DcgDict)
+            self.DiskSubsystem = cdisk.VirtualHostDiskPartitionsShared(self.DcgDict)
             
             found = True
             #self.logger.debug("setting  self.DiskSubsystem %s to VirtualHostDiskPartitionsShared" % self.HostName)
