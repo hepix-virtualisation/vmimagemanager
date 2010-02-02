@@ -354,8 +354,14 @@ class virtualhost(clock.DiscLocking):
                 rc = self.libvirtObj.destroy()
                 #print rc
             time.sleep(1)
-            (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
-            self.logger.info("state=%s, timeout in %s" %( state, timeout-  counter))
+            try:
+                (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
+                self.logger.info("state=%s, timeout in %s" %( state, timeout-  counter))
+            except: 
+                # Some times we get exceptions 
+                # libvir: QEMU error : operation failed: could not query memory balloon
+                # we dont need these
+                pass
             
             #print dir(self.libvirtObj)
             #print self.libvirtObj.destroy()
