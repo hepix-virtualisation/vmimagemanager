@@ -1,6 +1,6 @@
 from distutils.core import setup
 setup(name='vmimagemanager',
-    version='0.2.0',
+    version='0.2.1',
     description="vmimagemanager manages virtual maschines",
     author="O M Synge",
     author_email="owen.Synge@desy.de",
