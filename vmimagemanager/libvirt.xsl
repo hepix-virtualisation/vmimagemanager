@@ -10,7 +10,9 @@
     <domain type="kvm">
       <os>
         <type arch="x86_64" machine="pc">hvm</type>
-        <boot dev="hd" />
+        <kernel>/boot/kvm/vmlinuz-i386-2.6.9-89.0.25.EL</kernel>
+        <initrd>/boot/kvm/initrd-i386-2.6.9-89.0.25.EL.img</initrd>
+        <cmdline>root=/dev/hda1 divider=10 notsc</cmdline>
       </os>
       <features>
         <acpi />
@@ -28,13 +30,10 @@
   <xsl:template match="devices">
     <devices>
       <emulator>/usr/bin/kvm</emulator>
-      <serial type="pty">
-        <target port="0" />
-      </serial>
-      <console type="pty">
-        <target port="0" />
-      </console>
+      <input type='mouse' bus='ps2'/>      
       <xsl:apply-templates />
+      <graphics type='vnc' port='-1' autoport='yes' listen='127.0.0.1' keymap='en-us'/>
+
     </devices>
   </xsl:template>
   

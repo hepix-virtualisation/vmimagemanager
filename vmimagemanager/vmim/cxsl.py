@@ -54,7 +54,6 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         os = SubElement(domain, "os")
         os_type = SubElement(os, "type",arch="x86_64",machine="pc")
         os_type.text = str("hvm")
-        os_boot = SubElement(os, "boot",dev="hd")
         features = SubElement(domain, "features")
         acpi = SubElement(features, "acpi")
         apic = SubElement(features, "apic")
@@ -84,12 +83,6 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
              target = SubElement(interface, "target",dev='vnet1')
         else:
             self.logger.debug("Has no mac address")
-        serial = SubElement(devices, "serial")
-        serial.set('type', "pty")
-        serial_target  = SubElement(serial, "target",port="0")
-        console = SubElement(devices, "console")
-        console.set('type', "pty")
-        console_target  = SubElement(console, "target",port="0")
         
         #print "self.genXml=" + self.genXml()
         #print "genXmlShouldExist=" + text
