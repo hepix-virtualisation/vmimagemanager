@@ -31,7 +31,6 @@ class virtualhostKvm(cvirthost.virtualhost):
         os = SubElement(domain, "os")
         os_type = SubElement(os, "type",arch="x86_64",machine="pc")
         os_type.text = str("hvm")
-        os_boot = SubElement(os, "boot",dev="hd")
         features = SubElement(domain, "features")
         acpi = SubElement(features, "acpi")
         apic = SubElement(features, "apic")
@@ -64,9 +63,6 @@ class virtualhostKvm(cvirthost.virtualhost):
         serial = SubElement(devices, "serial")
         serial.set('type', "pty")
         serial_target  = SubElement(serial, "target",port="0")
-        console = SubElement(devices, "console")
-        console.set('type', "pty")
-        console_target  = SubElement(console, "target",port="0")
         
         #print "self.genXml=" + self.genXml()
         #print "genXmlShouldExist=" + text
