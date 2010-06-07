@@ -87,13 +87,20 @@ should help you get started I prefure to only install packages (Mine or other pe
 $python setup.py install 
 
 
-Setting up vmimagemanager
-
 Copy a template over to the correct location.
+
+- Example for RPM based install
 
 d430:~# cp  /etc/vmimagemanager/vmimagemanager-example-d430.cfg \
            /etc/vmimagemanager/vmimagemanager.cfg
 d430:~# vim /etc/vmimagemanager/vmimagemanager.cfg
+
+
+Configuring
+~~~~~~~~~~~
+
+
+
 
 Configuration Section "VmImageManager"
 
