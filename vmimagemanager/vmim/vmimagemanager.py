@@ -38,14 +38,14 @@ def start():
 
     ConfigFile = ""
 
-    Fillocations = ['vmimagemanager.cfg', os.path.expanduser('~/.vmimagemanager.cfg'),InstallPrefix + '/etc/vmimagemanager/vmimagemanager.cfg']
+    Fillocations = ['/etc/vmimagemanager/vmimagemanager.cfg']
 
     for fileName in Fillocations:
 	    if True == os.path.isfile(fileName):
 		    ConfigFile = fileName
 		    break
     if len(ConfigFile) == 0:
-	    ConfigFile = '/etc/vmimagemanager/vmimagemanager.cfg'
+	    ConfigFile = Fillocations[0]
     logger = logging.getLogger("vmimagemanager")
     
     #create formatter
