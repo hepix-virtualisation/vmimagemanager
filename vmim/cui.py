@@ -114,7 +114,9 @@ def HostContainerLoadConfigFile(virtualHostContainer,fileName):
     if len(newVmExtractsDir) == 0:
         virtualHostContainer.VmExtractsDir = newXenImageDir
         logging.warning("Configuration file does not have a section '%s' with a key in it 'vmextracts' defaulting to '%s'" % (GeneralSection,GeneralSection))
-    else:            
+    else:
+    	
+	virtualHostContainer.cfgDefault["vmextracts"] = newVmExtractsDir
         virtualHostContainer.VmExtractsDir = newVmExtractsDir
 
     VmMountsBaseDir = virtualHostContainer.config.get(GeneralSection,'mount')

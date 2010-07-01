@@ -403,7 +403,7 @@ class virtualhost(clock.DiscLocking):
 
     
     def ExtractDir(self):
-        return self.VmExtractsDir
+        return str(self.DcgDict["VmExtractsDir"])
         
     def AvailableExtract(self):
         if not os.path.isdir(self.ExtractDir()):
@@ -568,7 +568,7 @@ class virtualhost(clock.DiscLocking):
             
             #print "insertFormat=%s" % (insertFormat)
             if "tgz" == insertFormat:
-                cmd=  "tar -zxf %s --exclude=lost+found   -C %s" % (ImageName,self.PropertyMountGet())
+                cmd=  "tar -zxf %s --exclude=lost+found   -C %s" % (ImageName,self.DiskSubsystem.MountPoint)
             if "rsync" == insertFormat:
                 cmd = "rsync -ra --numeric-ids --exclude=lost+found %s/ %s/%s" % (ImageName,self.PropertyMountGet(),self.PropertyInsertionsGet()[ext])
             #print cmd
