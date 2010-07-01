@@ -317,7 +317,7 @@ def start():
                 for ext in HostContainer.hostlist[x].PropertyInsertionsGet().keys():
                     ImageName = "%s/%s" % (HostContainer.hostlist[x].ExtractDir(),ext)
                     if False == os.path.isfile(ImageName) and False == os.path.isdir(ImageName):
-                        logging.error("Error: Insert '%s' not found in directory '%s'" % (ext,box.ExtractDir()))
+                        logging.error("Error: Insert '%s' not found in directory '%s'" % (ext,HostContainer.hostlist[x].ExtractDir()))
                 sys.exit(1)
     HaveToCheckBoxes = []
     lockedBoxes = []
