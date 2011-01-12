@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+                         "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % sharedents SYSTEM "shared-entities.xml" >
+%sharedents;
+]>
+
+<chapter id="setup-kvm">
+
+  <title>Setting up on &debian;/&redhat; &kvm;</title>
+  <chapterinfo>
+    <authorgroup>
+      <author>
+	<firstname>Owen</firstname>
+	<surname>Synge</surname>
+      </author>
+    </authorgroup>
+  </chapterinfo>
+  
+  <para>First time users are recommend getting virt-manager to work before I trying vmimagemanager. 
+  virt-manager has a simple GUI for creating virtual maschines which has a dependacy upon libvirt, further it is
+  available in fedora, and debian flavours of line so only a command line away.</para>
+  <section id="setup-kvm-introduction">
+  <title>Dependacies</title>
+    <itemizedlist>
+      <listitem>LVM up and running and working.</listitem>
+      <listitem>KVM module installed in the kernel.</listitem>
+      <listitem>libvirtd deamon running correctly.</listitem>
+      <listitem>libvirt installed in the operating system.</listitem>
+      <listitem>kpartx a tool for mounting and unmounting partition tables in LVM</listitem>
+      <listitem>python</listitem>          
+    </itemizedlist>
+    <section>
+    <title>Dependacies Recomendations</title>
+    <para>
+      In the area of virtualization and the amount of development work going on in this sector, 
+      Always keep an eye on the latest release of all dependacies versions.
+    </para>
+    </section>
+    <section>
+    <title>LVM Setup</title>
+    <para>
+      KVM and vmimagmanager work with partitionions exported to the virtual maschine as disks. 
+      LVM should thierfore be set with a partition per VIrtual Slot. 
+      These partitions will be configured for the virtual maschine as disks vmimagemanger can help with that.
+    </para>
+    <para>Please skip the Xen section untill you see the heading "Setting up on Debian/Redhat XEN and KVM"</para>
+    </section>
+  </section>
+</chapter>

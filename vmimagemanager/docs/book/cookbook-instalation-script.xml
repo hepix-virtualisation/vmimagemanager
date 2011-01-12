@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+                         "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % sharedents SYSTEM "shared-entities.xml" >
+%sharedents;
+]>
+
+<chapter id="cb-instalation-script">
+
+  <title>initialisation-script</title>
+  <chapterinfo>
+    <authorgroup>
+      <author>
+	<firstname>Owen</firstname>
+	<surname>Synge</surname>
+      </author>
+    </authorgroup>
+  </chapterinfo>
+  
+  <para>The beginning of the automation of the install script, settign up LVM and the configuration of the vmimagemanager.</para>
+  <programlisting>DomainName=desy.de
+LvmVgName=VolGroup00
+HostName=dcache-devil5
+#mkdir -p  /server/vmstore/images
+#mv master_sl4_i386.tgz /server/vmstore/images/
+
+
+getMacForHost()
+{
+  bill=`dig ${1} | grep ^${1} | cut -dA -f 2 `
+  forth=`echo $bill | cut -d. -f 4`
+  third=`echo $bill | cut -d. -f 3`
+  second=`echo $bill | cut -d. -f 2`
+  first=`echo $bill | cut -d. -f 1`
+  while [ ${#forth} -lt 3 ]
+  do
+    forth=0${forth}
+  done
+  while [ ${#third} -lt 3 ]
+  do
+    third=0${third}
+  done
+  while [ ${#second} -lt 3 ]
+  do
+    second=0${second}
+  done
+  simple=1${second}${third}${forth}
+  mac="02"
+  while [ ${#simple} -gt 0 ] ; do
+    mac=${mac}:`echo $simple | cut -b1-2`
+    simple=`echo $simple | cut -b3-`
+  done
+  RET=$mac
+}
+
+
+for i in `seq -w 0 12`
+do
+  VmNumber=$i
+  lvcreate -L 10G -n ${HostName}-vm${VmNumber}-sys ${LvmVgName}
+  lvcreate -L 10G -n ${HostName}-vm${VmNumber}-swap ${LvmVgName}
+  mkfs.ext3 /dev/${LvmVgName}/${HostName}-vm${VmNumber}-sys
+  mkswap /dev/${LvmVgName}/${HostName}-vm${VmNumber}-swap
+
+  echo "[${HostName}-vm${VmNumber}.${DomainName}]" >> /etc/vmimagemanager/vmimagemanager.cfg
+  echo "vm_slot_enabled=on" >> /etc/vmimagemanager/vmimagemanager.cfg
+  echo "HostName=${HostName}-vm${VmNumber}.${DomainName}" >> /etc/vmimagemanager/vmimagemanager.cfg
+  echo "root=/dev/${LvmVgName}/${HostName}-vm${VmNumber}-sys" >> /etc/vmimagemanager/vmimagemanager.cfg
+  echo "swap=/dev/${LvmVgName}/${HostName}-vm${VmNumber}-swap" >> /etc/vmimagemanager/vmimagemanager.cfg
+  getMacForHost ${HostName}-vm${VmNumber}.${DomainName}
+  echo "mac=$RET" >> /etc/vmimagemanager/vmimagemanager.cfg
+  echo "vmimages=/server/vmstore/images" >> /etc/vmimagemanager/vmimagemanager.cfg
+  echo >> /etc/vmimagemanager/vmimagemanager.cfg
+
+done
+
+
+
+lvcreate -L 30G -n space ${LvmVgName}
+
+
+mkfs.ext3 /dev/${LvmVgName}/space
+echo "/dev/${LvmVgName}/space      /space     ext3    defaults       1 2" >> /dev/fstab
+mkdir /space
+
+
+vmimagemanager.py -b tb011-vm1.desy.de -d
+
+
+mkinitrd --fstab /mnt/vm/dcache-devil5-vm01.desy.de/etc/fstab \
+    --with xenblk --with=xennet --preload xenblk --preload xennet \
+    /boot/initrd-2.6.18-128.1.1.el5xen-guest.img 2.6.18-128.1.1.el5xen</programlisting>
+    
+  
+</chapter>

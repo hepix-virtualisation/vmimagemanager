@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+                         "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % sharedents SYSTEM "shared-entities.xml" >
+%sharedents;
+]>
+
+<chapter id="setup-install">
+
+  <title>Installing &vmim;</title>
+  <chapterinfo>
+    <authorgroup>
+      <author>
+	<firstname>Owen</firstname>
+	<surname>Synge</surname>
+      </author>
+    </authorgroup>
+  </chapterinfo>
+  <para>This section of the &vmim; book deals with the setup and instalation process.</para>
+  <section id="setup-install-code">
+    <title>Installing &vmim; software.</title>
+    <para>Download the python script tar.gz</para>
+    <para>open the compressed directory.</para>
+    <para>Run the python setup command to install from what ever format you chose</para>
+  </section>
+  <section id="setup-install-template">
+    <title>Installing &vmim; templates.</title>
+    <para>Copy a template over</para>
+    <screen>&prompt-user;<userinput>cp /usr/share/doc/vmimagemanager-X.X.X/example-cfg/vmimagemanager-example-d430.cfg \
+    /etc/vmimagemanager/vmimagemanager.cfg</userinput></screen>
+    <para>You will then need to modify the configuration file.</para>
+    <screen>&prompt-user;<userinput>vim /etc/vmimagemanager/vmimagemanager.cfg</userinput></screen>
+    <para>Copy the script into /usr/sbin set it executable.</para>
+  </section>
+  <section id="setup-install-config">
+    <title>Setting up the &vmim; configuration file.</title>
+    <para>The &vmim; configuration files are found in  <filename class="directory">/etc/vmimagemanager/</filename>. The most 
+    important file is <filename>vmimagemanager.cfg</filename>. This file is documented elsewhere in the book.</para>    
+  </section>
+</chapter>

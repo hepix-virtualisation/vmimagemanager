@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<!--
+This file contains entities.  These representing commonly typed
+text and provide a simple method of expansing to the
+underlying DocBook vocabulary.
+
+You use them by inserting the entity reference, like this:
+  &vmim; for the dCache entity.
+
+Rules / Guidelines / Suggestions for adding new entities:
+  0.  Check if it's already defined.
+  1.  Try to group similar defns, with common prefix (e.g. cell-nnn)
+  2.  All entities should be lowercase, by convention.
+  3.  Use "correct" DocBook markup: if it doesn't look right, adjust the XSLT.
+  4.  Go through whole document and switch existing usage to new entity.
+-->
+
+<!-- dCache-version -->
+<!ENTITY vmim-version          "0.2.0">
+
+<!-- "Products" or high-level services -->
+<!ENTITY vmim         "<productname>vmimagemanger</productname>">
+<!ENTITY lvm         "<productname>LVM</productname>">
+
+
+<!ENTITY vmim-support     "<email>vmimagemanager-support@lists.sourceforge.net</email>">
+<!ENTITY vmim-download    '<ulink url="http://sourceforge.net/projects/vmimagemanager/files/">vmimagemanger downloads</ulink>.'>
+<!ENTITY vmim-rcs-hg         '<para><literal>Mercurial</literal></para><userinput>http://vmimagemanager.hg.sourceforge.net:8000/hgroot/vmimagemanager/vmimagemanager</userinput>'>
+<!ENTITY vmim-rcs-svn         '<para><literal>SVN</literal></para><userinput>svn co https://vmimagemanager.svn.sourceforge.net/svnroot/vmimagemanager vmimagemanager</userinput>'>
+
+<!-- Various virtual maschine systesm -->
+<!ENTITY kvm              "<literal>KVM</literal>">
+<!ENTITY xen              "<literal>Xen</literal>">
+<!ENTITY qemu             "<literal>QEMU</literal>">
+<!ENTITY lxc              "<literal>LXC</literal>">
+<!ENTITY openvz           "<literal>OpenVZ</literal>">
+<!ENTITY uml              "<literal>User Mode Linux</literal>">
+<!ENTITY virtualbox       "<literal>VirtualBox</literal>">
+
+<!-- Various Operating systems -->
+<!ENTITY SL              "<literal>Scientfific Linux</literal>">
+<!ENTITY SL4              "<literal>&SL; 4</literal>">
+<!ENTITY redhat           "<literal>Redhat</literal>">
+<!ENTITY rhel             "<literal>&redhat; Enterprise Linux</literal>">
+<!ENTITY rhel5              "<literal>&rhel; 5</literal>">
+<!ENTITY centos           "<literal>Centos</literal>">
+<!ENTITY debian           "<literal>Debian</literal>">
+
+
+<!ENTITY vm                "<literal>Virtual Machine</literal>">
+
+<!-- Shell prompts -->
+<!ENTITY prompt-user   "<prompt>[user] $</prompt>">
+<!ENTITY prompt-root   "<prompt>[root] #</prompt>">
+
+<!-- Colo(u)r definitions -->
+<!ENTITY pi-fo-bgcolour-item "<?dbfo bgcolor='#FCFFFC'?>">
+<!-- !ENTITY pi-fo-bgcolour-bg   "<?dbfo bgcolor='#FDFDFD'?>" -->
+<!ENTITY pi-fo-bgcolour-bg   "<?dbfo bgcolor='#FFFFFF'?>">
+
+
+<!-- Misc -->
+<!-- <!ENTITY ndash "&#x2013;"> -->

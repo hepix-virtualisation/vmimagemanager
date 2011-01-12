@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+                         "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % sharedents SYSTEM "shared-entities.xml" >
+%sharedents;
+]>
+
+<chapter id="setup-lvm">
+
+  <title>Setting up on LVM</title>
+  <chapterinfo>
+    <authorgroup>
+      <author>
+	<firstname>Owen</firstname>
+	<surname>Synge</surname>
+      </author>
+    </authorgroup>
+  </chapterinfo>
+  <para>Typically any host using &vmim; must work with a large number of partitions. 
+  With Xen paravirtualisation 2 per host for maximum performance, though with KVM 
+  one partition per &vm; slot is enough. With &xen; partition per VM as a root file system and 
+  one for virtual ram or more commonly known as swap. Unfortuantely Linux does not 
+  recognize more than 15 partitions, on a conventional intel computer using an MSDOS 
+  partition table, this limited my experiments with slots to 7 LVM with &xen;.</para>
+  <section id="setup-kvm-introduction">
+    <title>Runnign many virtual maschines.</title>
+    <para>It seems to get maximum throughput each &vm; shoudl have one core and at least 10Gb 
+    disk, 512 Mb of RAM. For a typical desktop maschine, this leads the RAM and CPU become 
+    the limiting factor in supporting large numbers of virtual maschines.</para>
+    <para>Hard drives are currently large compared to the size of a virtual maschine image. 
+    To work around the artifical limit of MSDOS partitions supported by Linux, I recomend LVM.</para>
+    <para>LVM provides many features whcih are apealing to users of &vmim;, these include 
+    snapshotting, copy on write partitions, and the ability to have an unlimited number of 
+    partitions within a logical volume group. These features are not integrated into &vmim;
+    yet and thier is no requirement as yet to use LVM with &vmim;.</para>
+    <para>I used <ulink url="http://www.linuxconfig.org/Linux_lvm_-_Logical_Volume_Manager">
+    this guide to configuring LVM</ulink> and recomend that all users of &vmim; become 
+    familiar with the basic usage of &lvm;</para>
+  </section>
+</chapter>
