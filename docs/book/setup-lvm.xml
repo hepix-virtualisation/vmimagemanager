@@ -22,7 +22,7 @@
   one for virtual ram or more commonly known as swap. Unfortuantely Linux does not 
   recognize more than 15 partitions, on a conventional intel computer using an MSDOS 
   partition table, this limited my experiments with slots to 7 LVM with &xen;.</para>
-  <section id="setup-kvm-introduction">
+  <section id="setup-lvm-introduction">
     <title>Runnign many virtual maschines.</title>
     <para>It seems to get maximum throughput each &vm; shoudl have one core and at least 10Gb 
     disk, 512 Mb of RAM. For a typical desktop maschine, this leads the RAM and CPU become 

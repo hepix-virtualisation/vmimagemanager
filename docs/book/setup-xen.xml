@@ -19,7 +19,7 @@
   <para>First time users are recommend getting virt-manager to work before I trying vmimagemanager. 
   virt-manager has a simple GUI for creating virtual maschines which has a dependacy upon libvirt, further it is
   available in fedora, and debian flavours of line so only a command line away.</para>
-  <section id="setup-kvm-introduction">
+  <section id="setup-xen-introduction">
   <title>Dependacies</title>
     <itemizedlist>
       <listitem>Running Xen kernel (and expected a vm has already been booted)</listitem>
