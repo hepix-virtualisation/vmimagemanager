@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+                         "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % sharedents SYSTEM "shared-entities.xml" >
+%sharedents;
+]>
+
+<chapter id="setup-vmimagemanager-cfg">
+
+  <title>Setting up vmimagemanager.cfg</title>
+  <chapterinfo>
+    <authorgroup>
+      <author>
+	<firstname>Owen</firstname>
+	<surname>Synge</surname>
+      </author>
+    </authorgroup>
+  </chapterinfo>
+  <para>vmimagemanager.cfg follows the file format of a standard p[ython cfg file commonly known as a 'ini' file.</para>
+
+  <para>The vmimagemanager.cfg is broken down into sections, one global section and a section for each slot.</para>
+  <section id="setup-vmimagemanager-cfg-sections">
+    <title>Configuration vmimagemanager.cfg Section "VmImageManager"</title>
+    <para>The "VmImageManager" section of the vmimagemanager.cfg is the global section of vmimagemanager.cfg.</para>
+    <para>&vmim; manages your snapshots of an OS to devices and a large image store location. This path is 
+    set.on my server this space is mounted under <filename class="directory">/server/vmstore</filename>.</para>
+    <programlisting>vmimages=/server/vmstore/images
+vmextracts=/server/vmstore/extracts</programlisting>
+    <section>
+      <title>Depricated: Xen Pre 0.1.0 tempalating system</title>
+      <para>This is documented here as I feel that this aproach has some merrit, and it is intended 
+      that static template files be murged with vmimagemanger again so the following section is preserved. 
+      Please send in a bug request if the idea of template files apeals.</para>
+      <para>The Generated configurations for Xen and for the templates to generate them 
+      (Q: should posibly be in a <filename class="directory">/var/lib/</filename> directory ?) 
+      are by default in the <filename class="directory">/etc/vmimagemanager</filename></para>
+      <programlisting>vmconfdir=/var/lib/vmimagemanager/xen/
+xenconftemplate=/etc/vmimagemanager/xen.template</programlisting>
+    </section>
+  </section>
+  <section id="setup-vmimagemanager-cfg-slot">
+    <title>Configuration vmimagemanager.cfg Section for a slot</title>
+    <para>All sections of vmimagemanager.cfg except the "VmImageManager" section are per Virtual maschine 
+    configuration files. LibVirt also has a concept of defined hosts, if a defined host is deleted, 
+    &vmim; will redefine it based on the settings in these slots on execution.</para>
+    <para>Settings will only be applied to current virtual maschines if the maschine is deleted 
+    then &vmim; will recreate the virtual maschine based upon the configuration sections, 
+    including registering the diesks with the virtualisation frame work.</para>
+    <para>As a minimum, to define a slot, hostname, network connections and stroage must be defined.</para>
+    <para>Two slots from a vmimagemanager.cfg as an example</para>
+    <programlisting>[virt_yokel_org]
+vm_slot_enabled=on
+HostName=DebianStable
+root=/dev/hda5
+swap=/dev/hda10
+mount=/mnt/virt.yokel.org
+host=virt.yokel.org
+mac=02:11:62:22:21:13
+
+[vm001.yokel.org]
+vm_slot_enabled=on
+HostName=vm001.yokel.org
+root=/dev/hda11
+swap=/dev/hda12
+mount=/mnt/vm001.yokel.org
+host=virt.yokel.org
+mac=02:01:63:22:51:13</programlisting>
+    <para>The section names, are not important and must only be unique, in the above example the slots
+    are called <literal>virt_yokel_org</literal> and <literal>vm001.yokel.org</literal></para>
+    <para>The <literal>HostName</literal> is set to the name that matches the &vm; through libvirt.</para>
+    <para>The <literal>mac</literal> is set to the mac address to use with the &vm; I usually use dhcp to manage networking with &vm;'s.</para>
+    <section>
+      <title>Setting up a slots storage.</title>
+      <para>Due to the need to support &kvm; and &xen; paravirtualised, &vmim; supports two ways 
+      of setting up the storage for a &vm;.</para>
+      <section>
+        <title>Setting up a slots storage as disks.</title>
+        <para>This mechanism is generally used for all forms of virtualisation using raw disk images, 
+        and is the recomended mechanism for &kvm; and fully virtualised &xen;.</para>
+        <programlisting>hostdisk=/dev/d430/sysVm001
+partition=1</programlisting>
+      </section>
+      <section>
+        <title>Setting up a slots storage as partitions.</title>
+        <para>Using this apraoch partitions are parsed directly to the &vm; rather than complete disks. 
+        As far as we know this is the only supported on &xen; paravirtaulised.</para>
+        <programlisting>#root=/dev/hda11
+root=/dev/sbird/vm001sys
+#swap=/dev/hda12
+swap=/dev/sbird/vm001swap</programlisting>
+      </section>
+    </section>
+    <section>
+      <title>Getting a MAC Address for your &vm;</title>
+      <para>If you want how to get the mac address of a configured host. The admisn at DESY have come up with a nice convention.</para>
+        <itemizedlist>
+        <listitem>Take the IP address
+          <programlisting>131.169.226.57</programlisting>
+        </listitem>
+        <listitem>Fill up every part with zero.
+          <programlisting>131.169.226.057</programlisting>
+        </listitem>
+        <listitem>Replace the 2 first digit with 02 (this is an undefined MAC adress range)
+          <programlisting>021.169.226.057</programlisting>
+        </listitem>
+        <listitem>Remove the dots, and the result is our unique virtual machine mac address
+          <programlisting>021169226057</programlisting>
+        </listitem>
+      </itemizedlist>
+      <para>With this aproach you can assign a sensible MAC address to all your &vm;'s.</para>
+    </section>
+  </section>
+</chapter>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!ENTITY location-l3-template  "/template/l3-docs-book-1.9.11-header.shtml">
+<!ENTITY location-frag-footer  "/template/frags/footer.shtml">

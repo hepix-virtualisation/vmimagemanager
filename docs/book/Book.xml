@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+                 "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % sharedents SYSTEM "shared-entities.xml" >
+%sharedents;
+]>
+
+<book id="vmimagemanager"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <title>The vmimagemanger Book</title>
+  <subtitle>for 0.2.X releases</subtitle>
+  <titleabbrev>vmimagemanger Book</titleabbrev>
+
+  <bookinfo>
+    <abstract>
+      <para>
+	The &vmim; Book is split into 3 parts
+    The first part describes the installation of &vmim; setup. The second part describes the
+	usage of &vmim;. Finally, the last parts contain a glossary and a parameter and command reference.
+      </para>
+    </abstract>
+
+    <date>20010-01-11</date>
+
+    <author>
+      <firstname>Owen</firstname>
+      <surname>Synge</surname>
+    </author>
+<!--
+    <mediaobject>
+      <imageobject role="fo">
+<imagedata fileref="images/dCache-book-logo.svg"
+		   format="SVG" align="center" contentwidth="10cm"/>
+      </imageobject>
+    </mediaobject>
+!-->
+  </bookinfo>
+
+
+<xi:include href="preface.xml"/>
+  <toc/>
+  <xi:include href="setup.xml"/>
+  <xi:include href="usage.xml"/>
+  <xi:include href="cookbook.xml"/>
+
+
+</book>
+

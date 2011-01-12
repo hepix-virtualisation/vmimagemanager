@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+                         "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % sharedents SYSTEM "shared-entities.xml" >
+%sharedents;
+]>
+
+<chapter id="usage-examples">
+
+  <title>Examples of use of &vmim;</title>
+  <chapterinfo>
+    <authorgroup>
+      <author>
+	<firstname>Owen</firstname>
+	<surname>Synge</surname>
+      </author>
+    </authorgroup>
+  </chapterinfo>
+  <para>&vmim; useage examples.</para>
+  <section id="usage-examples-storing">
+    <title>Storing a &vm;</title>
+    <para>Storing an image of host steyr.desy.de as image sl4_x86_64_cert</para>
+    <screen>&prompt-root;<userinput>vmimagemanager -b steyr.desy.de -s sl4_x86_64_cert</userinput></screen>
+  </section>
+  <section id="usage-examples-restore">
+    <title>Restoring a &vm;</title>
+    <para>Restore image buildserver_x86_64 to host wien.desy.de and insert the host certificates to this image.</para>
+    <screen>&prompt-root;<userinput>vmimagemanager -b wien.desy.de -r buildserver_x86_64 -i certificates.tar.gz</userinput></screen>
+  </section>  
+  <section id="usage-examples-extract">
+    <title>Extract directory from a &vm;</title>
+    <para>And once the job is complete you want to extract a series of details.</para>
+    <screen>&prompt-root;<userinput>vmimagemanager -b wien.desy.de -z -e build-wien.desy.de-sl4-x64:/usr/src/redhat/ \
+    -e logs-wien.desy.de-sl4-x64:/usr/src/buildlogs/</userinput></screen>
+  </section>
+  <section id="usage-examples-invalid-box">
+    <title>An invalid &vm; name.</title>
+    <para>When you use an invalid &vm; name, &vmim; shows you a list of valid image names.</para>
+    <screen>&prompt-root;<userinput>vmimagemanager -b wien.desy.de -r fdfsf</userinput>Error: Image 'fdfsf' not found in directory '/space/SNAPSHOT//wien.desy.de'
+master_sl3
+buildserver-dev
+buildserver-working-host
+master_sl3_builder
+sl4_x86_64.tgz
+buildserver_x86_64
+sl4_x86_64_made_rpms
+master_sl4_i386.tgz
+sl3_i386_made_rpms
+sl4_i386_made_rpms</screen>
+  </section>
+  
+</chapter>
