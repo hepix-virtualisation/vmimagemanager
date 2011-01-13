@@ -48,14 +48,14 @@ xenconftemplate=/etc/vmimagemanager/xen.template</programlisting>
     including registering the diesks with the virtualisation frame work.</para>
     <para>As a minimum, to define a slot, hostname, network connections and stroage must be defined.</para>
     <para>Two slots from a vmimagemanager.cfg as an example</para>
-    <programlisting>[virt_yokel_org]
+    <programlisting>[test-vm01]
 vm_slot_enabled=on
-HostName=DebianStable
-root=/dev/hda5
-swap=/dev/hda10
-mount=/mnt/virt.yokel.org
-host=virt.yokel.org
-mac=02:11:62:22:21:13
+HostName=test-vm01
+HostDisk=/dev/mapper/virt-test--vm01
+partition=1
+mount=/mnt/virt-space
+mac=02:11:69:16:02:41
+vmimages=/space/vmimages
 
 [vm001.yokel.org]
 vm_slot_enabled=on
@@ -66,7 +66,7 @@ mount=/mnt/vm001.yokel.org
 host=virt.yokel.org
 mac=02:01:63:22:51:13</programlisting>
     <para>The section names, are not important and must only be unique, in the above example the slots
-    are called <literal>virt_yokel_org</literal> and <literal>vm001.yokel.org</literal></para>
+    are called <literal>test-vm01</literal> and <literal>vm001.yokel.org</literal></para>
     <para>The <literal>HostName</literal> is set to the name that matches the &vm; through libvirt.</para>
     <para>The <literal>mac</literal> is set to the mac address to use with the &vm; I usually use dhcp to manage networking with &vm;'s.</para>
     <section>
@@ -77,7 +77,7 @@ mac=02:01:63:22:51:13</programlisting>
         <title>Setting up a slots storage as disks.</title>
         <para>This mechanism is generally used for all forms of virtualisation using raw disk images, 
         and is the recomended mechanism for &kvm; and fully virtualised &xen;.</para>
-        <programlisting>hostdisk=/dev/d430/sysVm001
+        <programlisting>HostDisk=/dev/d430/sysVm001
 partition=1</programlisting>
       </section>
       <section>
