@@ -20,7 +20,12 @@
   <para>First time users are recommend getting virt-manager to work before I trying vmimagemanager. 
   virt-manager has a simple GUI for creating virtual maschines which has a dependacy upon libvirt, further it is
   available in fedora, and debian flavours of line so only a command line away.</para>
-  <section id="setup-kvm-introduction">
+  <section>
+    <title>Testing for KVM support</title>
+    <para>How to test if your host supports &kvm;.</para>
+    <screen>egrep '(vmx|svm)' --color=always /proc/cpuinfo</screen>
+    </section>
+  <section>
   <title>Dependacies</title>
     <itemizedlist>
       <listitem>LVM up and running and working.</listitem>
