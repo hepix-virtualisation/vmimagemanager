@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+                         "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % sharedents SYSTEM "shared-entities.xml" >
+%sharedents;
+]>
+
+<chapter id="setup-sl6">
+
+  <title>Setting up on &SL6;</title>
+  <chapterinfo>
+    <authorgroup>
+      <author>
+	<firstname>Owen</firstname>
+	<surname>Synge</surname>
+      </author>
+    </authorgroup>
+  </chapterinfo>
+  
+  <para>This part of the book is used for setting up your &SL6; host operating systems networking.</para>
+  <para>Thier are two main aproaches to networking a &vm;, using NAT or bridging. NAT is 
+  configured out of the box, but makes it difficult to provide inbound conectivity to the &vm;.</para>
+<section>
+    <title>Setting up and &SL6; bridge</title>
+    <para>Using a network bridge allows virtual maschines to share the same subnetwork as the physical hosts.</para>
+    <para>In SL6 all network is mostly setup in the directory 
+    <filename class="directory">/etc/sysconfig/network-scripts/</filename>
+    one for each network device.</para>
+    <para>We are goign to change the network configuration of the host so eth0 connects to a bridge and aall &vm;'s can also connect to this bridge.</para>
+    <screen>&prompt-root;<userinput>yum install bridge-utils</userinput></screen>
+    <para>Now we change modify the eth0 configuration from the original:</para>
+    <screen>&prompt-root;<userinput>cat /etc/sysconfig/network-scripts/ifcfg-eth0</userinput>
+DEVICE="eth0"
+BOOTPROTO="dhcp"
+HWADDR="B8:AC:6F:90:B8:DE"
+NM_CONTROLLED="yes"
+ONBOOT="yes"
+</screen>
+    <para>to the bridge connected device.</para>
+    <screen>&prompt-root;<userinput>cat /etc/sysconfig/network-scripts/ifcfg-eth0</userinput>
+DEVICE="eth0"
+BOOTPROTO="dhcp"
+HWADDR="B8:AC:6F:90:B8:DE"
+IPV6INIT="yes"
+IPV6_AUTOCONF="yes"
+NM_CONTROLLED="yes"
+ONBOOT="yes"
+BRIDGE="bridge0"</screen>
+    <para>Next we must add the bridge device, thsi is done by creating a new file in the 
+    same directory<filename class="directory">/etc/sysconfig/network-scripts/</filename> 
+    called <filename>ifcfg-bridge0</filename>.</para>
+    <screen>&prompt-root;<userinput>cat /etc/sysconfig/network-scripts/ifcfg-bridge0</userinput>
+DEVICE="bridge0"
+TYPE="Bridge"
+BOOTPROTO="dhcp"
+ONBOOT="yes"
+DELAY=0</screen>
+    <para>To set up the firewall so that it works fine you may need to add a line to the firewall 
+    settings. The firewall in &SL6; is configured in deirectory
+    <filename class="directory">/etc/sysconfig/</filename> with the filename
+    <filename>iptables</filename>. The following line shodul be added:</para>
+    <screen>-A RH-Firewall-1-INPUT -i bridge0 -j ACCEPT</screen>
+    <para>So the final line looks as</para>
+    <screen>&prompt-root;<userinput>cat /etc/sysconfig/iptables</userinput>
+*filter
+:INPUT ACCEPT
+:FORWARD ACCEPT
+:OUTPUT ACCEPT
+-A FORWARD -m physdev --physdev-is-bridged -j ACCEPT
+-A RH-Firewall-1-INPUT -i bridge0 -j ACCEPT
+COMMIT</screen>
+    <para>Once this is all completed, check over the configuration once again and reboot the host system.
+    The host come up again in bridged mode.</para>
+    <para>If you are configuring the host locally you could safely restart the networking devices</para>
+    <screen>&prompt-root;<userinput>ifdown eth1</userinput></screen>
+    <screen>&prompt-root;<userinput>ifdown bridge0</userinput></screen>
+    <screen>&prompt-root;<userinput>ifup eth1</userinput></screen>
+    <screen>&prompt-root;<userinput>ifup bridge0</userinput></screen>
+    <screen>&prompt-root;<userinput>/sbin/service iptables restart</userinput></screen>
+    </section>
+
+</chapter>
