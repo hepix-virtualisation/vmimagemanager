@@ -26,6 +26,7 @@
       Deferred flush to HSM: <command>define</command> in pools.
     -->
   </partintro>
+  <xi:include href="setup-sl6.xml"/>
   <xi:include href="setup-kvm.xml"/>
   <xi:include href="setup-xen.xml"/>
   <xi:include href="setup-lvm.xml"/>
