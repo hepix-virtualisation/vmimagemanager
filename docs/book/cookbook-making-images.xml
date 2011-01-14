@@ -25,7 +25,7 @@
         <para>When this subsection of the documentation was writern &SL4; was supported this is no longer true, but this section is left for referance.</para>
         <para>First I downloaded <ulink url="http://ftp.scientificlinux.org/linux/scientific/45/iso/i386/SL.45.062507.i386.disc1.iso">this ISO image of &SL4;</ulink>.</para>
         <para>Next I created a full virtualization image using this template. (Or you could use a real computer.)"</para>
-        <screen>&prompt-user;<userinput>cat /etc/vmimagemanager/xen.template.fullvirtualisation</userinput>
+        <screen>&prompt-root;<userinput>cat /etc/vmimagemanager/xen.template.fullvirtualisation</userinput>
 kernel="hvmloader"
 builder="hvm"
 
@@ -56,24 +56,24 @@ boot='d'</screen>
             <listitem>the sdl console is enabled so you can display more GUI based installers.</listitem>
         </itemizedlist>
         <para>I then completed a vanilla minimal SL4 install, and as root performed the following commands to update the host I was working upon (yum update ; yum upgrade) and to minimize the size (yum clean all)</para>
-        <screen>&prompt-user;<userinput>yum update</userinput></screen>
-        <screen>&prompt-user;<userinput>yum upgrade</userinput></screen>
-        <screen>&prompt-user;<userinput>rsync -x -ra --exclude=/backup / /backup/</userinput></screen>
-        <screen>&prompt-user;<userinput>tar   -zcsf /backup.tar.gz  -C /backup/ .</userinput></screen>
+        <screen>&prompt-root;<userinput>yum update</userinput></screen>
+        <screen>&prompt-root;<userinput>yum upgrade</userinput></screen>
+        <screen>&prompt-root;<userinput>rsync -x -ra --exclude=/backup / /backup/</userinput></screen>
+        <screen>&prompt-root;<userinput>tar   -zcsf /backup.tar.gz  -C /backup/ .</userinput></screen>
         <para>so then using scp I copied this into my image store directory. Un zipped it booted the system and it failed to boot, rebooted in full virtualisation mode and discovered the reason was the file system image I had made had the line in "/etc/fstab" to boot from "/" rather than do the obvious and fix it for good solution I took the tempary fix and Labeled the partition to be like the image.</para>
-        <screen>&prompt-user;<userinput>tune2fs -L / /dev/hda13</userinput></screen>
+        <screen>&prompt-root;<userinput>tune2fs -L / /dev/hda13</userinput></screen>
         <para>After doing this everything booted fine.</para>
-        <screen>&prompt-user;<userinput>cd /mnt/vm002.yokel.org</userinput></screen>
-        <screen>&prompt-user;<userinput>scp 192.168.0.80:/back*.tar* .</userinput></screen>
-        <screen>&prompt-user;<userinput>tar -zxvf backup.tar.gz</userinput></screen>
-        <screen>&prompt-user;<userinput>cd</userinput></screen>
-        <screen>&prompt-user;<userinput>vmimagemanager.py -b vm002.yokel.org -u</userinput></screen>
-        <screen>&prompt-user;<userinput>vmimagemanager.py -b vm002.yokel.org -s sl4.5-i386.small.tar.gz</userinput></screen>
-        <screen>&prompt-user;<userinput>du -h /server/vmstore/images/vm002.yokel.org/sl4.5-i386.small.tar.gz</userinput>
+        <screen>&prompt-root;<userinput>cd /mnt/vm002.yokel.org</userinput></screen>
+        <screen>&prompt-root;<userinput>scp 192.168.0.80:/back*.tar* .</userinput></screen>
+        <screen>&prompt-root;<userinput>tar -zxvf backup.tar.gz</userinput></screen>
+        <screen>&prompt-root;<userinput>cd</userinput></screen>
+        <screen>&prompt-root;<userinput>vmimagemanager.py -b vm002.yokel.org -u</userinput></screen>
+        <screen>&prompt-root;<userinput>vmimagemanager.py -b vm002.yokel.org -s sl4.5-i386.small.tar.gz</userinput></screen>
+        <screen>&prompt-root;<userinput>du -h /server/vmstore/images/vm002.yokel.org/sl4.5-i386.small.tar.gz</userinput>
 250M    /server/vmstore/images/vm002.yokel.org/sl4.5-i386.small.tar.gz</screen>
         <para>I then did the following operations. and had a booting VM of scientific linux which I then use para virtualised.</para>
         <para>Later I tried using a paravirtialized computer but found I was getting the error.</para>
-        <screen>&prompt-user;<userinput>/etc/init.d/network restart</userinput>
+        <screen>&prompt-root;<userinput>/etc/init.d/network restart</userinput>
 Shutting down interface eth0:  Device eth0 has different MAC address than expected, ignoring.
 [FAILED]
 Shutting down loopback interface:  [  OK  ]
@@ -82,26 +82,26 @@ Bringing up loopback interface:  [  OK  ]
 Bringing up interface eth0:  Device eth0 has different MAC address than expected, ignoring.
 [FAILED]</screen>
         <para>So I went in to the rehat configuration and commented out the "HWADDR" field.</para>
-        <screen>&prompt-user;<userinput>cat  /etc/sysconfig/network-scripts/ifcfg-eth0</userinput>
+        <screen>&prompt-root;<userinput>cat  /etc/sysconfig/network-scripts/ifcfg-eth0</userinput>
 # Realtek Semiconductor Co., Ltd. RTL-8139/8139C/8139C+
 DEVICE=eth0
 ONBOOT=yes
 BOOTPROTO=dhcp
 #HWADDR=00:16:3E:34:9A:39</screen>
         <para>I then thought to check the modules loaded, and since this si a default kernel which quite rightly makes a lot of modules</para>
-        <screen>&prompt-user;<userinput>lsmod</userinput>
+        <screen>&prompt-root;<userinput>lsmod</userinput>
 Module                  Size  Used by
 ext3                  138512  1
 jbd                    65392  1 ext3
 mbcache                14216  1 ext3</screen>
         <para>So I copied over the Xen kernels modules</para>
-        <screen>&prompt-user;<userinput>vmimagemanager.py -b vm002.yokel.org -d</userinput></screen>
-        <screen>&prompt-user;<userinput>cp -r /lib/modules/2.6.18-6-xen-amd64 \
+        <screen>&prompt-root;<userinput>vmimagemanager.py -b vm002.yokel.org -d</userinput></screen>
+        <screen>&prompt-root;<userinput>cp -r /lib/modules/2.6.18-6-xen-amd64 \
 /mnt/vm002.yokel.org/lib/modules/</userinput></screen>
-        <screen>&prompt-user;<userinput>vmimagemanager.py -b vm002.yokel.org -u</userinput></screen>
+        <screen>&prompt-root;<userinput>vmimagemanager.py -b vm002.yokel.org -u</userinput></screen>
         <para>Which happily solved the issue of the modules missing because I was running a debian kernel.</para>
         <para>I then solved the labeling of partitions image in the correct way by editing the fstab.</para>
-        <screen>&prompt-user;<userinput>cat  /etc/fstab</userinput>
+        <screen>&prompt-root;<userinput>cat  /etc/fstab</userinput>
 # This file is edited by fstab-sync - see 'man fstab-sync' for details
 #LABEL=/                 /                       ext3    defaults        1 1
 /dev/hda1               /                       ext3    defaults        1 1
@@ -111,7 +111,7 @@ none                    /proc                   proc    defaults        0 0
 none                    /sys                    sysfs   defaults        0 0
 LABEL=SWAP-hda3         swap                    swap    defaults        0 0</screen>
         <para>mkinitrd command</para>
-        <screen>&prompt-user;<userinput>mkinitrd --fstab /mnt/vm/ford.desy.de/etc/fstab \
+        <screen>&prompt-root;<userinput>mkinitrd --fstab /mnt/vm/ford.desy.de/etc/fstab \
         --with xenblk --with=xennet --preload xenblk --preload xennet \
         /boot/initrd-2.6.18-53.1.4.el5xen-guest 2.6.18-53.1.4.el5xen</userinput></screen>
         <para>note the trick of using the mounted subdomains fstab.</para>

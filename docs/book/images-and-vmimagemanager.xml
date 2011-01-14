@@ -19,22 +19,22 @@
   <para>Handling Images and vmimagemanager.</para>
   <para>For &xen; We recommend you setup 2 partitions one for swap and one for your root mount point, the mount point should be then mounted and the image expanded.</para>
   <para>For &kvm; We recommend you setup 1 partitions one the virtual maschines hard drive.</para>
-  <screen>&prompt-user;<userinput>cd /yourr/mounted/vm/root/directoy/</userinput></screen>
-  <screen>&prompt-user;<userinput>tar -zxf sl4.5-i386.small.tar.gz</userinput></screen>
+  <screen>&prompt-root;<userinput>cd /yourr/mounted/vm/root/directoy/</userinput></screen>
+  <screen>&prompt-root;<userinput>tar -zxf sl4.5-i386.small.tar.gz</userinput></screen>
   <para>Try this once,</para>
-  <screen>&prompt-user;<userinput>tar -zxf sl4.5-i386.small.tar.gz</userinput></screen>
+  <screen>&prompt-root;<userinput>tar -zxf sl4.5-i386.small.tar.gz</userinput></screen>
 
   <para>This will create a template file for you where specified in the configuration file.</para>
   <para>You can safely edit this templated file, a new one will not be generated unless the file is missing. I typically.</para>
-  <screen>&prompt-user;<userinput>xm create -c vm002.yokel.org</userinput></screen>
+  <screen>&prompt-root;<userinput>xm create -c vm002.yokel.org</userinput></screen>
   <para>For debugging you might like, to edit the configuration file and set this Monitor emulator. It works nicely showing a boot screen,</para>
   <programlisting>sdl=1
 vnc=0
 vncviewer=0</programlisting>
   <para>Or as I find more convenient occasionally using.</para>
-  <screen>&prompt-user;<userinput>xm console vm002.yokel.org</userinput></screen>
+  <screen>&prompt-root;<userinput>xm console vm002.yokel.org</userinput></screen>
   <para>Once this vm boots up is successfully,</para>
-  <screen>&prompt-user;<userinput>vmimagemanager.py -b vm002.yokel.org -z -s sl4.5-i386.small.tar.gz</userinput></screen>
+  <screen>&prompt-root;<userinput>vmimagemanager.py -b vm002.yokel.org -z -s sl4.5-i386.small.tar.gz</userinput></screen>
   <para>And after some time you should get your first image.</para>
   <para>The recommended setup of images in XEN is one VM with 2 physical devices one for swap and one for data.</para>
   <para>Xen supports only virtualizing the full hard disk drive in fully virtualized mode, and this can be tricky 

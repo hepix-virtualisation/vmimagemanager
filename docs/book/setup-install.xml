@@ -26,10 +26,10 @@
   <section id="setup-install-template">
     <title>Installing &vmim; templates.</title>
     <para>Copy a template over</para>
-    <screen>&prompt-user;<userinput>cp /usr/share/doc/vmimagemanager-X.X.X/example-cfg/vmimagemanager-example-d430.cfg \
+    <screen>&prompt-root;<userinput>cp /usr/share/doc/vmimagemanager-X.X.X/example-cfg/vmimagemanager-example-d430.cfg \
     /etc/vmimagemanager/vmimagemanager.cfg</userinput></screen>
     <para>You will then need to modify the configuration file.</para>
-    <screen>&prompt-user;<userinput>vim /etc/vmimagemanager/vmimagemanager.cfg</userinput></screen>
+    <screen>&prompt-root;<userinput>vim /etc/vmimagemanager/vmimagemanager.cfg</userinput></screen>
     <para>Copy the script into /usr/sbin set it executable.</para>
   </section>
   <section id="setup-install-config">
