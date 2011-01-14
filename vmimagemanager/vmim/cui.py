@@ -150,4 +150,10 @@ def HostContainerLoadConfigFile(virtualHostContainer,fileName):
         virtualHostContainer.cfgDefault["vcpu"] = int(virtualHostContainer.config.get(GeneralSection,'vcpu'))
     else:
         virtualHostContainer.cfgDefault["vcpu"] = int(1)
+    if (virtualHostContainer.config.has_option(GeneralSection, "vmemulator")):
+        virtualHostContainer.cfgDefault["vmemulator"] = str(virtualHostContainer.config.get(GeneralSection,'vmemulator'))
+    else:
+        default = 'qemu:///system'
+        logging.warning("Configuration file does not have a section '%s' with a key in it 'vmemulator' defaulting to '%s'" % (GeneralSection,default))
+        virtualHostContainer.cfgDefault["vmemulator"] = default
 

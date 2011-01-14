@@ -29,7 +29,6 @@
   
   <xsl:template match="devices">
     <devices>
-      <emulator>/usr/bin/kvm</emulator>
       <input type='mouse' bus='ps2'/>      
       <xsl:apply-templates />
       <graphics type='vnc' port='-1' autoport='yes' listen='127.0.0.1' keymap='en-us'/>
