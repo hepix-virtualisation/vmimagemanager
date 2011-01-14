@@ -72,11 +72,11 @@ COMMIT</screen>
     <para>Once this is all completed, check over the configuration once again and reboot the host system.
     The host come up again in bridged mode.</para>
     <para>If you are configuring the host locally you could safely restart the networking devices</para>
+    <screen>&prompt-root;<userinput>/sbin/service iptables restart</userinput></screen>
     <screen>&prompt-root;<userinput>ifdown eth1</userinput></screen>
     <screen>&prompt-root;<userinput>ifdown bridge0</userinput></screen>
-    <screen>&prompt-root;<userinput>ifup eth1</userinput></screen>
     <screen>&prompt-root;<userinput>ifup bridge0</userinput></screen>
-    <screen>&prompt-root;<userinput>/sbin/service iptables restart</userinput></screen>
+    <screen>&prompt-root;<userinput>ifup eth1</userinput></screen>    
     </section>
 
 </chapter>
