@@ -250,7 +250,7 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
         if not self.PartitionsOpen():
             raise "error"
         if not os.path.isdir(self.MountPoint):
-            self.logger.info("os.makedirs(%s)%s" % (self.MountPoint,self.HostRootSpace))
+            self.logger.info("os.makedirs(%s)" % (self.MountPoint))
             os.makedirs(self.MountPoint)
             self.logger.info( 'Made Directory %s' % (self.MountPoint))
         cmd="mount %s %s" % (self.HostRootSpace,self.MountPoint)

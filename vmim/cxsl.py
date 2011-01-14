@@ -69,7 +69,9 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         devices = SubElement(domain, "devices")
         emulator = SubElement(devices, "emulator")
         emulator.text = "/usr/bin/kvm"
-        
+        emulator.text = "/usr/libexec/qemu-kvm"
+        if "vmemulator" in  self.DcgDict.keys():
+             emulator.text = self.DcgDict['vmemulator']
         self.RealiseDevice()
         self.DiskSubsystem.LibVirtXmlTreeGenerate(devices)
         self.logger.debug("DiskSubsystem %s" %(self.DiskSubsystem))
@@ -88,14 +90,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         #print "genXmlShouldExist=" + text
         if "hosttransform" in  self.DcgDict.keys():
             libvirtxsltfile = str(self.DcgDict["hosttransform"])
-            print libvirtxsltfile
             if path.isfile(libvirtxsltfile):
                 defaultTransfrom = ""
                 for line in open(libvirtxsltfile):
                     defaultTransfrom += line
                 self.logger.debug( defaultTransfrom)
             else:
-                print "dfsdfSDF"
                 self.logger.error("libvirtxslt file not found with path %s" % (libvirtxsltfile))
         else:
             self.logger.error("libvirtxslt file not defined.")
