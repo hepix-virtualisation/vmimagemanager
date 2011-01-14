@@ -32,4 +32,5 @@
   <xi:include href="setup-lvm.xml"/>
   <xi:include href="setup-install.xml"/>
   <xi:include href="setup-vmimagemanager-cfg.xml"/>
+  <xi:include href="setup-libvirt-xsl.xml"/>
 </part>
