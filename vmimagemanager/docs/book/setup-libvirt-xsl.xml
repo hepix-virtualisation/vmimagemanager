@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+                         "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd" [
+<!ENTITY % sharedents SYSTEM "shared-entities.xml" >
+%sharedents;
+]>
+
+<chapter id="setup-libvirt-xsl">
+
+  <title>Setting up libvirt.xsl</title>
+  <chapterinfo>
+    <authorgroup>
+      <author>
+	<firstname>Owen</firstname>
+	<surname>Synge</surname>
+      </author>
+    </authorgroup>
+  </chapterinfo>
+  <para>The &vmim; uses &libvirt; to provide an abstraction for starting and stoping &vm;'s. &libvirt; is a library 
+  and deamon to which the library connects which provides a simple and comprehensive API to both &kvm; and &xen;.
+  &libvirt; stores meta data about each of the &vm;'s to allow them to be started at boot.</para>
+  <para>&vmim; also has meta data about each &vm;. &vmim; queries &libvirt; to allow control of &vm;'s not defined in 
+  &vmim;'s <filename>vmimagemanager.cfg</filename>. If &vmim; is configured to use a &vm; that is not defined in 
+  &libvirt;, then &vmim; will attempt to define the missing &vm;'s for &libvirt;. To do this &vmim; generates XML 
+  from its own meta data for a &vm; and uses XSL to transform this XML into a format understood &libvirt;.</para>
+  <para>The following configuration from &vmim; is used to generate XML.</para>
+  <programlisting>[test-vm02]
+vm_slot_enabled=on
+HostName=test-vm02
+HostDisk=/dev/mapper/virt-test_vm02
+partition=1
+mount=/mnt/virt-space2
+mac=02:11:69:16:02:41
+vmimages=/space/vmimages
+</programlisting>
+  <para>An example of the XSL used to define a domain in &libvirt;</para>
+<programlisting>&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+  
+  &lt;xsl:template match="@*|node()"&gt;
+    &lt;xsl:copy&gt;
+      &lt;xsl:apply-templates select="@*|node()" /&gt;
+    &lt;/xsl:copy&gt;
+  &lt;/xsl:template&gt;
+  
+  &lt;xsl:template match="domain"&gt;
+    &lt;domain type="kvm"&gt;
+      &lt;os&gt;
+        &lt;type arch="x86_64" machine="pc"&gt;hvm&lt;/type&gt;
+        &lt;kernel&gt;/boot/kvm/vmlinuz-i386-2.6.9-89.0.25.EL&lt;/kernel&gt;
+        &lt;initrd&gt;/boot/kvm/initrd-i386-2.6.9-89.0.25.EL.img&lt;/initrd&gt;
+        &lt;cmdline&gt;root=/dev/hda1 divider=10 notsc&lt;/cmdline&gt;
+      &lt;/os&gt;
+      &lt;features&gt;
+        &lt;acpi /&gt;
+        &lt;apic /&gt;
+        &lt;pae /&gt;
+      &lt;/features&gt;
+      &lt;clock offset="utc" /&gt;
+      &lt;on_poweroff&gt;destroy&lt;/on_poweroff&gt;
+      &lt;on_reboot&gt;destroy&lt;/on_reboot&gt;
+      &lt;on_crash&gt;destroy&lt;/on_crash&gt;
+      &lt;xsl:apply-templates /&gt;
+    &lt;/domain&gt;
+  &lt;/xsl:template&gt;
+  
+  &lt;xsl:template match="devices"&gt;
+    &lt;devices&gt;
+      &lt;input type='mouse' bus='ps2'/&gt;      
+      &lt;xsl:apply-templates /&gt;
+      &lt;graphics type='vnc' port='-1' autoport='yes' listen='127.0.0.1' keymap='en-us'/&gt;
+    &lt;/devices&gt;
+  &lt;/xsl:template&gt;
+  
+&lt;/xsl:stylesheet&gt;</programlisting>
+  <para>&libvirt; stores its configuration in XML format, in the <filename class="directory">/etc/libvirt/qemu/</filename>.</para>
+  <para>Here is an example of the XML stored in &libvirt;.</para>
+<programlisting>&lt;domain type='kvm'&gt;
+  &lt;name&gt;test-vm02&lt;/name&gt;
+  &lt;uuid&gt;5f2c973f-e94b-d84b-fb5b-2890ae1ef932&lt;/uuid&gt;
+  &lt;memory&gt;597152&lt;/memory&gt;
+  &lt;currentMemory&gt;597152&lt;/currentMemory&gt;
+  &lt;vcpu&gt;1&lt;/vcpu&gt;
+  &lt;os&gt;
+    &lt;type arch='x86_64' machine='rhel6.0.0'&gt;hvm&lt;/type&gt;
+    &lt;kernel&gt;/boot/kvm/vmlinuz-i386-2.6.9-89.0.25.EL&lt;/kernel&gt;
+    &lt;initrd&gt;/boot/kvm/initrd-i386-2.6.9-89.0.25.EL.img&lt;/initrd&gt;
+    &lt;cmdline&gt;root=/dev/hda1 divider=10 notsc&lt;/cmdline&gt;
+    &lt;boot dev='hd'/&gt;
+  &lt;/os&gt;
+  &lt;features&gt;
+    &lt;acpi/&gt;
+    &lt;apic/&gt;
+    &lt;pae/&gt;
+  &lt;/features&gt;
+  &lt;clock offset='utc'/&gt;
+  &lt;on_poweroff&gt;destroy&lt;/on_poweroff&gt;
+  &lt;on_reboot&gt;destroy&lt;/on_reboot&gt;
+  &lt;on_crash&gt;destroy&lt;/on_crash&gt;
+  &lt;devices&gt;
+    &lt;emulator&gt;/usr/libexec/qemu-kvm&lt;/emulator&gt;
+    &lt;disk type='block' device='disk'&gt;
+      &lt;driver name='qemu' type='raw'/&gt;
+      &lt;source dev='/dev/mapper/virt-test_vm02'/&gt;
+      &lt;target dev='hda' bus='ide'/&gt;
+      &lt;address type='drive' controller='0' bus='0' unit='0'/&gt;
+    &lt;/disk&gt;
+    &lt;controller type='ide' index='0'&gt;
+      &lt;address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x1'/&gt;
+    &lt;/controller&gt;
+    &lt;interface type='bridge'&gt;
+      &lt;mac address='02:11:69:16:02:41'/&gt;
+      &lt;source bridge='br0'/&gt;
+      &lt;address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/&gt;
+    &lt;/interface&gt;
+    &lt;serial type='pty'&gt;
+      &lt;target port='0'/&gt;
+    &lt;/serial&gt;
+    &lt;console type='pty'&gt;
+      &lt;target port='0'/&gt;
+    &lt;/console&gt;
+    &lt;input type='mouse' bus='ps2'/&gt;
+    &lt;graphics type='vnc' port='-1' autoport='yes' listen='127.0.0.1' keymap='en-us'/&gt;
+    &lt;video&gt;
+      &lt;model type='cirrus' vram='9216' heads='1'/&gt;
+      &lt;address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x0'/&gt;
+    &lt;/video&gt;
+    &lt;memballoon model='virtio'&gt;
+      &lt;address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/&gt;
+    &lt;/memballoon&gt;
+  &lt;/devices&gt;
+&lt;/domain&gt;</programlisting>
+  <para>The above XML was generated by &vmim; from the above configuration and the XSL, and 
+  then finally decorated by &libvirt;.</para>
+  <para>The &vm; definitions used by &libvirt; differ between virtulaisation platforms 
+  so to support &kvm; and &xen; for a local site effort may be needed to write site specific 
+  XML. Other things that deployers may want to do includes setting the kernel and initrd for 
+  boot for a &vm;</para>
+</chapter>
