@@ -36,7 +36,8 @@
   <section id="usage-examples-invalid-box">
     <title>An invalid &vm; name.</title>
     <para>When you use an invalid &vm; name, &vmim; shows you a list of valid image names.</para>
-    <screen>&prompt-root;<userinput>vmimagemanager -b wien.desy.de -r fdfsf</userinput>Error: Image 'fdfsf' not found in directory '/space/SNAPSHOT//wien.desy.de'
+    <screen>&prompt-root;<userinput>vmimagemanager -b wien.desy.de -r fdfsf</userinput>
+Error: Image 'fdfsf' not found in directory '/space/SNAPSHOT//wien.desy.de'
 master_sl3
 buildserver-dev
 buildserver-working-host
