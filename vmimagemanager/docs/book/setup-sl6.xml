@@ -20,7 +20,7 @@
   <para>This part of the book is used for setting up your &SL6; host operating systems networking.</para>
   <para>Thier are two main aproaches to networking a &vm;, using NAT or bridging. NAT is 
   configured out of the box, but makes it difficult to provide inbound conectivity to the &vm;.</para>
-<section>
+<section id="setup-sl6-bridge">
     <title>Setting up and &SL6; bridge</title>
     <para>Using a network bridge allows virtual maschines to share the same subnetwork as the physical hosts.</para>
     <para>In SL6 all network is mostly setup in the directory 
