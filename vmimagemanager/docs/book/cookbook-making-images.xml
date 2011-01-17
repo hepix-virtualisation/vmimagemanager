@@ -79,7 +79,7 @@ Setting network parameters:  [  OK  ]
 Bringing up loopback interface:  [  OK  ]
 Bringing up interface eth0:  Device eth0 has different MAC address than expected, ignoring.
 [FAILED]</screen>
-        <para>So I went in to the &rh; configuration and commented out the "HWADDR" field.</para>
+        <para>So I went in to the &redhat; configuration and commented out the "HWADDR" field.</para>
         <screen>&prompt-root;<userinput>cat  /etc/sysconfig/network-scripts/ifcfg-eth0</userinput>
 # Realtek Semiconductor Co., Ltd. RTL-8139/8139C/8139C+
 DEVICE=eth0
