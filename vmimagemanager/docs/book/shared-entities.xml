@@ -41,6 +41,7 @@ Rules / Guidelines / Suggestions for adding new entities:
 
 <!-- Various Operating systems -->
 <!ENTITY SL              "<literal>Scientfific Linux</literal>">
+<!ENTITY SL3              "<literal>&SL; 3</literal>">
 <!ENTITY SL4              "<literal>&SL; 4</literal>">
 <!ENTITY SL6              "<literal>&SL; 6</literal>">
 <!ENTITY redhat           "<literal>Redhat</literal>">

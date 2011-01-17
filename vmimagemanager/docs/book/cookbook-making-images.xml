@@ -55,7 +55,7 @@ boot='d'</screen>
             <listitem>That I have configured xen to pass control of the cdrom (/dev/scd0 on my laptop) to the virtualized domain.</listitem>
             <listitem>the sdl console is enabled so you can display more GUI based installers.</listitem>
         </itemizedlist>
-        <para>I then completed a vanilla minimal SL4 install, and as root performed the following commands to update the host I was working upon (yum update ; yum upgrade) and to minimize the size (yum clean all)</para>
+        <para>I then completed a vanilla minimal &SL4; install, and as root performed the following commands to update the host I was working upon (yum update ; yum upgrade) and to minimize the size (yum clean all)</para>
         <screen>&prompt-root;<userinput>yum update</userinput></screen>
         <screen>&prompt-root;<userinput>yum upgrade</userinput></screen>
         <screen>&prompt-root;<userinput>rsync -x -ra --exclude=/backup / /backup/</userinput></screen>
