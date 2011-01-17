@@ -16,8 +16,8 @@
       </author>
     </authorgroup>
   </chapterinfo>
-  <para>First time users are recommend getting &virt-manager; to work before I trying &vmim;.
-  &virt-manager; has a simple GUI for creating &vm;'s which has a dependency upon &libvirt;, further it is
+  <para>First time users are recommend getting &virtmanager; to work before I trying &vmim;.
+  &virtmanager; has a simple GUI for creating &vm;'s which has a dependency upon &libvirt;, further it is
   available in fedora, and debian flavors of line so only a command line away.</para>
   <section id="setup-xen-introduction">
   <title>Dependencies</title>
