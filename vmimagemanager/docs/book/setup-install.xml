@@ -34,7 +34,7 @@
   </section>
   <section id="setup-install-config">
     <title>Setting up the &vmim; configuration file.</title>
-    <para>The &vmim; configuration files are found in  <filename class="directory">/etc/vmimagemanager/</filename>. The most 
-    important file is <filename>vmimagemanager.cfg</filename>. This file is documented elsewhere in the book.</para>    
+    <para>The &vmim; configuration files are found in  <filename class="directory">/etc/vmimagemanager/</filename>. The most
+    important file is <filename>vmimagemanager.cfg</filename>. This file is documented elsewhere in the book.</para>
   </section>
 </chapter>

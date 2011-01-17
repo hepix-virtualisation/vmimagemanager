@@ -13,11 +13,11 @@
   <?dbhtml filename="index.shtml"?>
 
   <title>&vm; usage</title>
-  
+
   <partintro>
     <para>
       This part contains guides for specific tasks a use will operate &vmim;
-    </para> 
+    </para>
 
     <!-- TODO:
       Security issues: Passwort in batch file for SRM, Pin, ... (chmod 600)

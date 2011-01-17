@@ -16,7 +16,7 @@
       </author>
     </authorgroup>
   </chapterinfo>
-  <para>First time users are recommend getting &virt-manager; to work before I trying &vmim;. 
+  <para>First time users are recommend getting &virt-manager; to work before I trying &vmim;.
   &virt-manager; has a simple GUI for creating &vm;'s which has a dependency upon &libvirt;, further it is
   available in fedora, and debian flavors of line so only a command line away.</para>
   <section id="setup-xen-introduction">
@@ -24,55 +24,55 @@
     <itemizedlist>
       <listitem>Running Xen kernel (and expected a &vm; has already been booted)</listitem>
       <listitem>Linux platform</listitem>
-      <listitem>python</listitem>          
+      <listitem>python</listitem>
     </itemizedlist>
     <section>
     <title>Tips on setting up &xen;</title>
     <para>
-      In the area of Virtualization and the amount of development work going on in this sector, 
+      In the area of Virtualization and the amount of development work going on in this sector,
       Always keep an eye on the latest release of all dependencies versions.
     </para>
     </section>
     <section>
     <title>&lvm; Setup</title>
     <para>
-      Which &xen; their are two modes of operation, paravirualization or full virtualization. 
-      Paravirualization is faster but requires the kernels of the management domain and the 
-      kernel of the &vm; to pass requests to each other. Paravirualization is a faster technique for 
+      Which &xen; their are two modes of operation, paravirualization or full virtualization.
+      Paravirualization is faster but requires the kernels of the management domain and the
+      kernel of the &vm; to pass requests to each other. Paravirualization is a faster technique for
       Virtualization but has the disadvantage in that guests have to use modified kernels.
     </para>
     <para>
-      If you are using paravirtualization in Xen you can also export only partitions without the 
-      &vm; even having a disk, this is recommended if you have a paravirtualizable 
-      client OS such as Linux, Solaris and maybe Plan9 Kernels. 2 Partitions are recommended 
-      for parvitualized systems should have swap space for the &vm; Virtual Memory. 
-      With Linux guests It changes the booting complications but provides an improved performance 
+      If you are using paravirtualization in Xen you can also export only partitions without the
+      &vm; even having a disk, this is recommended if you have a paravirtualizable
+      client OS such as Linux, Solaris and maybe Plan9 Kernels. 2 Partitions are recommended
+      for parvitualized systems should have swap space for the &vm; Virtual Memory.
+      With Linux guests It changes the booting complications but provides an improved performance
       since the hyper visor just gives access control.
     </para>
     <para>
-      For exported partition images each slot should have root=/dev/sbird/vm001sys swap=/dev/sbird/vm001swap 
+      For exported partition images each slot should have root=/dev/sbird/vm001sys swap=/dev/sbird/vm001swap
       type attributes depending upon your virtulized host name and &lvm; volume group.
     </para>
     <para>
-      For exported disks each slot should have its attribute set so &vmim; knows which files system 
-      to mount from the virtual disks. for a set of library images are loaded on two a set of slots. 
-      You must decide how to organize this. I recommend buying some fresh large storage half a tera byte, 
+      For exported disks each slot should have its attribute set so &vmim; knows which files system
+      to mount from the virtual disks. for a set of library images are loaded on two a set of slots.
+      You must decide how to organize this. I recommend buying some fresh large storage half a tera byte,
       attached via SATA or better storage infrastructure.
     </para>
-    <para>    
-      splinting the content 50/50 with space against running images, and create the partitions on demand 
+    <para>
+      splinting the content 50/50 with space against running images, and create the partitions on demand
       if you don't intend to uses as many images or less static images. If your intending running less .
-      &vmim; works for maximum performance of Linux virtualization hence supporting xen. This 
-      allows the use of para-Virtualization where the best performance exists currently although I have 
+      &vmim; works for maximum performance of Linux virtualization hence supporting xen. This
+      allows the use of para-Virtualization where the best performance exists currently although I have
       not seen comparative data with Solaris containers.
     </para>
     <para>
-      At this moment Xen and 3d graphics and advanced graphics interactions has led to data loaded on 
-      the screen, files system corruption and crashes. For this reason I suggest removing your login 
-      manager (gdm, kdm , xdm) and shutting down X11 and using ssh to log into your xen server in 
-      my case an ultra portable laptop with a large USB drive which is a little slow but to work on 
+      At this moment Xen and 3d graphics and advanced graphics interactions has led to data loaded on
+      the screen, files system corruption and crashes. For this reason I suggest removing your login
+      manager (gdm, kdm , xdm) and shutting down X11 and using ssh to log into your xen server in
+      my case an ultra portable laptop with a large USB drive which is a little slow but to work on
       my desktop is just wrong!.
-    </para>        
+    </para>
     </section>
   </section>
 </chapter>

@@ -16,7 +16,7 @@
       </author>
     </authorgroup>
   </chapterinfo>
-  <para>&vmim; has a many command line options it will print the command line options if it 
+  <para>&vmim; has a many command line options it will print the command line options if it
   cannot find a task, tasks are operations on hosts. Running &vmim; with no command line options.</para>
   <screen>&prompt-root;<userinput>vmimagemanager</userinput>
 Error: No task selected
@@ -47,25 +47,25 @@ Error: No task selected
   </section>
   <section id="usage-cmdline-version">
     <title>Command option --version -v</title>
-    <para>Shows the version of &vmim; this is taken from the tag it 
-    was checked out with or will be "Development" for other versions checked 
+    <para>Shows the version of &vmim; this is taken from the tag it
+    was checked out with or will be "Development" for other versions checked
     out from non tags.</para>
-  </section> 
+  </section>
   <section id="usage-cmdline-config">
     <title>Command option --config -c [filename]</title>
     <para>Over rides teh default config file with a specified config file.</para>
   </section>
   <section id="usage-cmdline-print-config">
     <title>Command option --print-config -c</title>
-    <para>Prints an abbreviated list of configuration options, including available 
-    host names. Where the images are stored and where the components of images 
+    <para>Prints an abbreviated list of configuration options, including available
+    host names. Where the images are stored and where the components of images
     are stored.</para>
-  </section> 
+  </section>
   <section id="usage-cmdline-box">
     <title>Command option --box -b [host]</title>
-    <para>Select the host to operate on with &vmim; will operate. 
-    Host is a mandatory option as you must specify the host, if the host 
-    identifier is unknown please use an incorrect string and &vmim; 
+    <para>Select the host to operate on with &vmim; will operate.
+    Host is a mandatory option as you must specify the host, if the host
+    identifier is unknown please use an incorrect string and &vmim;
     will return a list of available hosts.</para>
     <screen>&prompt-root;<userinput>vmimagemanager -b sdfkldsfjsldfj</userinput>
 Host 'sdfkldsfjsldfj' not found! Try ..
@@ -78,36 +78,36 @@ steyr.desy.de
 traun.desy.de
 wien.desy.de
 leoben.desy.de</screen>
-  </section> 
+  </section>
   <section id="usage-cmdline-store">
     <title>Command option --store -s [image]</title>
-    <para>Will store an image of the host operating on, the attribute image is required. 
-    The host being set with the --box -b option which is mandatory for this option to 
+    <para>Will store an image of the host operating on, the attribute image is required.
+    The host being set with the --box -b option which is mandatory for this option to
     proceed. This operation is a task.</para>
-    <para>The store operation will stop a running host, mount the file system, store 
+    <para>The store operation will stop a running host, mount the file system, store
     the image in the correct directory, unmount the file system, and restart the host.
     </para>
-  </section> 
+  </section>
   <section id="usage-cmdline-restore">
     <title>Command option --restore -r [image]</title>
-    <para>Will restore an image of the host previously stored, the attribute image is 
-    required. The host being set with the --box -b option which is mandatory for this 
+    <para>Will restore an image of the host previously stored, the attribute image is
+    required. The host being set with the --box -b option which is mandatory for this
     option to proceed. This operation is a task.</para>
-    <para>The restore operation will stop a running host, mount the file system, copy 
-    the image in to the mounted file system, unmount the file system and restart the 
+    <para>The restore operation will stop a running host, mount the file system, copy
+    the image in to the mounted file system, unmount the file system and restart the
     host.</para>
-  </section>  
+  </section>
   <section id="usage-cmdline-insert">
     <title>Command option --insert -i [component]:[dir]</title>
-    <para>This option is used to insert a subdirectory into the image being installed. 
-    The attribute consists of too components, the identifier of the component and the 
-    subdirectory which is stored, these two fields are delimited by ":" the directory 
+    <para>This option is used to insert a subdirectory into the image being installed.
+    The attribute consists of too components, the identifier of the component and the
+    subdirectory which is stored, these two fields are delimited by ":" the directory
     is optional and not required.</para>
-  </section> 
+  </section>
   <section id="usage-cmdline-extract">
     <title>Command option --extract -e [component]:[dir]</title>
-    <para>This option is used to extract a subdirectory and store it independently from 
-    the image. The attribute consists of too components, the identifier of the component 
+    <para>This option is used to extract a subdirectory and store it independently from
+    the image. The attribute consists of too components, the identifier of the component
     and the subdirectory which is stored, these two fields are delimited by ":".</para>
   </section>
   <section id="usage-cmdline-debug">
@@ -116,37 +116,37 @@ leoben.desy.de</screen>
   </section>
   <section id="usage-cmdline-up">
     <title>Command option --up -u</title>
-    <para>Start the host specified with the -b --box option. This unmounts the file 
+    <para>Start the host specified with the -b --box option. This unmounts the file
     system, and starts the image that is present on the file system.</para>
-  </section> 
+  </section>
   <section id="usage-cmdline-down">
     <title>Command option --down -d</title>
-    <para>Stop the host specified with the -b --box option. This stops the image and 
+    <para>Stop the host specified with the -b --box option. This stops the image and
     mounts the file system.</para>
-  </section> 
+  </section>
   <section id="usage-cmdline-list-boxes">
     <title>Command option --list-boxes -l</title>
     <para>List Virtual Boxes available.</para>
-  </section> 
+  </section>
   <section id="usage-cmdline-list-images">
     <title>Command option --list-images -L</title>
     <para>List Virtual Box images available for the box you have selected with the --box -b option.</para>
-  </section> 
+  </section>
   <section id="usage-cmdline-kill">
     <title>Command option --kill -k</title>
-    <para>Kill's the virtual box even if it wont stop, this wont always work and if it does not, 
-    the only way you can recover the VM is to reboot the complete xen domain zero. You must have 
+    <para>Kill's the virtual box even if it wont stop, this wont always work and if it does not,
+    the only way you can recover the VM is to reboot the complete xen domain zero. You must have
     specified a box using the --box -b option.</para>
-  </section> 
+  </section>
   <section id="usage-cmdline-tgz">
     <title>Command option --tgz -z</title>
-    <para>When used with the --store -s option will store the &vm; image as a tgz image, 
+    <para>When used with the --store -s option will store the &vm; image as a tgz image,
     rather than the default rsync method.</para>
   </section>
   <section id="usage-cmdline-locked">
     <title>Command option --locked -m</title>
     <para>Useful for locking the VM while operating are beign performed.</para>
-  </section> 
+  </section>
   <section id="usage-cmdline-free">
     <title>Command option --free -f</title>
     <para>Returns a list of not running &vm; that are not locked.</para>
@@ -154,11 +154,11 @@ leoben.desy.de</screen>
   <section id="usage-cmdline-used">
     <title>Command option --used -U</title>
     <para>Returns a list of running &vm; or locked &vm;'s.</para>
-  </section> 
+  </section>
   <section id="usage-cmdline-rsync">
     <title>Command option --rsync -y</title>
-    <para>When used with the --store -s option will store the &vm; image as a copy of 
-    the current image, this is faster than compressing the image, and for repreat installs 
+    <para>When used with the --store -s option will store the &vm; image as a copy of
+    the current image, this is faster than compressing the image, and for repreat installs
     minimizes the data transfered.</para>
   </section>
   <section id="usage-cmdline-cpu">

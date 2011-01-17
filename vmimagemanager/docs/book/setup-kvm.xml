@@ -16,8 +16,8 @@
       </author>
     </authorgroup>
   </chapterinfo>
-  
-  <para>First time users are recommend getting &virtmanager; to work before I trying &vmim;. 
+
+  <para>First time users are recommend getting &virtmanager; to work before I trying &vmim;.
   &virtmanager; has a simple GUI for creating &vm;'s which has a dependency upon &libvirt;, further it is
   available in fedora, and debian flavors of line so only a command line away.</para>
   <section id="setup-kvm-test">
@@ -33,20 +33,20 @@
       <listitem>libvirtd daemon running correctly.</listitem>
       <listitem>&libvirt; installed in the operating system.</listitem>
       <listitem>&kpartx; a tool for mounting and un mounting partition tables in &lvm;</listitem>
-      <listitem>python</listitem>          
+      <listitem>python</listitem>
     </itemizedlist>
     <section>
     <title>Dependacies Recommendations</title>
     <para>
-      In the area of virtualization and the amount of development work going on in this sector, 
+      In the area of virtualization and the amount of development work going on in this sector,
       Always keep an eye on the latest release of all dependencies versions.
     </para>
     </section>
     <section>
     <title>LVM Setup</title>
     <para>
-      &kvm; and &vmim; work with partitions exported to the &vm; as disks. 
-      &lvm; should therefore be set with a partition per Virtual Slot. 
+      &kvm; and &vmim; work with partitions exported to the &vm; as disks.
+      &lvm; should therefore be set with a partition per Virtual Slot.
       These partitions will be configured for the virtual maschine as disks &vmim; can help with that.
     </para>
     <para>Please skip the &xen; section until you see the heading "Setting up on Debian/Redhat &xen; and &kvm;"</para>

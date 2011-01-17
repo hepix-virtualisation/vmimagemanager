@@ -16,7 +16,7 @@
       </author>
     </authorgroup>
   </chapterinfo>
-  
+
   <para>The beginning of the automation of the install script, setting up LVM and the configuration of the vmimagemanager.</para>
   <programlisting>DomainName=desy.de
 LvmVgName=VolGroup00
@@ -90,6 +90,6 @@ vmimagemanager -b tb011-vm1.desy.de -d
 mkinitrd --fstab /mnt/vm/dcache-devil5-vm01.desy.de/etc/fstab \
     --with xenblk --with=xennet --preload xenblk --preload xennet \
     /boot/initrd-2.6.18-128.1.1.el5xen-guest.img 2.6.18-128.1.1.el5xen</programlisting>
-    
-  
+
+
 </chapter>

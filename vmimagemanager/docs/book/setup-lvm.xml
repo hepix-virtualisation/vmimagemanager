@@ -16,25 +16,25 @@
       </author>
     </authorgroup>
   </chapterinfo>
-  <para>Typically any host using &vmim; must work with a large number of partitions. 
-  With &xen; para virtulization 2 per host for maximum performance, though with &kvm; 
-  one partition per &vm; slot is enough. With &xen; partition per VM as a root file system and 
-  one for virtual ram or more commonly known as swap. Unfortunately Linux does not 
-  recognize more than 15 partitions, on a conventional Intel computer using an MSDOS 
+  <para>Typically any host using &vmim; must work with a large number of partitions.
+  With &xen; para virtulization 2 per host for maximum performance, though with &kvm;
+  one partition per &vm; slot is enough. With &xen; partition per VM as a root file system and
+  one for virtual ram or more commonly known as swap. Unfortunately Linux does not
+  recognize more than 15 partitions, on a conventional Intel computer using an MSDOS
   partition table, this limited my experiments with slots to 7 LVM with &xen;.</para>
   <section id="setup-lvm-introduction">
     <title>Running many virtual maschines.</title>
-    <para>It seems to get maximum throughput each &vm; should have one core and at least 10Gb 
-    disk, 512 Mb of RAM. For a typical desktop machine, this leads the RAM and CPU become 
+    <para>It seems to get maximum throughput each &vm; should have one core and at least 10Gb
+    disk, 512 Mb of RAM. For a typical desktop machine, this leads the RAM and CPU become
     the limiting factor in supporting large numbers of virtual maschines.</para>
-    <para>Hard drives are currently large compared to the size of a &vm; image. 
+    <para>Hard drives are currently large compared to the size of a &vm; image.
     To work around the artificial limit of MSDOS partitions supported by Linux, I recommend LVM.</para>
-    <para>LVM provides many features which are appealing to users of &vmim;, these include 
-    snap shotting, copy on write partitions, and the ability to have an unlimited number of 
+    <para>LVM provides many features which are appealing to users of &vmim;, these include
+    snap shotting, copy on write partitions, and the ability to have an unlimited number of
     partitions within a logical volume group. These features are not integrated into &vmim;
     yet and their is no requirement as yet to use LVM with &vmim;.</para>
     <para>I used <ulink url="http://www.linuxconfig.org/Linux_lvm_-_Logical_Volume_Manager">
-    this guide to configuring LVM</ulink> and recommend that all users of &vmim; become 
+    this guide to configuring LVM</ulink> and recommend that all users of &vmim; become
     familiar with the basic usage of &lvm;</para>
   </section>
 </chapter>
