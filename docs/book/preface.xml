@@ -68,8 +68,8 @@ So far its optimized for repeatedly restarting a Virtual Machine slot with a res
     <section id="preface-performance">
       <title>Performance</title>
       <para>In testing timings for shutting down, rsync reinstalling and rebooting a standard a vanilla Scientific Linux 
-      (Red Hat Enterprise Linux binary compatible OS) where in the region of 30-40 seconds for SL3 and 40-50 seconds for 
-      SL4, your performance may vary, at home I also run a ultra portable laptop which with slower USB attached hard 
+      (Red Hat Enterprise Linux binary compatible OS) where in the region of 30-40 seconds for &SL3; and 40-50 seconds for 
+      &SL4;, your performance may vary, at home I also run a ultra portable laptop which with slower USB attached hard 
       drives that cant reach near this I/O performance so shutdown, rsync, bootup can at around 70-80 seconds, Im sure 
       with appropriate (and user friendly error handling) , the performance of bootup would still dominate execution time 
       even with enhancements like upstart in ubuntu.
