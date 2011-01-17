@@ -26,7 +26,8 @@
     <para>In &SL6; all network is mostly setup in the directory 
     <filename class="directory">/etc/sysconfig/network-scripts/</filename>
     one for each network device.</para>
-    <para>We are goign to change the network configuration of the host so eth0 connects to a bridge and aall &vm;'s can also connect to this bridge.</para>
+    <para>We are goign to change the network configuration of the host so eth0 connects to a bridge and 
+    all &vm;'s can also connect to this bridge.</para>
     <screen>&prompt-root;<userinput>yum install bridge-utils</userinput></screen>
     <para>Now we change modify the eth0 configuration from the original:</para>
     <screen>&prompt-root;<userinput>cat /etc/sysconfig/network-scripts/ifcfg-eth0</userinput>

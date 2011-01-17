@@ -43,7 +43,7 @@ xenconftemplate=/etc/vmimagemanager/xen.template</programlisting>
   <section id="setup-vmimagemanager-cfg-slot">
     <title>Configuration <filename>vmimagemanager.cfg</filename> Section for a slot</title>
     <para>All sections of <filename>vmimagemanager.cfg</filename> except the "VmImageManager" section 
-    are per Virtual maschine configuration files. LibVirt also has a concept of defined hosts, if a 
+    are per Virtual maschine configuration files. &libvirt; also has a concept of defined hosts, if a 
     defined host is deleted, &vmim; will redefine it based on the settings in these slots on execution.</para>
     <para>The easiest way to make a slot, is to set up a &vm; in &libvirt;. The easiest way is to use 
     &virtmanager; to create the &vm;'s, once this is done &vm; slot can be created to set the partitions 
@@ -72,7 +72,7 @@ host=virt.yokel.org
 mac=02:01:63:22:51:13</programlisting>
     <para>The section names, are not important and must only be unique, in the above example the slots
     are called <literal>test-vm01</literal> and <literal>vm001.yokel.org</literal></para>
-    <para>The <literal>HostName</literal> is set to the name that matches the &vm; through libvirt.</para>
+    <para>The <literal>HostName</literal> is set to the name that matches the &vm; through &libvirt;.</para>
     <para>The <literal>mac</literal> is set to the mac address to use with the &vm; I usually use dhcp to manage networking with &vm;'s.</para>
     <section>
       <title>Setting up a slots storage.</title>
