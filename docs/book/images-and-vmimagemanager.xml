@@ -16,7 +16,7 @@
     </authorgroup>
   </chapterinfo>
   <para>Handling Images and &vmim;.</para>
-  <para>For &xen; We recommend you setup 2 partitions one for swap and one for your root mount point, 
+  <para>For &xen; We recommend you setup 2 partitions one for swap and one for your root mount point,
   the mount point should be then mounted and the image expanded.</para>
   <para>For &kvm; We recommend you setup 1 partitions one the &vm;'s hard drive.</para>
   <screen>&prompt-root;<userinput>cd /your/mounted/vm/root/directory/</userinput></screen>
@@ -37,7 +37,7 @@ vncviewer=0</programlisting>
   <screen>&prompt-root;<userinput>vmimagemanager -b vm002.yokel.org -z -s sl4.5-i386.small.tar.gz</userinput></screen>
   <para>And after some time you should get your first image.</para>
   <para>The recommended setup of images in XEN is one VM with 2 physical devices one for swap and one for data.</para>
-  <para>Xen supports only virtualizing the full hard disk drive in fully virtualized mode, and this can be tricky 
+  <para>Xen supports only virtualizing the full hard disk drive in fully virtualized mode, and this can be tricky
     to retrieve as in the case of LVM based distributions like SL4.</para>
   <para><ulink url="http://www.howtoforge.com/perfect_xen_setup_debian_ubuntu">The Perfect Xen Setup For Debian And Ubuntu</ulink>
   another called <ulink url="http://www.howtoforge.com/perfect_setup_debian_sarge">The Perfect Xen Setup For Debian Sarge</ulink></para>

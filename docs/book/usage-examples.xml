@@ -26,7 +26,7 @@
     <title>Restoring a &vm;</title>
     <para>Restore image buildserver_x86_64 to host wien.desy.de and insert the host certificates to this image.</para>
     <screen>&prompt-root;<userinput>vmimagemanager -b wien.desy.de -r buildserver_x86_64 -i certificates.tar.gz</userinput></screen>
-  </section>  
+  </section>
   <section id="usage-examples-extract">
     <title>Extract directory from a &vm;</title>
     <para>And once the job is complete you want to extract a series of details.</para>
@@ -49,5 +49,5 @@ master_sl4_i386.tgz
 sl3_i386_made_rpms
 sl4_i386_made_rpms</screen>
   </section>
-  
+
 </chapter>

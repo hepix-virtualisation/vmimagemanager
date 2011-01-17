@@ -25,7 +25,7 @@ The user interface was designed to complement the xm series of commands, but wil
 So far its optimized for repeatedly restarting a &vm; slot with a reset image, with one command line.
     </para>
 
-    <para>     
+    <para>
       Features of &vmim; are:
       <itemizedlist>
         <listitem><para>Works with &kvm; through &libvirt;.</para></listitem>
@@ -56,33 +56,33 @@ So far its optimized for repeatedly restarting a &vm; slot with a reset image, w
 
     <section id="preface-model">
       <title>Model</title>
-      <para>Virtualization hosts will run a fixed number of "Slots" upon which &vm;s can be started, 
-      The rational of this is based on the work of many groups in HTC (High Throughput Computing (1)) it seems 
-      that the number of jobs per host is at best N+1:N proportional to the CPU/cores's. This varies with IO 
-      jobs and CPU requirements for the job. Secure services require certificates, secure automatic certificate 
-      generation seemed to complex. On this reasoning the slot and &vm; model was used, since the idea 
+      <para>Virtualization hosts will run a fixed number of "Slots" upon which &vm;s can be started,
+      The rational of this is based on the work of many groups in HTC (High Throughput Computing (1)) it seems
+      that the number of jobs per host is at best N+1:N proportional to the CPU/cores's. This varies with IO
+      jobs and CPU requirements for the job. Secure services require certificates, secure automatic certificate
+      generation seemed to complex. On this reasoning the slot and &vm; model was used, since the idea
       of a Host . This script is never going to be a complete solution to virtualisation on a batch queue Jobs that
-      require low latency communication and highly multi threaded optimized might be better suited waiting for 
+      require low latency communication and highly multi threaded optimized might be better suited waiting for
       virtualization in these areas.</para>
     </section>
     <section id="preface-performance">
       <title>Performance</title>
-      <para>In testing timings for shutting down, rsync reinstalling and rebooting a standard a vanilla Scientific Linux 
-      (Red Hat Enterprise Linux binary compatible OS) where in the region of 30-40 seconds for &SL3; and 40-50 seconds for 
-      &SL4;, your performance may vary, at home I also run a ultra portable laptop which with slower USB attached hard 
-      drives that cant reach near this I/O performance so shutdown, rsync, bootup can at around 70-80 seconds, Im sure 
-      with appropriate (and user friendly error handling) , the performance of bootup would still dominate execution time 
+      <para>In testing timings for shutting down, rsync reinstalling and rebooting a standard a vanilla Scientific Linux
+      (Red Hat Enterprise Linux binary compatible OS) where in the region of 30-40 seconds for &SL3; and 40-50 seconds for
+      &SL4;, your performance may vary, at home I also run a ultra portable laptop which with slower USB attached hard
+      drives that cant reach near this I/O performance so shutdown, rsync, bootup can at around 70-80 seconds, Im sure
+      with appropriate (and user friendly error handling) , the performance of bootup would still dominate execution time
       even with enhancements like upstart in ubuntu.
       </para>
-      <para>Virtulization penalties in seem to lie in disk IO. (todo: ref HEPIX talks) for &xen;, and &kvm;. Multi core CPU 
-      performance may be enhanced, their are no convincing explanations for this phenomenon yet. I have seen next to 
-      zero data on virtualized network latency delay for &kvm; or &xen;, but bandwidth of &xen; seems near native, and &kvm; has 
+      <para>Virtulization penalties in seem to lie in disk IO. (todo: ref HEPIX talks) for &xen;, and &kvm;. Multi core CPU
+      performance may be enhanced, their are no convincing explanations for this phenomenon yet. I have seen next to
+      zero data on virtualized network latency delay for &kvm; or &xen;, but bandwidth of &xen; seems near native, and &kvm; has
       slight out band overhead, but inbound network connectivity is native.</para>
       <section>
         <title>Notes</title>
         <itemizedlist>
           <listitem><para>HTC and HPC:High performance Computing became well defined and included low latency communication (2) between different computer CPU's, and through this definition came the need to define High Throughput Computing, which differs in the amount of synchronization operations the computers need to perform.</para></listitem>
-          <listitem><para>&xen; used to increase TCP connections over Ethernet latency by 60us for its bridge, if addressed by a low latency networking standard or potentially a PCI-E bus sharing system native speed should suitable for HPC job platform isolation as well.</para></listitem>          
+          <listitem><para>&xen; used to increase TCP connections over Ethernet latency by 60us for its bridge, if addressed by a low latency networking standard or potentially a PCI-E bus sharing system native speed should suitable for HPC job platform isolation as well.</para></listitem>
         </itemizedlist>
       </section>
     </section>
@@ -92,10 +92,10 @@ So far its optimized for repeatedly restarting a &vm; slot with a reset image, w
       <itemizedlist>
         <listitem><para>&vmim; should always work along side other virtulization tools.</para></listitem>
         <listitem><para>&vmim; is meant to be part of things. &vmim; will never be a complete solution for virtulization with x509 certificate generation and network management such as Cloud computing, but rather something that makes writing such a system easy.</para></listitem>
-        <listitem><para>To be as user friendly as possible, while making a simple command line interface to Virtulization of &kvm; and in the future regain &xen; compatibility on Linux.</para></listitem>        
+        <listitem><para>To be as user friendly as possible, while making a simple command line interface to Virtulization of &kvm; and in the future regain &xen; compatibility on Linux.</para></listitem>
         <listitem><para>This script is also intended to be placed on an LHC worker node along with SGE (sun grid engine).</para></listitem>
         <listitem><para>&vmim; may extend its self to support iSCSI,virtualbox, Solaris, but stability and functionality will be placed before diversity of platforms.</para></listitem>
-        <listitem><para>The batch queue integration scripts may need a separate source forge project, and hopefully will be completely rewritten, as they are at the moment not intelligent.</para></listitem>        
+        <listitem><para>The batch queue integration scripts may need a separate source forge project, and hopefully will be completely rewritten, as they are at the moment not intelligent.</para></listitem>
         <listitem><para>Other Plans include a platform application flexible virtulization abstraction for a build system, so that software projects can build rpm's or &debian; debs easily with virtual build servers and so trace build ability bugs. (such a think exists already for debian.).</para></listitem>
       </itemizedlist>
     </section>
@@ -123,8 +123,8 @@ So far its optimized for repeatedly restarting a &vm; slot with a reset image, w
           <listitem><para>Software: &virtmanager; installed and working.</para></listitem>
         </itemizedlist>
       </para>
-      <para> 
-        If you wish to setup a &vmim; and have specific requirements for &vmim; or just difficulty setting it up please 
+      <para>
+        If you wish to setup a &vmim; and have specific requirements for &vmim; or just difficulty setting it up please
         read this manual and contact &vmim-support;.
       </para>
     </section>
@@ -147,7 +147,7 @@ So far its optimized for repeatedly restarting a &vm; slot with a reset image, w
           <itemizedlist>
             <listitem>&vmim-rcs-hg;</listitem>
             <listitem>&vmim-rcs-svn;</listitem>
-            
+
           </itemizedlist>
         </listitem>
       </itemizedlist>
