@@ -16,8 +16,8 @@
       </author>
     </authorgroup>
   </chapterinfo>
-  <para>The &vmim; uses &libvirt; to provide an abstraction for starting and stoping &vm;'s. &libvirt; is a library 
-  and deamon to which the library connects which provides a simple and comprehensive API to both &kvm; and &xen;.
+  <para>The &vmim; uses &libvirt; to provide an abstraction for starting and stopping &vm;'s. &libvirt; is a library 
+  and daemon to which the library connects which provides a simple and comprehensive API to both &kvm; and &xen;.
   &libvirt; stores meta data about each of the &vm;'s to allow them to be started at boot.</para>
   <para>&vmim; also has meta data about each &vm;. &vmim; queries &libvirt; to allow control of &vm;'s not defined in 
   &vmim;'s <filename>vmimagemanager.cfg</filename>. If &vmim; is configured to use a &vm; that is not defined in 
@@ -133,6 +133,6 @@ vmimages=/space/vmimages
   then finally decorated by &libvirt;.</para>
   <para>The &vm; definitions used by &libvirt; differ between virtulaisation platforms 
   so to support &kvm; and &xen; for a local site effort may be needed to write site specific 
-  XML. Other things that deployers may want to do includes setting the kernel and initrd for 
+  XML. Other things that users may want to do includes setting the kernel and initrd for 
   boot for a &vm;</para>
 </chapter>

@@ -17,12 +17,12 @@
 
 
     <para>
-      &vmim; is a python script for managing a small cluster of &libvirt; virtual machines on a single host with one command using the unix command line interface.
-it is intended for scripted VM manipulation, by automating the task of launching and shutting down virtual machine images mounting the VM file systems, extracting artifacts, inserting artifacts, snappshotting and restoring images.for virtualizing Operating systems which has been useful at work in High through put server deployment.
-Vmimagemanager was originally writern for &xen; prior to 0.1.0 when it was ported to &libvirt; controlling &kvm; in the future it may support more open platforms including &xen;, &kvm; and virtual box.
+      &vmim; is a python script for managing a small cluster of &libvirt; &vm;s on a single host with one command using the unix command line interface.
+it is intended for scripted VM manipulation, by automating the task of launching and shutting down &vm; images mounting the VM file systems, extracting artifacts, inserting artifacts, snap shots and restoring images.for virtualizing Operating systems which has been useful at work in High through put server deployment.
+&vmim; was originally written for &xen; prior to 0.1.0 when it was ported to &libvirt; controlling &kvm; in the future it may support more open platforms including &xen;, &kvm; and virtual box.
 The user interface was designed to complement the xm series of commands, but will be extended since xm commands are &xen; specific.
-virt-manager is can be used along side vmimagemanager, and complement each other, virtmanger of one off work vmimagemanager for clusters.
-So far its optimized for repeatedly restarting a Virtual Machine slot with a reset image, with one command line.
+&virtmanager; is can be used along side &vmim;, and complement each other, &virtmanager; of one off work &vmim; for clusters.
+So far its optimized for repeatedly restarting a &vm; slot with a reset image, with one command line.
     </para>
 
     <para>     
@@ -30,14 +30,14 @@ So far its optimized for repeatedly restarting a Virtual Machine slot with a res
       <itemizedlist>
         <listitem><para>Works with &kvm; through &libvirt;.</para></listitem>
         <listitem><para>Works with local storage.</para></listitem>
-        <listitem><para>Simple Slot and Virtual Machine model of deployment.</para></listitem>
-        <listitem><para>Slot configuration, and Host configuration defaulting so you only need to specifiy the image directory once.</para></listitem>
+        <listitem><para>Simple Slot and &vm; model of deployment.</para></listitem>
+        <listitem><para>Slot configuration, and Host configuration defaulting so you only need to specify the image directory once.</para></listitem>
         <listitem><para>Speeds the import and export of images to tgz or rsync directories for archive.</para></listitem>
-        <listitem><para>Retrive artifacts or Insert artifacts into the files system, (eg, cirtificates=x509, keys=ssh,apache)</para></listitem>
+        <listitem><para>Retrieve artifacts or Insert artifacts into the files system, (eg, cirtificates=x509, keys=ssh,apache)</para></listitem>
         <listitem><para>Speedy frequent redeploys with rsync.</para></listitem>
         <listitem><para>Extracting or Overlaying Archived Directories images.</para></listitem>
         <listitem><para>Defaults and per Slot configuration.</para></listitem>
-        <listitem><para>Manages mounting domains when then Vm is down and un-mounting when the domain is launched.</para></listitem>
+        <listitem><para>Manages mounting domains when then &vm; is down and un-mounting when the domain is launched.</para></listitem>
         <listitem><para>Manages exporting images in tar.gz format.</para></listitem>
         <listitem><para>Lists Free Slots.</para></listitem>
         <listitem><para>&libvirt; gives support can be extended to work with the &xen; hypervisor on Linux and Solaris hosts. On Linux QEMU, KVM, LXC, OpenVZ, User Mode Linux, and VirtualBox.</para></listitem>
@@ -56,11 +56,11 @@ So far its optimized for repeatedly restarting a Virtual Machine slot with a res
 
     <section id="preface-model">
       <title>Model</title>
-      <para>Virtualization hosts will run a fixed number of "Slots" upon which Virtual Machines can be started, 
+      <para>Virtualization hosts will run a fixed number of "Slots" upon which &vm;s can be started, 
       The rational of this is based on the work of many groups in HTC (High Throughput Computing (1)) it seems 
       that the number of jobs per host is at best N+1:N proportional to the CPU/cores's. This varies with IO 
       jobs and CPU requirements for the job. Secure services require certificates, secure automatic certificate 
-      generation seemed to complex. On this reasoning the slot and virtual machine model was used, since the idea 
+      generation seemed to complex. On this reasoning the slot and &vm; model was used, since the idea 
       of a Host . This script is never going to be a complete solution to virtualisation on a batch queue Jobs that
       require low latency communication and highly multi threaded optimized might be better suited waiting for 
       virtualization in these areas.</para>
@@ -75,14 +75,14 @@ So far its optimized for repeatedly restarting a Virtual Machine slot with a res
       even with enhancements like upstart in ubuntu.
       </para>
       <para>Virtulization penalties in seem to lie in disk IO. (todo: ref HEPIX talks) for &xen;, and &kvm;. Multi core CPU 
-      performance may be enhanced, thier are no convincing explinations for this phenominum yet. I have seen next to 
-      zero data on virtualized network latency delay for &kvm; or &xen;, but bandwith of &xen; seems near native, and &kvm; has 
-      slight outband overhead, but inbound network connectivitiy is native.</para>
+      performance may be enhanced, their are no convincing explanations for this phenomenon yet. I have seen next to 
+      zero data on virtualized network latency delay for &kvm; or &xen;, but bandwidth of &xen; seems near native, and &kvm; has 
+      slight out band overhead, but inbound network connectivity is native.</para>
       <section>
         <title>Notes</title>
         <itemizedlist>
           <listitem><para>HTC and HPC:High performance Computing became well defined and included low latency communication (2) between different computer CPU's, and through this definition came the need to define High Throughput Computing, which differs in the amount of synchronization operations the computers need to perform.</para></listitem>
-          <listitem><para>&xen; used to increase TCP connections over ethernet latency by 60us for its bridge, if addressed by a low latency networking standard or potentially a PCI-E bus sharing system native speed should suitable for HPC job platform isolation as well.</para></listitem>          
+          <listitem><para>&xen; used to increase TCP connections over Ethernet latency by 60us for its bridge, if addressed by a low latency networking standard or potentially a PCI-E bus sharing system native speed should suitable for HPC job platform isolation as well.</para></listitem>          
         </itemizedlist>
       </section>
     </section>
@@ -90,22 +90,22 @@ So far its optimized for repeatedly restarting a Virtual Machine slot with a res
       <title>Roadmap</title>
       <para>The current roadmap for &vmim;.</para>
       <itemizedlist>
-        <listitem><para>vmimagemanger should always work along side other virtulization tools.</para></listitem>
-        <listitem><para>vmimanager is ment to be part of things. vmimagemanger will never be a complete solution for virtulization with x509 certificate generation and network management such as Cloud computing, but rather something that makes writing such a system easy.</para></listitem>
+        <listitem><para>&vmim; should always work along side other virtulization tools.</para></listitem>
+        <listitem><para>&vmim; is meant to be part of things. &vmim; will never be a complete solution for virtulization with x509 certificate generation and network management such as Cloud computing, but rather something that makes writing such a system easy.</para></listitem>
         <listitem><para>To be as user friendly as possible, while making a simple command line interface to Virtulization of &kvm; and in the future regain &xen; compatibility on Linux.</para></listitem>        
         <listitem><para>This script is also intended to be placed on an LHC worker node along with SGE (sun grid engine).</para></listitem>
-        <listitem><para>vmimagemanger may extend its self to support iSCSI,virtualbox, Solaris, but stability and functionality will be placed before diversity of platforms.</para></listitem>
+        <listitem><para>&vmim; may extend its self to support iSCSI,virtualbox, Solaris, but stability and functionality will be placed before diversity of platforms.</para></listitem>
         <listitem><para>The batch queue integration scripts may need a separate source forge project, and hopefully will be completely rewritten, as they are at the moment not intelligent.</para></listitem>        
-        <listitem><para>Other Plans include a platform application flexible virtulization abstraction for a build system, so that software projects can build rpm's or debian debs easily with virtual build servers and so trace build ability bugs. (such a think exists already for debian.).</para></listitem>
+        <listitem><para>Other Plans include a platform application flexible virtulization abstraction for a build system, so that software projects can build rpm's or &debian; debs easily with virtual build servers and so trace build ability bugs. (such a think exists already for debian.).</para></listitem>
       </itemizedlist>
     </section>
     <section id="preface-why">
-      <title>Why use vmimagemanager script to manage virtual machines ?</title>
+      <title>Why use &vmim; script to manage &vm;s ?</title>
       <itemizedlist>
-        <listitem><para>Useful for off line backing up virtual machine systems, extracting and inserting directories, and reseting the operating system, using rsync, just the sort of thing that you might do on a batch queue to run jobs in virtual machines, destroying and reinstalling virtual machines to test for installation bugs on complex server applications.</para></listitem>
-        <listitem><para>This script is a simple script, and is meant to be useful and user friendly and save time doing the sort of thing you need to do with virtual maschines when you have one virtual server.</para></listitem>
-        <listitem><para>This tool was writern to be combined with the xm tools from &xen; and depends on them and complements them until a better solution for end users comes.</para></listitem>
-        <listitem><para>This tool is also meant to be used by other automation tools, such as automated build and testing set ups, where simplicity of managing virtual machine slots for your own scripts is a priority not a gui.</para></listitem>
+        <listitem><para>Useful for off line backing up &vm; systems, extracting and inserting directories, and resetting the operating system, using rsync, just the sort of thing that you might do on a batch queue to run jobs in &vm;s, destroying and reinstalling &vm;s to test for installation bugs on complex server applications.</para></listitem>
+        <listitem><para>This script is a simple script, and is meant to be useful and user friendly and save time doing the sort of thing you need to do with &vm;s when you have one virtual server.</para></listitem>
+        <listitem><para>This tool was written to be combined with the xm tools from &xen; and depends on them and complements them until a better solution for end users comes.</para></listitem>
+        <listitem><para>This tool is also meant to be used by other automation tools, such as automated build and testing set ups, where simplicity of managing &vm; slots for your own scripts is a priority not a gui.</para></listitem>
       </itemizedlist>
     </section>
     <section id="preface-requirements">
@@ -113,10 +113,10 @@ So far its optimized for repeatedly restarting a Virtual Machine slot with a res
       <para>
         For minimal test installation:
         <itemizedlist>
-          <listitem><para>Hardware: contemporary CPU , 1 GiB of RAM , 100 MiB free harddisk space</para></listitem>
+          <listitem><para>Hardware: contemporary CPU , 1 GiB of RAM , 100 MiB free hard disk space</para></listitem>
           <listitem><para>Software: &libvirt; managed virtulisation layer.</para></listitem>
         </itemizedlist>
-        Recomended test instalation:
+        Recommended test installation:
         <itemizedlist>
           <listitem><para>Software: &lvm; installed.</para></listitem>
           <listitem><para>Software: &kvm;.</para></listitem>
@@ -124,7 +124,7 @@ So far its optimized for repeatedly restarting a Virtual Machine slot with a res
         </itemizedlist>
       </para>
       <para> 
-        If you wish to setup a &vmim; and have specific requirements for &vmim; or just dificulty settign it up please 
+        If you wish to setup a &vmim; and have specific requirements for &vmim; or just difficulty setting it up please 
         read this manual and contact &vmim-support;.
       </para>
     </section>

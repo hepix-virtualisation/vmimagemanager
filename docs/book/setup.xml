@@ -18,13 +18,7 @@
     <para>
       This part contains guides for specific tasks a system
       administrator might want to perform.
-    </para> 
-
-    <!-- TODO:
-      Security issues: Passwort in batch file for SRM, Pin, ... (chmod 600)
-
-      Deferred flush to HSM: <command>define</command> in pools.
-    -->
+    </para>
   </partintro>
   <xi:include href="setup-sl6.xml"/>
   <xi:include href="setup-kvm.xml"/>
