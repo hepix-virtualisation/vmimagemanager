@@ -140,7 +140,7 @@ leoben.desy.de</screen>
   </section> 
   <section id="usage-cmdline-tgz">
     <title>Command option --tgz -z</title>
-    <para>When used with the --store -s option will store the virtual machine image as a tgz image, 
+    <para>When used with the --store -s option will store the &vm; image as a tgz image, 
     rather than the default rsync method.</para>
   </section>
   <section id="usage-cmdline-locked">
@@ -157,7 +157,7 @@ leoben.desy.de</screen>
   </section> 
   <section id="usage-cmdline-rsync">
     <title>Command option --rsync -y</title>
-    <para>When used with the --store -s option will store the virtual machine image as a copy of 
+    <para>When used with the --store -s option will store the &vm; image as a copy of 
     the current image, this is faster than compressing the image, and for repreat installs 
     minimizes the data transfered.</para>
   </section>

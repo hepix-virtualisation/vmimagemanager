@@ -17,7 +17,7 @@
     </authorgroup>
   </chapterinfo>
   
-  <para>The beginning of the automation of the install script, settign up LVM and the configuration of the vmimagemanager.</para>
+  <para>The beginning of the automation of the install script, setting up LVM and the configuration of the vmimagemanager.</para>
   <programlisting>DomainName=desy.de
 LvmVgName=VolGroup00
 HostName=dcache-devil5

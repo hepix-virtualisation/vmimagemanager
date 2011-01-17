@@ -18,15 +18,15 @@
   </chapterinfo>
   
   <para>This part of the book is used for setting up your &SL6; host operating systems networking.</para>
-  <para>Thier are two main aproaches to networking a &vm;, using NAT or bridging. NAT is 
-  configured out of the box, but makes it difficult to provide inbound conectivity to the &vm;.</para>
+  <para>There are two main approaches to networking a &vm;, using NAT or bridging. NAT is 
+  configured out of the box, but makes it difficult to provide inbound connectivity to the &vm;.</para>
 <section id="setup-sl6-bridge">
     <title>Setting up a bridge with &SL6;</title>
-    <para>Using a network bridge allows virtual maschines to share the same subnetwork as the physical hosts.</para>
+    <para>Using a network bridge allows &vm;'s to share the same sub network as the physical hosts.</para>
     <para>In &SL6; all network is mostly setup in the directory 
     <filename class="directory">/etc/sysconfig/network-scripts/</filename>
     one for each network device.</para>
-    <para>We are goign to change the network configuration of the host so eth0 connects to a bridge and 
+    <para>We are going to change the network configuration of the host so eth0 connects to a bridge and 
     all &vm;'s can also connect to this bridge.</para>
     <screen>&prompt-root;<userinput>yum install bridge-utils</userinput></screen>
     <para>Now we change modify the eth0 configuration from the original:</para>
@@ -47,7 +47,7 @@ IPV6_AUTOCONF="yes"
 NM_CONTROLLED="yes"
 ONBOOT="yes"
 BRIDGE="bridge0"</screen>
-    <para>Next we must add the bridge device, thsi is done by creating a new file in the 
+    <para>Next we must add the bridge device, this is done by creating a new file in the 
     same directory<filename class="directory">/etc/sysconfig/network-scripts/</filename> 
     called <filename>ifcfg-bridge0</filename>.</para>
     <screen>&prompt-root;<userinput>cat /etc/sysconfig/network-scripts/ifcfg-bridge0</userinput>
@@ -57,7 +57,7 @@ BOOTPROTO="dhcp"
 ONBOOT="yes"
 DELAY=0</screen>
     <para>To set up the firewall so that it works fine you may need to add a line to the firewall 
-    settings. The firewall in &SL6; is configured in deirectory
+    settings. The firewall in &SL6; is configured in directory
     <filename class="directory">/etc/sysconfig/</filename> with the filename
     <filename>iptables</filename>. The following line shodul be added:</para>
     <screen>-A RH-Firewall-1-INPUT -i bridge0 -j ACCEPT</screen>

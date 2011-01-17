@@ -6,7 +6,6 @@
 ]>
 
 <chapter id="cb-vmim-images">
-
   <title>Images</title>
   <chapterinfo>
     <authorgroup>
@@ -16,16 +15,17 @@
       </author>
     </authorgroup>
   </chapterinfo>
-  <para>Handling Images and vmimagemanager.</para>
-  <para>For &xen; We recommend you setup 2 partitions one for swap and one for your root mount point, the mount point should be then mounted and the image expanded.</para>
-  <para>For &kvm; We recommend you setup 1 partitions one the virtual maschines hard drive.</para>
-  <screen>&prompt-root;<userinput>cd /yourr/mounted/vm/root/directoy/</userinput></screen>
+  <para>Handling Images and &vmim;.</para>
+  <para>For &xen; We recommend you setup 2 partitions one for swap and one for your root mount point, 
+  the mount point should be then mounted and the image expanded.</para>
+  <para>For &kvm; We recommend you setup 1 partitions one the &vm;'s hard drive.</para>
+  <screen>&prompt-root;<userinput>cd /your/mounted/vm/root/directory/</userinput></screen>
   <screen>&prompt-root;<userinput>tar -zxf sl4.5-i386.small.tar.gz</userinput></screen>
   <para>Try this once,</para>
   <screen>&prompt-root;<userinput>tar -zxf sl4.5-i386.small.tar.gz</userinput></screen>
 
   <para>This will create a template file for you where specified in the configuration file.</para>
-  <para>You can safely edit this templated file, a new one will not be generated unless the file is missing. I typically.</para>
+  <para>You can safely edit this template file, a new one will not be generated unless the file is missing. I typically.</para>
   <screen>&prompt-root;<userinput>xm create -c vm002.yokel.org</userinput></screen>
   <para>For debugging you might like, to edit the configuration file and set this Monitor emulator. It works nicely showing a boot screen,</para>
   <programlisting>sdl=1
@@ -41,6 +41,4 @@ vncviewer=0</programlisting>
     to retrieve as in the case of LVM based distributions like SL4.</para>
   <para><ulink url="http://www.howtoforge.com/perfect_xen_setup_debian_ubuntu">The Perfect Xen Setup For Debian And Ubuntu</ulink>
   another called <ulink url="http://www.howtoforge.com/perfect_setup_debian_sarge">The Perfect Xen Setup For Debian Sarge</ulink></para>
-    
-  
 </chapter>

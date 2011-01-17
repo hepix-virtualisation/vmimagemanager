@@ -16,7 +16,7 @@
       </author>
     </authorgroup>
   </chapterinfo>
-  <para>vmimagemanager.cfg follows the file format of a standard p[ython cfg file commonly known as a 'ini' file.</para>
+  <para>vmimagemanager.cfg follows the file format of a standard python cfg file commonly known as a 'ini' file.</para>
 
   <para>The <filename>vmimagemanager.cfg</filename> is broken down into sections, one global section and a section 
   for each slot.</para>
@@ -29,12 +29,12 @@
     <programlisting>vmimages=/server/vmstore/images
 vmextracts=/server/vmstore/extracts</programlisting>
     <section>
-      <title>Depricated: Xen Pre 0.1.0 tempalating system</title>
-      <para>This is documented here as I feel that this aproach has some merrit, and it is intended 
-      that static template files be murged with vmimagemanger again so the following section is preserved. 
+      <title>Deprecated: &xen; Pre 0.1.0 template system</title>
+      <para>This is documented here as I feel that this approach has some merit, and it is intended 
+      that static template files be merged with &vmim; again so the following section is preserved. 
       Please send in a bug request if the idea of template files apeals.</para>
-      <para>The Generated configurations for Xen and for the templates to generate them 
-      (Q: should posibly be in a <filename class="directory">/var/lib/</filename> directory ?) 
+      <para>The Generated configurations for &xen; and for the templates to generate them 
+      (Q: should possibly be in a <filename class="directory">/var/lib/</filename> directory ?) 
       are by default in the <filename class="directory">/etc/vmimagemanager</filename></para>
       <programlisting>vmconfdir=/var/lib/vmimagemanager/xen/
 xenconftemplate=/etc/vmimagemanager/xen.template</programlisting>
@@ -43,15 +43,15 @@ xenconftemplate=/etc/vmimagemanager/xen.template</programlisting>
   <section id="setup-vmimagemanager-cfg-slot">
     <title>Configuration <filename>vmimagemanager.cfg</filename> Section for a slot</title>
     <para>All sections of <filename>vmimagemanager.cfg</filename> except the "VmImageManager" section 
-    are per Virtual maschine configuration files. &libvirt; also has a concept of defined hosts, if a 
+    are per &vm; configuration files. &libvirt; also has a concept of defined hosts, if a 
     defined host is deleted, &vmim; will redefine it based on the settings in these slots on execution.</para>
     <para>The easiest way to make a slot, is to set up a &vm; in &libvirt;. The easiest way is to use 
     &virtmanager; to create the &vm;'s, once this is done &vm; slot can be created to set the partitions 
     and mount points for the &vm;.</para>
-    <para>If a &vm; is defained as a slot, and is not defined in &libvirt;, &vmim; will attempt to define the
+    <para>If a &vm; is defined as a slot, and is not defined in &libvirt;, &vmim; will attempt to define the
     &vm; within &libvirt;. This allows for cluster installs setting up &vm; within &libvirt;. An added advantage is 
-    that settigns can esily be deleted using for example &virtmanager; and &vmim; will recreate the &vm;.</para>
-    <para>As a minimum, to define a slot, hostname, network connections and stroage must be defined.</para>
+    that settings can easily be deleted using for example &virtmanager; and &vmim; will recreate the &vm;.</para>
+    <para>As a minimum, to define a slot, hostname, network connections and storage must be defined.</para>
     <para>Two slots from a vmimagemanager.cfg as an example</para>
     <programlisting>[test-vm01]
 vm_slot_enabled=on
@@ -80,14 +80,14 @@ mac=02:01:63:22:51:13</programlisting>
       of setting up the storage for a &vm;.</para>
       <section>
         <title>Setting up a slots storage as disks.</title>
-        <para>This mechanism is generally used for all forms of virtualisation using raw disk images, 
-        and is the recomended mechanism for &kvm; and fully virtualised &xen;.</para>
+        <para>This mechanism is generally used for all forms of Virtualization using raw disk images, 
+        and is the recommended mechanism for &kvm; and fully virtualised &xen;.</para>
         <programlisting>HostDisk=/dev/d430/sysVm001
 partition=1</programlisting>
       </section>
       <section>
         <title>Setting up a slots storage as partitions.</title>
-        <para>Using this apraoch partitions are parsed directly to the &vm; rather than complete disks. 
+        <para>Using this approach partitions are parsed directly to the &vm; rather than complete disks. 
         As far as we know this is the only supported on &xen; paravirtaulised.</para>
         <programlisting>#root=/dev/hda11
 root=/dev/sbird/vm001sys
@@ -97,7 +97,7 @@ swap=/dev/sbird/vm001swap</programlisting>
     </section>
     <section>
       <title>Getting a MAC Address for your &vm;</title>
-      <para>If you want how to get the mac address of a configured host. The admisn at DESY have come up with a nice convention.</para>
+      <para>If you want how to get the mac address of a configured host. The administrators at DESY have come up with a nice convention.</para>
         <itemizedlist>
         <listitem>Take the IP address
           <programlisting>131.169.226.57</programlisting>
@@ -108,11 +108,11 @@ swap=/dev/sbird/vm001swap</programlisting>
         <listitem>Replace the 2 first digit with 02 (this is an undefined MAC adress range)
           <programlisting>021.169.226.057</programlisting>
         </listitem>
-        <listitem>Remove the dots, and the result is our unique virtual machine mac address
+        <listitem>Remove the dots, and the result is our unique &vm; mac address
           <programlisting>021169226057</programlisting>
         </listitem>
       </itemizedlist>
-      <para>With this aproach you can assign a sensible MAC address to all your &vm;'s.</para>
+      <para>With this approach you can assign a sensible MAC address to all your &vm;'s.</para>
     </section>
   </section>
 </chapter>
