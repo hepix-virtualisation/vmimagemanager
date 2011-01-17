@@ -23,6 +23,7 @@ Rules / Guidelines / Suggestions for adding new entities:
 <!ENTITY vmim         "<productname>vmimagemanger</productname>">
 <!ENTITY lvm         "<productname>LVM</productname>">
 <!ENTITY libvirt         "<productname>libvirt</productname>">
+<!ENTITY virtmanager         "<productname><ulink url='http://people.redhat.com/berrange/virt-manager/'>Virtual Machine Manager</ulink></productname>">
 
 <!ENTITY vmim-support     "<email>vmimagemanager-support@lists.sourceforge.net</email>">
 <!ENTITY vmim-download    '<ulink url="http://sourceforge.net/projects/vmimagemanager/files/">vmimagemanger downloads</ulink>.'>

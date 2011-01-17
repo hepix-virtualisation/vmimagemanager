@@ -18,10 +18,12 @@
   </chapterinfo>
   <para>vmimagemanager.cfg follows the file format of a standard p[ython cfg file commonly known as a 'ini' file.</para>
 
-  <para>The vmimagemanager.cfg is broken down into sections, one global section and a section for each slot.</para>
+  <para>The <filename>vmimagemanager.cfg</filename> is broken down into sections, one global section and a section 
+  for each slot.</para>
   <section id="setup-vmimagemanager-cfg-sections">
     <title>Configuration vmimagemanager.cfg Section "VmImageManager"</title>
-    <para>The "VmImageManager" section of the vmimagemanager.cfg is the global section of vmimagemanager.cfg.</para>
+    <para>The "VmImageManager" section of the <filename>vmimagemanager.cfg</filename> is the global section of 
+    <filename>vmimagemanager.cfg</filename>.</para>
     <para>&vmim; manages your snapshots of an OS to devices and a large image store location. This path is 
     set.on my server this space is mounted under <filename class="directory">/server/vmstore</filename>.</para>
     <programlisting>vmimages=/server/vmstore/images
@@ -39,13 +41,16 @@ xenconftemplate=/etc/vmimagemanager/xen.template</programlisting>
     </section>
   </section>
   <section id="setup-vmimagemanager-cfg-slot">
-    <title>Configuration vmimagemanager.cfg Section for a slot</title>
-    <para>All sections of vmimagemanager.cfg except the "VmImageManager" section are per Virtual maschine 
-    configuration files. LibVirt also has a concept of defined hosts, if a defined host is deleted, 
-    &vmim; will redefine it based on the settings in these slots on execution.</para>
-    <para>Settings will only be applied to current virtual maschines if the maschine is deleted 
-    then &vmim; will recreate the virtual maschine based upon the configuration sections, 
-    including registering the diesks with the virtualisation frame work.</para>
+    <title>Configuration <filename>vmimagemanager.cfg</filename> Section for a slot</title>
+    <para>All sections of <filename>vmimagemanager.cfg</filename> except the "VmImageManager" section 
+    are per Virtual maschine configuration files. LibVirt also has a concept of defined hosts, if a 
+    defined host is deleted, &vmim; will redefine it based on the settings in these slots on execution.</para>
+    <para>The easiest way to make a slot, is to set up a &vm; in &libvirt;. The easiest way is to use 
+    &virtmanager; to create the &vm;'s, once this is done &vm; slot can be created to set the partitions 
+    and mount points for the &vm;.</para>
+    <para>If a &vm; is defained as a slot, and is not defined in &libvirt;, &vmim; will attempt to define the
+    &vm; within &libvirt;. This allows for cluster installs setting up &vm; within &libvirt;. An added advantage is 
+    that settigns can esily be deleted using for example &virtmanager; and &vmim; will recreate the &vm;.</para>
     <para>As a minimum, to define a slot, hostname, network connections and stroage must be defined.</para>
     <para>Two slots from a vmimagemanager.cfg as an example</para>
     <programlisting>[test-vm01]
