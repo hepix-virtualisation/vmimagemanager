@@ -67,8 +67,8 @@ boot='d'</screen>
         <screen>&prompt-root;<userinput>scp 192.168.0.80:/back*.tar* .</userinput></screen>
         <screen>&prompt-root;<userinput>tar -zxvf backup.tar.gz</userinput></screen>
         <screen>&prompt-root;<userinput>cd</userinput></screen>
-        <screen>&prompt-root;<userinput>vmimagemanager.py -b vm002.yokel.org -u</userinput></screen>
-        <screen>&prompt-root;<userinput>vmimagemanager.py -b vm002.yokel.org -s sl4.5-i386.small.tar.gz</userinput></screen>
+        <screen>&prompt-root;<userinput>vmimagemanager -b vm002.yokel.org -u</userinput></screen>
+        <screen>&prompt-root;<userinput>vmimagemanager -b vm002.yokel.org -s sl4.5-i386.small.tar.gz</userinput></screen>
         <screen>&prompt-root;<userinput>du -h /server/vmstore/images/vm002.yokel.org/sl4.5-i386.small.tar.gz</userinput>
 250M    /server/vmstore/images/vm002.yokel.org/sl4.5-i386.small.tar.gz</screen>
         <para>I then did the following operations. and had a booting VM of scientific linux which I then use para virtualised.</para>
@@ -95,10 +95,10 @@ ext3                  138512  1
 jbd                    65392  1 ext3
 mbcache                14216  1 ext3</screen>
         <para>So I copied over the Xen kernels modules</para>
-        <screen>&prompt-root;<userinput>vmimagemanager.py -b vm002.yokel.org -d</userinput></screen>
+        <screen>&prompt-root;<userinput>vmimagemanager -b vm002.yokel.org -d</userinput></screen>
         <screen>&prompt-root;<userinput>cp -r /lib/modules/2.6.18-6-xen-amd64 \
 /mnt/vm002.yokel.org/lib/modules/</userinput></screen>
-        <screen>&prompt-root;<userinput>vmimagemanager.py -b vm002.yokel.org -u</userinput></screen>
+        <screen>&prompt-root;<userinput>vmimagemanager -b vm002.yokel.org -u</userinput></screen>
         <para>Which happily solved the issue of the modules missing because I was running a debian kernel.</para>
         <para>I then solved the labeling of partitions image in the correct way by editing the fstab.</para>
         <screen>&prompt-root;<userinput>cat  /etc/fstab</userinput>

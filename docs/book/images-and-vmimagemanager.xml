@@ -34,7 +34,7 @@ vncviewer=0</programlisting>
   <para>Or as I find more convenient occasionally using.</para>
   <screen>&prompt-root;<userinput>xm console vm002.yokel.org</userinput></screen>
   <para>Once this vm boots up is successfully,</para>
-  <screen>&prompt-root;<userinput>vmimagemanager.py -b vm002.yokel.org -z -s sl4.5-i386.small.tar.gz</userinput></screen>
+  <screen>&prompt-root;<userinput>vmimagemanager -b vm002.yokel.org -z -s sl4.5-i386.small.tar.gz</userinput></screen>
   <para>And after some time you should get your first image.</para>
   <para>The recommended setup of images in XEN is one VM with 2 physical devices one for swap and one for data.</para>
   <para>Xen supports only virtualizing the full hard disk drive in fully virtualized mode, and this can be tricky 

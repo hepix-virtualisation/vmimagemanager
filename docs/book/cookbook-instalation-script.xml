@@ -84,7 +84,7 @@ echo "/dev/${LvmVgName}/space      /space     ext3    defaults       1 2" >> /de
 mkdir /space
 
 
-vmimagemanager.py -b tb011-vm1.desy.de -d
+vmimagemanager -b tb011-vm1.desy.de -d
 
 
 mkinitrd --fstab /mnt/vm/dcache-devil5-vm01.desy.de/etc/fstab \

@@ -17,11 +17,11 @@
     </authorgroup>
   </chapterinfo>
   
-  <para>First time users are recommend getting virt-manager to work before I trying vmimagemanager. 
-  virt-manager has a simple GUI for creating virtual maschines which has a dependacy upon libvirt, further it is
+  <para>First time users are recommend getting &virtmanager; to work before I trying &vmim;. 
+  &virtmanager; has a simple GUI for creating &vm;'s which has a dependacy upon &libvirt;, further it is
   available in fedora, and debian flavours of line so only a command line away.</para>
   <section id="setup-kvm-test">
-    <title>Testing for KVM support</title>
+    <title>Testing for &kvm; support</title>
     <para>How to test if your host supports &kvm;.</para>
     <screen>egrep '(vmx|svm)' --color=always /proc/cpuinfo</screen>
     </section>
@@ -29,10 +29,10 @@
   <title>Dependacies</title>
     <itemizedlist>
       <listitem>LVM up and running and working.</listitem>
-      <listitem>KVM module installed in the kernel.</listitem>
+      <listitem>&kvm; module installed in the kernel.</listitem>
       <listitem>libvirtd deamon running correctly.</listitem>
-      <listitem>libvirt installed in the operating system.</listitem>
-      <listitem>kpartx a tool for mounting and unmounting partition tables in LVM</listitem>
+      <listitem>&libvirt; installed in the operating system.</listitem>
+      <listitem>&kpartx; a tool for mounting and unmounting partition tables in &lvm;</listitem>
       <listitem>python</listitem>          
     </itemizedlist>
     <section>
@@ -45,11 +45,11 @@
     <section>
     <title>LVM Setup</title>
     <para>
-      KVM and vmimagmanager work with partitionions exported to the virtual maschine as disks. 
-      LVM should thierfore be set with a partition per VIrtual Slot. 
+      &kvm; and vmimagmanager work with partitionions exported to the virtual maschine as disks. 
+      &lvm; should thierfore be set with a partition per Virtual Slot. 
       These partitions will be configured for the virtual maschine as disks vmimagemanger can help with that.
     </para>
-    <para>Please skip the Xen section untill you see the heading "Setting up on Debian/Redhat XEN and KVM"</para>
+    <para>Please skip the &xen; section untill you see the heading "Setting up on Debian/Redhat &xen; and &kvm;"</para>
     </section>
   </section>
 </chapter>

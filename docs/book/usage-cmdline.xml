@@ -16,7 +16,7 @@
       </author>
     </authorgroup>
   </chapterinfo>
-  <para>vmimagemanager has a many command line options it will print the command line options if it 
+  <para>&vmim; has a many command line options it will print the command line options if it 
   cannot find a task, tasks are operations on hosts. Running &vmim; with no command line options.</para>
   <screen>&prompt-root;<userinput>vmimagemanager</userinput>
 Error: No task selected
@@ -47,7 +47,7 @@ Error: No task selected
   </section>
   <section id="usage-cmdline-version">
     <title>Command option --version -v</title>
-    <para>Shows the version of vmimagemanager.py this is taken from the tag it 
+    <para>Shows the version of &vmim; this is taken from the tag it 
     was checked out with or will be "Development" for other versions checked 
     out from non tags.</para>
   </section> 
@@ -63,11 +63,12 @@ Error: No task selected
   </section> 
   <section id="usage-cmdline-box">
     <title>Command option --box -b [host]</title>
-    <para>Select the host to operate on with vmimagemanger.py will operate. 
+    <para>Select the host to operate on with &vmim; will operate. 
     Host is a mandatory option as you must specify the host, if the host 
-    identifier is unknown please use an incorrect string and vmimagemanger 
+    identifier is unknown please use an incorrect string and &vmim; 
     will return a list of available hosts.</para>
-    <screen>&prompt-root;<userinput>vmimagemanager -b sdfkldsfjsldfj</userinput>Host 'sdfkldsfjsldfj' not found! Try ..
+    <screen>&prompt-root;<userinput>vmimagemanager -b sdfkldsfjsldfj</userinput>
+Host 'sdfkldsfjsldfj' not found! Try ..
 wels.desy.de
 graz.desy.de
 baden.desy.de
