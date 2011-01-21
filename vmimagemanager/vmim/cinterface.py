@@ -149,8 +149,10 @@ class virtualHostContainer:
                     else:
                         cfgDict["ConfTemplateXen"] = self.ConfTemplateXen
                     
-                    
-                    
+                    if (self.config.has_option(cfgSection, "bridge")):
+                        cfgDict["bridge"]  = self.config.get(cfgSection,"bridge")
+                    else:
+                        cfgDict["bridge"]  = self.cfgDefault["bridge"]
                     try:      
                         newhost = self.virtualHostGenerator(cfgDict)
                         
