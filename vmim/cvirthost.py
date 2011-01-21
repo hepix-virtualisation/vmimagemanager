@@ -321,7 +321,10 @@ class virtualhost(clock.DiscLocking):
 #            test = "startep bad for %s" % (self.HostName)
 #            print test
 #            raise InputError(test)
-        self.libvirtObj.setVcpus(int(self.DcgDict["vcpu"]))
+        try:
+            self.libvirtObj.setVcpus(int(self.DcgDict["vcpu"]))
+        except:
+            pass
         rc = self.libvirtObj.create()
         (state,maxMem,memory,nrVirtCpu,cpuTime) =  self.libvirtObj.info()
         while state not in (1,2,3):

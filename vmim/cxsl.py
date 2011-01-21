@@ -70,19 +70,15 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         emulator = SubElement(devices, "emulator")
         emulator.text = "/usr/bin/kvm"
         emulator.text = "/usr/libexec/qemu-kvm"
-        if "vmemulator" in  self.DcgDict.keys():
-             emulator.text = self.DcgDict['vmemulator']
         self.RealiseDevice()
         self.DiskSubsystem.LibVirtXmlTreeGenerate(devices)
         self.logger.debug("DiskSubsystem %s" %(self.DiskSubsystem))
-        self.Bridge = "br0"
-        if hasattr(self,"Bridge") and hasattr(self,"HostMacAddress"):
+        if self.DcgDict.has_key("bridge") and self.DcgDict.has_key("HostMacAddress"):
              
              interface = SubElement(devices, "interface")
              interface.set('type', "bridge")
-             mac_address = SubElement(interface, "mac",address='%s' % (self.HostMacAddress))
-             source = SubElement(interface, "source",bridge='br0')
-             target = SubElement(interface, "target",dev='vnet1')
+             mac_address = SubElement(interface, "mac",address='%s' % (self.DcgDict["HostMacAddress"]))
+             source = SubElement(interface, "source",bridge='%s' % (self.DcgDict["bridge"]))
         else:
             self.logger.debug("Has no mac address")
         
