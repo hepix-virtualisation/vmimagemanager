@@ -20,6 +20,7 @@
       administrator might want to perform.
     </para>
   </partintro>
+  <xi:include href="cookbook-virtmanager-adding-vm.xml"/>
   <xi:include href="cookbook-making-images.xml"/>
   <xi:include href="cookbook-instalation-script.xml"/>
   <xi:include href="images-and-vmimagemanager.xml"/>
