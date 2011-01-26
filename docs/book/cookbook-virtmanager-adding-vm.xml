@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+    "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"
+[
+<!ENTITY % sharedents SYSTEM "shared-entities.xml" >
+%sharedents;
+]>
+<chapter id="cb-virtmanager-adding-vm">
+  <title>Making Images</title>
+  <chapterinfo>
+    <authorgroupara>
+      <author>
+        <firstname>Owen</firstname>
+        <surname>Synge</surname>
+      </author>
+    </authorgroupara>
+  </chapterinfo>
+  <section>
+    <title>Adding a new VM</title>
+    <para>Adding a Virtual maschine with &virtmanager;</para>
+    <section>
+      <title>Prerequisites</title>
+      <para>Register a MAC address in DHCP</para>
+    </section>
+    <section>
+      <title>Create the virtual disk</title>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata fileref="./images/cb-virtmanager-adding-vm-0-lvm.png"
+          format="png" align="center" contentwidth="16cm" />
+        </imageobject>
+      </mediaobject>
+      <para>This is not strictly necessary but I like the
+      convenience of LVM with its many features. Here I create a
+      simple logical partition which will appear as the disk for
+      the virtual maschine.</para>
+      <para>I avoid the use of the '-' in LVM names as this is the
+      delimiter between volume group and logical volume in the
+      "/dev/mapper" directory.</para>
+    </section>
+    <section>
+      <title>Start virt-manager new VM wizard.</title>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata fileref="./images/cb-virtmanager-adding-vm-1-virt-manager.png"
+          format="png" align="center" contentwidth="16cm" />
+        </imageobject>
+      </mediaobject>
+      <para>virt-manager is the simplest way to set up a VM. It has
+      a rich and well designed wizard interface.</para>
+      <para>Set the virtual machine name and install mechanism. For
+      testing operating systems it is often useful to test using
+      ISO CD/DVD ROM images, but for this install we will use
+      net-boot to test the auto install routines.</para>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata fileref="./images/cb-virtmanager-adding-vm-2-wiz-name.png"
+          format="png" align="center" contentwidth="8cm" />
+        </imageobject>
+      </mediaobject>
+    </section>
+    <section>
+      <title>Set the virtual machine OS and subversion.</title>
+      <para>Setting the operating system here is not critical, but
+      virt-manager has knowledge about different optimization for
+      different operating systems. This selection of optimizations
+      is the big advantage of using virt-manager.</para>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata fileref="./images/cb-virtmanager-adding-vm-3-wiz-os.png"
+          format="png" align="center" contentwidth="8cm" />
+        </imageobject>
+      </mediaobject>
+    </section>
+    <section>
+      <title>Set the virtual machine memory and CPU's.</title>
+      <para>As defaults a good minimum is one CPU in a virtual
+      machines and 1024 MB of RAM is a good minimum for a low
+      resources Linux install.</para>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata fileref="./images/cb-virtmanager-adding-vm-4-wiz-mem.png"
+          format="png" align="center" contentwidth="8cm" />
+        </imageobject>
+      </mediaobject>
+    </section>
+    <section>
+      <title>Set the virtual machine storage.</title>
+      <para>The Logical volume created earlier is now used.</para>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata fileref="./images/cb-virtmanager-adding-vm-5-wiz-hdd.png"
+          format="png" align="center" contentwidth="8cm" />
+        </imageobject>
+      </mediaobject>
+    </section>
+    <section>
+      <title>Set the virtual machine network.</title>
+      <para>To set up the virtual machines network connection for
+      most use cases a simple bridged interface is ideal. In this
+      example eth0 is acting as a bridge interface, passing dhcp
+      requests from the virtual machine, to the network dhcp
+      server.</para>
+      <para>Select "Advanced options" to expand the options, and
+      set the MAC address as registered in the dhcp server.</para>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata fileref="./images/cb-virtmanager-adding-vm-6-wiz-mac.png"
+          format="png" align="center" contentwidth="8cm" />
+        </imageobject>
+      </mediaobject>
+    </section>
+    <section>
+      <title>Start the VM install.</title>
+      <para>Now on clicking the finish button the VM will boot and
+      the install process can start.</para>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata fileref="./images/cb-virtmanager-adding-vm-7-wiz-pexe.png"
+          format="png" align="center" contentwidth="16cm" />
+        </imageobject>
+      </mediaobject>
+    </section>
+    <section>
+      <title>Enabling vmimagemanager.</title>
+      <para>vmimagemanager allows command line access and auto
+      mounting and unmounting of your virtual machine images as
+      well as snapshotting.</para>
+      <para>To add a new virtual machine to vmimagemanager you only
+      need to add a single section like the two shown below.</para>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata fileref="./images/cb-virtmanager-adding-vm-8-vmim.png"
+          format="png" align="center" contentwidth="16cm" />
+        </imageobject>
+      </mediaobject>
+      <para>The "HostDisk" specifies the logical volume acting as
+      the virtual machines hard drive, the "partition" specifies
+      the virtual machines virtual disk partition to mount, and the
+      "mount" point defines where the virtual machines previously
+      specified partition is to be mounted.</para>
+      <para>The path "vmimages" specifies where all snap shots are
+      stored by vmimagemanager.</para>
+    </section>
+  </section>
+</chapter>
