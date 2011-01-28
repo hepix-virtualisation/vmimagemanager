@@ -143,8 +143,6 @@ class VirtualHostDiskPartitionsShared(VirtualHostDiskPartiions):
             source.set('dev', self.HostDisk)
         except:
             source.set('dev', "/dev/mapper/d430-sysVm002")
-        target = SubElement(disk, "target",dev="hda",bus="ide")
-        serial = SubElement(devices, "serial")
     
 
 
@@ -297,7 +295,5 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
             source.set('dev', self.HostDisk)
         except:
             source.set('dev', "/dev/mapper/d430-sysVm002")
-        target = SubElement(disk, "target",dev="hda",bus="ide")
-        serial = SubElement(devices, "serial")
 
 

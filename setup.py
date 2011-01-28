@@ -20,5 +20,6 @@ setup(name='vmimagemanager',
 'docs/examples/vmimagemanager-xen-example.template',
 'docs/examples/xen.template',
 'docs/examples/xen.template.example.full.virtualisation',
-'docs/examples/logging.conf'])]
+'docs/examples/logging.conf',
+'docs/examples/libvirt-redhat-el-6.xsl'])]
 )
