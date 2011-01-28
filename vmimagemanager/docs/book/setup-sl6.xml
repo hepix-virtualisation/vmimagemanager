@@ -59,7 +59,11 @@ DELAY=0</screen>
     <para>To set up the firewall so that it works fine you may need to add a line to the firewall
     settings. The firewall in &SL6; is configured in directory
     <filename class="directory">/etc/sysconfig/</filename> with the filename
-    <filename>iptables</filename>. The following line shodul be added:</para>
+    <filename>iptables</filename>. If the file does not exist try running 
+    the following command:</para>
+    <screen>&prompt-root;<userinput>/sbin/service iptables save</userinput></screen>
+    </para>
+    The following line should be added:</para>
     <screen>-A RH-Firewall-1-INPUT -i bridge0 -j ACCEPT</screen>
     <para>So the final line looks as</para>
     <screen>&prompt-root;<userinput>cat /etc/sysconfig/iptables</userinput>
