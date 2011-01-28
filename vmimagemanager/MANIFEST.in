@@ -9,6 +9,7 @@ include docs/examples/vmimagemanager-xen-example.template
 include docs/examples/xen.template
 include docs/examples/xen.template.example.full.virtualisation
 include docs/examples/logging.conf
+include docs/examples/libvirt-redhat-el-6.xsl
 include docs/pics
 include docs/pics/Makefile
 include docs/pics/SGE_WN.txt

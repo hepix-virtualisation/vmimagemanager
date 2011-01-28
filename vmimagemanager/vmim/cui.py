@@ -60,10 +60,11 @@ def HostContainerLoadConfigFile(virtualHostContainer,fileName):
     GeneralSection = "VmImageManager"
     HostListSection = "AvailalableHosts"
     RequiredSections = [GeneralSection]
-    
+    #RequiredSections = [GeneralSection,HostListSection]
     virtualHostContainer.config = ConfigParser.ConfigParser()
     cmdFormatFilter = "mkfs.ext3 -L / %s"
     virtualHostContainer.config.readfp(open(fileName,'r'))
+    #virtualHostContainer.logger.warning( config.sections()
     configurationSections = virtualHostContainer.config.sections()
     for ASection in RequiredSections:
         if not ASection in configurationSections:
@@ -83,7 +84,9 @@ def HostContainerLoadConfigFile(virtualHostContainer,fileName):
     if len(virtualHostContainer.newvmconfdir) == 0:
         virtualHostContainer.logger.fatal( "Configuration file does not have a section '%s' with a key in it 'vmconfdir'" % (GeneralSection))
         return False
+    ##virtualHostContainer.VmSlotVarDir = newvmconfdir
     virtualHostContainer.PropertyVmSlotVarDirSet(virtualHostContainer.newvmconfdir)
+    #logging.warning( virtualHostContainer.__VmSlotVarDir
     newConfTemplateXen = virtualHostContainer.config.get(GeneralSection,'xenconftemplate')
     if len(newConfTemplateXen) == 0:
         virtualHostContainer.logger.fatal( "Configuration file does not have a section '%s' with a key in it 'xenconftemplate'" % (GeneralSection))
@@ -118,12 +121,12 @@ def HostContainerLoadConfigFile(virtualHostContainer,fileName):
 
     VmMountsBaseDir = virtualHostContainer.config.get(GeneralSection,'mount')
 
-    ThisKey = 'vmemulator'
+    ThisKey = 'virthost'
     if (virtualHostContainer.config.has_option(GeneralSection, ThisKey)):
         virtualHostContainer.VmHostServer = str(virtualHostContainer.config.get(GeneralSection,ThisKey))
     else:
         default = 'qemu:///system'
-        logging.warning("Configuration file does not have a section '%s' with a key in it '%s' defaulting to '%s'" % (ThisKey,GeneralSection,default))
+        logging.warning("Configuration file does not have a section '%s' with a key in it 'virthost' defaulting to '%s'" % (GeneralSection,default))
         virtualHostContainer.VmHostServer = default
 
 
