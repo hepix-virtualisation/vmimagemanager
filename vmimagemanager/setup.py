@@ -1,6 +1,6 @@
 from distutils.core import setup
 setup(name='vmimagemanager',
-    version='0.2.1',
+    version='0.2.2',
     description="vmimagemanager manages virtual maschines",
     author="O M Synge",
     author_email="owen.Synge@desy.de",
@@ -21,5 +21,6 @@ setup(name='vmimagemanager',
 'docs/examples/xen.template',
 'docs/examples/xen.template.example.full.virtualisation',
 'docs/examples/logging.conf',
-'docs/examples/libvirt-redhat-el-6.xsl'])]
+'docs/examples/libvirt-redhat-el-6.xsl',
+'docs/examples/libvirt-redhat-el-5.xsl'])]
 )
