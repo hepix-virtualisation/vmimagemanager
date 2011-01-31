@@ -63,8 +63,7 @@ DELAY=0</screen>
     the following command:</para>
     <screen>&prompt-root;<userinput>/sbin/service iptables save</userinput>
 Saving firewall rules to /etc/sysconfig/iptables:          [  OK  ]</screen>
-    </para>
-    The following line should be added:</para>
+    <para>The following line should be added:</para>
     <screen>-A RH-Firewall-1-INPUT -i bridge0 -j ACCEPT</screen>
     <para>So the final line looks as</para>
     <screen>&prompt-root;<userinput>cat /etc/sysconfig/iptables</userinput>
@@ -83,6 +82,17 @@ COMMIT</screen>
     <screen>&prompt-root;<userinput>ifdown bridge0</userinput></screen>
     <screen>&prompt-root;<userinput>ifup bridge0</userinput></screen>
     <screen>&prompt-root;<userinput>ifup eth1</userinput></screen>
-    </section>
-
+  </section>
+  <section id="setup-sl6-persistent-mac">
+    <title>Preventing persistent ethernet naming on images.</title>
+    <para>
+    By default &SL6; stores teh MAC addess for each network device, and names it consistently. 
+    This is fine for a rela host where the MAC address never changes and is tightly coupled 
+    to the hardware. With &vm;'s thsi is not true as a &vm; image may be shared with many 
+    hosts slots each with a unique MAC address.
+    </para>
+    <para>TO disable this behaviour on &SL6; do the following commands.</para>
+    <screen>&prompt-root;<userinput>echo -n > /etc/udev/rules.d/70-persistent-net.rules</userinput></screen>
+    <screen>&prompt-root;<userinput>echo -n > /lib/udev/rules.d/75-persistent-net-generator.rules</userinput></screen>
+  </section> 
 </chapter>
