@@ -154,5 +154,8 @@ def HostContainerLoadConfigFile(virtualHostContainer,fileName):
     if (virtualHostContainer.config.has_option(GeneralSection, "bridge")):
         virtualHostContainer.cfgDefault["bridge"] = str(virtualHostContainer.config.get(GeneralSection,'bridge'))
     else:
-        virtualHostContainer.cfgDefault["bridge"] = 'br0'
+    	default = 'br0'
+        virtualHostContainer.cfgDefault["bridge"] = default
+	logging.warning("Configuration file does not have a section '%s' with a key in it 'bridge' defaulting to '%s'" % (GeneralSection,default))
+        
     return True
