@@ -110,7 +110,7 @@ class VirtualHostDiskPartitionsShared(VirtualHostDiskPartiions):
         if rc != 0:
             self.logger.debug( 'self=%s,self.HostRootSpace=%s,self.MountPoint=%s' % (self,self.HostRootSpace,self.MountPoint))
             self.logger.error('Command "%s" Failed' % (cmd))
-            self.logger.info( 'rc=%s,output=%s' % (rc,cmdoutput))
+            self.logger.error( 'rc=%s,output=%s' % (rc,cmdoutput))
             return False          
         return True
 
@@ -123,7 +123,7 @@ class VirtualHostDiskPartitionsShared(VirtualHostDiskPartiions):
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             self.logger.error('Command "%s" Failed' % (cmd))
-            self.logger.info('rc=%s,output=%s' % (rc,cmdoutput))
+            self.logger.error('rc=%s,output=%s' % (rc,cmdoutput))
             return False          
         return True
 
@@ -164,7 +164,7 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
         self.logger.debug("Running command %s" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
-            self.logging.error('mount Failed with error code %s and the folleowing error:%s' % (rc,cmdoutput))
+            self.logging.error('mount Failed with error code %s and the following error:%s' % (rc,cmdoutput))
             sys.exit(1)            
         #print "%s %s" % (self.PropertyHostRootSpaceGet(),self.PropertyMountGet())
         for mntline in cmdoutput.split("\n"):
@@ -255,9 +255,8 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
         self.logger.debug("Running command %s" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
-            self.logger.debug( 'gggggggggggself=%s,self.HostRootSpace=%s,self.MountPoint=%s' % (self,self.HostRootSpace,self.MountPoint))
             self.logger.error('Command "%s" Failed' % (cmd))
-            self.logger.info( 'rc=%s,output=%s' % (rc,cmdoutput))
+            self.logger.error( 'rc=%s,output=%s' % (rc,cmdoutput))
             sys.exit(1)            
         return    
 
@@ -270,7 +269,7 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             self.logger.error('Command "%s" Failed' % (cmd))
-            self.logger.info('rc=%s,output=%s' % (rc,cmdoutput))
+            self.logger.error('rc=%s,output=%s' % (rc,cmdoutput))
             sys.exit(1)       
         
         return True
