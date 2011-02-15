@@ -91,8 +91,12 @@ COMMIT</screen>
     to the hardware. With &vm;'s thsi is not true as a &vm; image may be shared with many 
     hosts slots each with a unique MAC address.
     </para>
-    <para>TO disable this behaviour on &SL6; do the following commands.</para>
+    <para>To disable this behaviour on &SL6; do the following commands.</para>
     <screen>&prompt-root;<userinput>echo -n > /etc/udev/rules.d/70-persistent-net.rules</userinput></screen>
     <screen>&prompt-root;<userinput>echo -n > /lib/udev/rules.d/75-persistent-net-generator.rules</userinput></screen>
+    <para>On other linux operating systems these files maybe in different locations
+    and the names may change slightly, for example on Ubuntu 'hardy'</para>
+    <screen>&prompt-root;<userinput></userinput>echo -n > /etc/udev/rules.d/70-persistent-net.rules</screen>
+    <screen>&prompt-root;<userinput></userinput>echo -n > /etc/udev/rules.d/75-persistent-net-generator.rules</screen>
   </section> 
 </chapter>
