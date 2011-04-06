@@ -22,9 +22,31 @@
   available in fedora, and debian flavors of line so only a command line away.</para>
   <section id="setup-kvm-test">
     <title>Testing for &kvm; support</title>
-    <para>How to test if your host supports &kvm;.</para>
-    <screen>egrep '(vmx|svm)' --color=always /proc/cpuinfo</screen>
+    <para>&kvm; will only work with the hardware supported virtualisation. The following command will show if hardware 
+    virtualisation is available.</para>
+    <screen>&prompt-root;<userinput>egrep '(vmx|svm)' --color=always /proc/cpuinfo</userinput></screen>
     </section>
+  <section id="setup-kvm-modules">
+    <title>&kvm; and the Linux Kernel.</title>
+    <para>By default most hardware has hardware virtualisation disabled at the BIOS level. 
+    The reason is that malicious software could potentially run the users operating system as a &vm; and 
+    so be very difficult to detect.</para>
+    <section id="setup-kvm-modules-checking">
+      <title>Checking the &kvm; modules (Intel).</title>
+      <para>&kvm; consists of 2 kernel modules, one module is generic &kvm; and one is hardware specific.</para>
+      <screen>&prompt-root;<userinput>lsmod  | grep kvm</userinput>
+kvm_intel              46589  18 
+kvm                   292815  1 kvm_intel</screen>
+      <para>If only one module is installed it is likely that hardware virtualisation is disabled in the BIOS.</para>
+      <para>Trying to install the hardware specific module will likely fail.</para>
+      <screen>&prompt-root;<userinput>modprobe kvm_intel</userinput>
+FATAL: Error inserting kvm_intel (/lib/modules/2.6.18-238.5.1.el5/weak-updates/kmod-kvm/kvm-intel.ko): Operation not supported</screen>
+      <para>This may give a detailed responce in the logs.</para>
+      <screen>&prompt-root;<userinput>dmesg | tail -n 1</userinput>
+kvm: disabled by bios</screen>
+
+    </section>
+  </section>
   <section id="setup-kvm-deps">
   <title>Dependacies</title>
     <itemizedlist>
@@ -47,7 +69,7 @@
     <para>
       &kvm; and &vmim; work with partitions exported to the &vm; as disks.
       &lvm; should therefore be set with a partition per Virtual Slot.
-      These partitions will be configured for the virtual maschine as disks &vmim; can help with that.
+      These partitions will be configured for the &vm; as disks &vmim; can help with that.
     </para>
     <para>Please skip the &xen; section until you see the heading "Setting up on Debian/Redhat &xen; and &kvm;"</para>
     </section>
