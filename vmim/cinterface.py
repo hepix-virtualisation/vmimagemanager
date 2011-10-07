@@ -73,6 +73,8 @@ class virtualHostContainer:
                     
                     if (self.config.has_option(cfgSection, "HostName")):
                         cfgDict["HostName"]  = self.config.get(cfgSection,"HostName")
+                    else:
+                        cfgDict["HostName"] = cfgSection
                     if (self.config.has_option(cfgSection, "mac")):
                         cfgDict["HostMacAddress"]  = self.config.get(cfgSection,"mac")
                     if (self.config.has_option(cfgSection, "ip")):
