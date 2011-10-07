@@ -1,6 +1,17 @@
-from distutils.core import setup
+from vmim.__version__ import version
+from sys import version_info
+if version_info < (2, 6):
+	from distutils.core import setup
+else:
+	try:
+        	from setuptools import setup, find_packages
+	except ImportError:
+        	from ez_setup import use_setuptools
+        	use_setuptools()
+        	from setuptools import setup, find_packages
+            
 setup(name='vmimagemanager',
-    version='0.2.2',
+    version=version,
     description="vmimagemanager manages virtual maschines",
     author="O M Synge",
     author_email="owen.Synge@desy.de",
