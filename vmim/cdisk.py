@@ -208,7 +208,12 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
                     rootStrip = len(string.rstrip(Partition['Path'],string.digits))
                     if rootStrip > 0:
                         rootStripLen = rootStrip
-                Partition['Number'] = int(PartitionLineSplit[0][(rootStripLen):])
+                parsedInfo = PartitionLineSplit[0][(rootStripLen):]
+                try:
+                    Partition['Number'] = int(parsedInfo)
+                except:
+                    continue
+                
                 #self.logger.debug("Partition=%s" % (Partition))
                 DiskPartitionD.append(Partition)
         
