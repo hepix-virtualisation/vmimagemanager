@@ -441,7 +441,7 @@ class virtualhost(clock.DiscLocking):
         if os.path.isdir('%s/%s' % (storedir,ImageName)):
             self.PropertyImageModeSet("rsync")
         if "tgz" == self.PropertyImageModeGet():
-            cmd = "tar -zcsf %s/%s --exclude=lost+found -C %s ." % (storedir,ImageName,self.DiskSubsystem.MountPoint)
+            cmd = "tar -zcspf %s/%s --exclude=lost+found -C %s ." % (storedir,ImageName,self.DiskSubsystem.MountPoint)
         if "rsync" == self.PropertyImageModeGet():
             cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/%s/" % (self.DiskSubsystem.MountPoint,storedir,ImageName)
         if cmd == "":
@@ -509,7 +509,7 @@ class virtualhost(clock.DiscLocking):
                     sys.exit(1)                    
                 cmd = "rm -rf %s" % (self.DiskSubsystem.MountPoint)
                 (rc,cmdoutput) = commands.getstatusoutput(cmd)
-                cmd = "tar -zxf %s --exclude=lost+found   -C %s" % (ImageName,self.DiskSubsystem.MountPoint)
+                cmd = "tar -zxfps %s --exclude=lost+found   -C %s" % (ImageName,self.DiskSubsystem.MountPoint)
             if "rsync" == self.PropertyImageModeGet():
                 cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,self.DiskSubsystem.MountPoint)
                 self.logger.debug('Running command "%s".' % (cmd))
@@ -534,7 +534,7 @@ class virtualhost(clock.DiscLocking):
             target = "%s/%s" % (self.PropertyMountGet(),ext)
             if "tgz" == self.PropertyImageModeGet():
                 selectedDir = self.PropertyExtractionsGet()[ext].strip('/')
-                cmd = "tar -zcsf %s/%s --exclude=lost+found -C %s %s" % (self.ExtractDir(),ext,self.PropertyMountGet(),selectedDir)
+                cmd = "tar -zcpsf %s/%s --exclude=lost+found -C %s %s" % (self.ExtractDir(),ext,self.PropertyMountGet(),selectedDir)
             if "rsync" == self.PropertyImageModeGet():
                 cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/%s %s/%s/" % (self.PropertyMountGet(),self.PropertyExtractionsGet()[ext],self.ExtractDir(),ext)
         #print cmd
@@ -571,7 +571,7 @@ class virtualhost(clock.DiscLocking):
             
             #print "insertFormat=%s" % (insertFormat)
             if "tgz" == insertFormat:
-                cmd=  "tar -zxf %s --exclude=lost+found   -C %s" % (ImageName,self.DiskSubsystem.MountPoint)
+                cmd=  "tar -zxpsf %s --exclude=lost+found   -C %s" % (ImageName,self.DiskSubsystem.MountPoint)
             if "rsync" == insertFormat:
                 cmd = "rsync -ra --numeric-ids --exclude=lost+found %s/ %s/%s" % (ImageName,self.PropertyMountGet(),self.PropertyInsertionsGet()[ext])
             #print cmd
