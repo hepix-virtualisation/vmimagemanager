@@ -33,7 +33,8 @@ class vmMdl:
         self.libvirtMaxMem = Observable(None)
         self.libvirtNrVirtCpu = Observable(None)
         self.libvirtCpuTime = Observable(None)
-        
+        self.libvirtId = Observable(None)
+        self.libvirtUuid = Observable(None)
         
 class vhostMdl:
     def __init__(self):
@@ -46,6 +47,17 @@ def LibvirtUpdate(conection,model):
     for LibVirtRunningDomainId in RunningDomains:
         hostPtr = conection.lookupByID(LibVirtRunningDomainId)
         print dir(hostPtr)
+        Name = hostPtr.name()
+        Uuid = hostPtr.UUIDString()
+        ID = hostPtr.ID()
+        vmModel = vmMdl()
+        vmModel.libvirtName.set(Name)
+        vmModel.libvirtUuid.set(Uuid)
+        vmModel.libvirtId.set(ID)
+        model.vmsbyName[Name] = vmModel
+        model.vmsbyId[ID] = vmModel
+        model.vmsByUuid[Uuid] = vmModel
+        
     DefinedDomains = set(conection.listDefinedDomains())
     for Name in DefinedDomains.difference(model.vmsbyName.keys()):
         vmModel = vmMdl()
