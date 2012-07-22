@@ -199,8 +199,6 @@ def start():
         if int(ParsedCpu) > 0:
             HostContainer.hostlist[x].DcgDict["vcpu"] = int(ParsedCpu)
         HostContainer.hostlist[x].cfgApply()
-        HostContainer.hostlist[x].Lock()
-    #print "dslkjsdljsdlkjsd"
     
     if (len(notfoundllist) != 0):
         message = ""
@@ -323,29 +321,13 @@ def start():
     lockedBoxes = []
     for x in pbindex:
         logging.debug("Processing=%s" % (HostContainer.hostlist[x].HostName))
-        if HostContainer.hostlist[x].IsLockedByMe():
-            #print "dabox.HostName"
-            lockedBoxes.append(x)
-            logging.debug("IsLockedByMe x=%s,hostnam=%s" % (x,HostContainer.hostlist[x].HostName))
-        else:
-            #print "dabox.fffffffffHostName"
-            if HostContainer.hostlist[x].Lock():
-                HaveToCheckBoxes.append(x)
-            else:
-                #print "Locked %s" % (abox)
-                if not HostContainer.hostlist[x].IsLockedStill():
-                    #print "foor %s,%s,%s" % (abox.IsLockedByMe(),abox.IsLockedStill(),abox.IsLocked())
-                    if HostContainer.hostlist[x].Lock():
-                        HaveToCheckBoxes.append(x)
-                else:
-                    logging.error("Host %s is nn Use")
-                
+        HaveToCheckBoxes.append(x)
+
     
     if (len(HaveToCheckBoxes) > 0):
         time.sleep(1)
         for x in HaveToCheckBoxes:
-            if HostContainer.hostlist[x].IsLockedByMe():
-                lockedBoxes.append(x)
+            lockedBoxes.append(x)
     logging.debug("lockedBoxes=%s" % (lockedBoxes) )
     logging.debug( "pbindex=%s" % (pbindex) )
     #logging.debug(  HostContainer.hostlist[3].HostName)
@@ -374,7 +356,6 @@ def start():
             if command in ["extract","insert","store","restore","up"]:
                 HostContainer.hostlist[x].StartUp()
                 #print "called startup here"
-        HostContainer.hostlist[x].Unlock()
     FoundLockedBox = False
     
     for abox in processingBoxes:
