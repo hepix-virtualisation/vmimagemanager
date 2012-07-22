@@ -104,7 +104,7 @@ class vhostMdl:
         return None
 
     def addVM(self,vmModel):
-        debugVm(vmModel)
+        #debugVm(vmModel)
         match = self.getVmMatch(vmModel)
         if match != None:
             vmModel.update(match)
@@ -162,15 +162,15 @@ class vhostMdl:
         matches = self.getVmMatch(NewItem)
         if matches == None:
             #print "fddddddddddddddddddddxxssddddd"
-            debugVm(NewItem)       
+            #debugVm(NewItem)       
             self.vmsByUuid[Uuid] = NewItem
             matches = self.getVmMatch(NewItem)
         for UuidNow in self.vmsByUuid.keys():
             CurrentUuId = self.vmsByUuid[UuidNow].libvirtUuid.get()
             if CurrentUuId != UuidNow:
-                print 'naughty',CurrentUuId , UuidNow
-                debugVm(self.vmsByUuid[UuidNow]) 
-                debugVm(self.vmsByUuid[UuidNow]) 
+                #print 'naughty',CurrentUuId , UuidNow
+                #debugVm(self.vmsByUuid[UuidNow]) 
+                
                 del self.vmsByUuid[UuidNow]
         if not Uuid in self.vmsByUuid.keys():
             self.vmsByUuid[Uuid] = matches
@@ -189,9 +189,12 @@ class vhostMdl:
         matches = self.getVmMatch(NewItem)
         if matches == None:
             #print "fddddddddddddddddddddddddd"
-            debugVm(NewItem)
-            self.vmsbyName[Name] = NewItem
-            matches = self.vmsbyName[Name]
+            #debugVm(NewItem)
+            if validIdentifier:
+                self.vmsbyName[Name] = NewItem
+                matches = self.vmsbyName[Name]
+            else:
+                return None
         OldName = matches.libvirtName.get()
         if OldName != None:
             #print 'herere;',debugVm(matches)
@@ -244,7 +247,7 @@ class LibVirtCnt(object):
         for name in self.model.vmsbyName.keys():
             hostPtr = self.connection.lookupByName(name)
             Uuid = hostPtr.UUIDString()
-            print 'ssssssssss',Uuid
+            #print 'ssssssssss',Uuid
             vmModel = vmMdl()
             ID = hostPtr.ID()
             vmModel.libvirtName.update(Name)
@@ -259,7 +262,7 @@ class LibVirtCnt(object):
             self.model.addVM(vmModel)
         
     def getLibVrtPtr(self,vm):
-        debugModel(self.model)
+        #debugModel(self.model)
         #print vm.libvirtName.get()
         #print "getLibVrtPtr",vm.libvirtName.get()
         vmDetails = self.model.getVmMatch(vm)
