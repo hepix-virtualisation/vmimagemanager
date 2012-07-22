@@ -49,16 +49,14 @@ class ObservableDict( UserDict.DictMixin):
         return self._dict[item]
         
     def addCbPost(self, key, func):
-        
         self.callbacks[key] = func
-        print self,self.callbacks
+        
     def delCbPost(self, key):
         del self.callback[key]
     
     def _doCbPost(self,key):
-        print "doingcallbacks for" ,self, self.callbacks
+        #print "doingcallbacks for" ,self, self.callbacks
         for func in self.callbacks:
-            print 'ssss'
             self.callbacks[func](key)
 
     def __setitem__(self, item, value):
