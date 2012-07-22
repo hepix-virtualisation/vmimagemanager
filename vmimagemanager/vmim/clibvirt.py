@@ -17,7 +17,7 @@ import cxsl as cvirthost
 
 # I shoudl make my own GenKeyFunction Later
 from observable import GenKey, Observable, ObservableDict
-
+import functools
 
 class vmMdl:
     def __init__(self):
@@ -69,7 +69,7 @@ class vmMdl:
         if libvirtNrVirtCpu != None:
             destination.libvirtNrVirtCpu.update(libvirtNrVirtCpu)
         libvirtCpuTime = self.libvirtCpuTime.get()
-        if libvirtId != None:
+        if libvirtCpuTime != None:
             destination.libvirtCpuTime.update(libvirtCpuTime)
         
        
@@ -93,27 +93,44 @@ class vhostMdl:
         return None
 
     def addVM(self,vmModel):
-        print 'sssssssssssssssssssss'
         match = self.getVmMatch(vmModel)
         if match != None:
             vmModel.update(match)
             return match
-        print 'sdasdasdasdasd'
         newOne = vmMdl()
-        
-        newOne.libvirtUuid.addCallback(self.callbackKey,self._onUuidPost)
+        newOne.libvirtUuid.addCallback(self.callbackKey,functools.partial(self._onUuidPost,newOne))
+        newOne.libvirtId.addCallback(self.callbackKey,functools.partial(self._onIdPost,newOne))
+        newOne.libvirtName.addCallback(self.callbackKey,functools.partial(self._onNamePost,newOne))
         vmModel.update(newOne)
         return newOne
         
         
+    def _onIdPost(self,NewItem):
+        identifier = NewItem.libvirtId.get()
+        if identifier != None:
+            match = self.getVmMatch(NewItem)
+            if match != None:
+                NewItem.update(match)
+                return
+            self.vmsbyId[identifier] = NewItem
+            
+    def _onUuidPost(self,NewItem):
+        Uuid = NewItem.libvirtUuid.get()
+        if Uuid != None:
+            match = self.getVmMatch(NewItem)
+            if match != None:
+                NewItem.update(match)
+                return
+            self.vmsByUuid[Uuid] = NewItem
         
-    def _onUuidPost(self,key):
-        print "DfddddddddddddddfD"
-    def _onNamePost(self,key):
-        print 'dsdddddddddddddd'
-        if key in self.vmsbyName.keys():
-            print "can find out more"
-
+    def _onNamePost(self,NewItem):
+        Name = NewItem.libvirtName.get()
+        if Name != None:
+            match = self.getVmMatch(NewItem)
+            if match != None:
+                NewItem.update(match)
+                return
+            self.vmsbyName[Name] = NewItem
 
 def tester(conection,model):
     vmModel = vmMdl()
@@ -143,12 +160,11 @@ def LibvirtUpdate(conection,model):
     for name in model.vmsbyName.keys():
         hostPtr = conection.lookupByName(name)
         Uuid = hostPtr.UUIDString()
-        
+        vmModel = vmMdl()
         ID = hostPtr.ID()
         ThisObj = model.vmsbyName[name]
         ThisObj.libvirtName.update(Name)
         ThisObj.libvirtUuid.update(Uuid)
-        print "Uuid",Uuid
         ThisObj.libvirtId.update(ID)
         (state,maxMem,memory,nrVirtCpu,cpuTime) =  hostPtr.info()
         ThisObj.libvirtState.update(state)
@@ -157,6 +173,7 @@ def LibvirtUpdate(conection,model):
         ThisObj.libvirtNrVirtCpu.update(nrVirtCpu)
         ThisObj.libvirtCpuTime.update(cpuTime)
         
+    
     for item in model.vmsByUuid.keys():
         print "By UUID %s=%s,%s" % (model.vmsByUuid[item].libvirtName.get(),
             model.vmsByUuid[item].libvirtUuid.get(),
@@ -207,6 +224,13 @@ class virtualHostContainerLibVirt(cinterface.virtualHostContainer):
         self.conection = libvirt.open(str(self.VmHostServer))
         mytestmodel = vhostMdl()
         LibvirtUpdate(self.conection,mytestmodel)
+        
+        
+        
+        
+        
+        
+        
         #print "libvirtImport" + str(dir(self.conection))
         #print self.conection.listDevices()
         #print self.conection.listDomainsID()
