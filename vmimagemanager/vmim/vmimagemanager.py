@@ -159,7 +159,6 @@ def start():
         sys.exit(1)
     
     connectionstring = str(HostContainer.VmHostServer)
-    print connectionstring
     HostContainer.libvirtImport(connectionstring)
     
     HostContainer.cfgHostsLoad()
@@ -169,15 +168,16 @@ def start():
     libvirtHost = vhostMdl()
     
     lbvtCon = LibVirtConnection(connectionstring)
-    print "connectionstring",connectionstring
+    
     libvirtControl = LibVirtCnt(connectionstring,libvirtHost)
     vmtostart = vmMdl()
     vmtostart.libvirtName.set("debianTesting")
     libvirtControl.updateModel()
-    libvirtControl.vmStart(vmtostart)
-    
+    #libvirtControl.vmStart(vmtostart)
+    #libvirtControl.updateModel()
+    #libvirtControl.vmStop(vmtostart)
     #print "cxxC"
-    
+    #print "connectionstring",connectionstring
     if ParsedImage != None:
         HostContainer.ImageMode = ParsedImage
     processingBoxes = []

@@ -84,23 +84,183 @@ class vhostMdl:
 
     def getVmMatch(self,vmModel):
         Uuid = vmModel.libvirtUuid.get()
+        candidateUuid = []
+        
+        candidates = []
         if Uuid != None:
             if Uuid in self.vmsByUuid:
-                return self.vmsByUuid[Uuid]
-            else:
-                return None
+                candidateUuid.append(self.vmsByUuid[Uuid])
+
+        candidateId = []
         ID = vmModel.libvirtId.get()
         if ID != None and ID != -1:
             if ID in self.vmsbyId:
-                return self.vmsbyId[ID]
-            else:
-                return None
+                candidateId.append(self.vmsbyId[ID])
+        
+        candidateName = []
         Name = vmModel.libvirtName.get()
         if Name != None:
             if Name in self.vmsbyName:
-                return self.vmsbyName[Name]
-            else:
-                return None
+                candidateName.append(self.vmsbyName[Name])
+        
+        candidateUuidSet = set(candidateUuid)
+        candidateUuidSetLen = len(candidateUuidSet)
+        candidateIdSet =  set(candidateId)
+        candidateIdSetLen = len(candidateIdSet)
+        candidateNameSet =  set(candidateName)
+        candidateNameSetLen = len(candidateNameSet)
+        if ((candidateNameSetLen > 0) and (candidateIdSetLen > 0) and (candidateUuidSetLen > 0)):
+            completeSet = candidateUuidSet.intersection(candidateNameSet).intersection(candidateIdSet)
+            
+            if len(completeSet) == 1:
+                return completeSet.pop()
+        if ((candidateNameSetLen > 0) and (candidateUuidSetLen > 0)):
+            nameUuidSet = candidateUuidSet.intersection(candidateNameSet)
+            if len(nameUuidSet) == 1:
+                return nameUuidSet.pop()
+        if ((candidateNameSetLen > 0) and (candidateIdSetLen > 0)):
+            nameIdSet = candidateIdSet.intersection(candidateNameSet)
+            if len(nameIdSet) == 1:
+                return nameIdSet.pop()
+        if (candidateUuidSetLen > 0):
+            nameUuidSetLen = len(candidateUuidSet)
+            #print "nameUuidSetLen",nameUuidSetLen
+            if nameUuidSetLen == 1:
+                return candidateUuidSet.pop()
+        if (candidateNameSetLen > 0):
+            nameIdSetLen = len(candidateNameSet)
+            #print "nameIdSetLen",nameIdSetLen
+            if nameIdSetLen == 1:
+                return candidateNameSet.pop()
+        if (candidateIdSetLen > 0):
+            nameIdSetLen = len(candidateIdSet)
+            #print "nameIdSetLen",nameIdSetLen
+            if nameIdSetLen == 1:
+                return candidateIdSet.pop()
+        
+        
+        lenAllSets = candidateUuidSetLen + candidateIdSetLen + candidateNameSetLen
+        #print lenAllSets
+        if lenAllSets == 0:
+            # If we have no results return
+            return None
+        
+        
+        if candidateUuidSetLen == 1:
+            return candidateUuidSet.pop()
+        
+        print 'sssssssssssssssssssss'
+        
+        
+        
+        candidates = candidateUuid + candidateId + candidateName
+        candidateSet = set(candidates)
+        
+        if len(candidateSet) == 0:
+            return None
+        if len(candidateSet) == 1:
+            return candidateSet.pop()
+
+        lenCandidateUuid = len(candidateUuid)
+        if lenCandidateUuid > 1:
+            print 'sdfsdfsdf'            
+        if lenCandidateUuid > 0:
+            if ID != None and ID != -1:
+                if not ID in self.vmsbyId.keys():
+                    self.vmsbyId[ID] = candidateUuid[0]
+                else:
+                    if self.vmsbyId[ID] != candidateUuid[0]:
+                        # Only Over wrie when different
+                        print "Overwrite ID CandidateUuid"
+                        self.vmsbyId[ID] = candidateUuid[0]
+            if Name != None:
+                if not Name in self.vmsbyName.keys():
+                    self.vmsbyName[Name] = candidateUuid[0]
+                else:
+                    if self.vmsbyName[Name] != candidateUuid[0]:
+                        # Only Over wrie when different
+                        print "Overwrite Name CandidateUuid"
+                        #debugVm(self.vmsbyName[Name])
+                        #debugVm(candidateUuid[0])
+                        self.vmsbyName[Name] = candidateUuid[0]
+            if Uuid != None:
+                if not Uuid in self.vmsByUuid.keys():
+                    self.vmsByUuid[Uuid] = candidateUuid[0]
+                else:
+                    if self.vmsByUuid[Uuid] != candidateUuid[0]:
+                        # Only Over wrie when different
+                        print "Overwrite Uuid CandidateUuid"
+                        self.vmsByUuid[Uuid] = candidateUuid[0]
+
+        lenCandidateId = len(candidateId)
+        
+        if lenCandidateId > 1:
+            print "does this ever1"
+        if lenCandidateId > 0:
+            if ID != None and ID != -1:
+                if not ID in self.vmsbyId.keys():
+                    self.vmsbyId[ID] = candidateId[0]
+                else:
+                    if self.vmsbyId[ID] != candidateId[0]:
+                        # Only Over wrie when different
+                        print "Overwrite ID candidateId"
+                        self.vmsbyId[ID] = candidateId[0]
+            if Name != None:
+                if not Name in self.vmsbyName.keys():
+                    self.vmsbyName[Name] = candidateId[0]
+                else:
+                    if self.vmsbyName[Name] != candidateId[0]:
+                        # Only Over wrie when different
+                        print "Overwrite Name candidateId"
+                        self.vmsbyName[Name] = candidateId[0]
+            if Uuid != None:
+                if not Uuid in self.vmsByUuid.keys():
+                    self.vmsByUuid[Uuid] = candidateId[0]
+                else:
+                    if self.vmsByUuid[Uuid] != candidateId[0]:
+                        # Only Over wrie when different
+                        print "Overwrite Uuid candidateId"
+                        self.vmsByUuid[Uuid] = candidateId[0]
+            
+        
+        
+        lenCandidateName = len(candidateName)
+        #print lenCandidateName
+        if lenCandidateName > 1:
+            print "does this ever1"
+        if lenCandidateName > 0:
+            if ID != None and ID != -1:
+                if not ID in self.vmsbyId.keys():
+                    self.vmsbyId[ID] = candidateName[0]
+                else:
+                    if self.vmsbyId[ID] != candidateName[0]:
+                        # Only Over wrie when different
+                        print "Overwrite ID candidateName"
+                        self.vmsbyId[ID] = candidateName[0]
+                    
+            if Name != None:
+                if not Name in self.vmsbyName.keys():
+                    self.vmsbyName[Name] = candidateName[0]
+                else:
+                    if self.vmsbyName[Name] != candidateName[0]:
+                        # Only Over wrie when different
+                        print "Overwrite Name candidateName"
+                        self.vmsbyName[Name] = candidateName[0]
+                
+            if Uuid != None:
+                
+                if not Uuid in self.vmsByUuid.keys():
+                    self.vmsByUuid[Uuid] = candidateUuid[0]
+                else:
+                    if self.vmsByUuid[Uuid] != candidateName[0]:
+                        # Only Over wrie when different
+                        print "Overwrite Uuid candidateName"
+                        self.vmsByUuid[Uuid] = candidateName[0]
+                
+        candidates = candidateUuid + candidateId + candidateName
+        if len(candidates) > 0:
+            return candidates[0]
+
         return None
 
     def addVM(self,vmModel):
@@ -146,7 +306,7 @@ class vhostMdl:
         if not identifier in self.vmsbyId.keys():
             self.vmsbyId[identifier] = matches
         
-        NewItem.update(self.vmsbyId[identifier])
+        #NewItem.update(self.vmsbyId[identifier])
         
         return self.vmsbyId[identifier]
     
@@ -158,23 +318,23 @@ class vhostMdl:
         validIdentifier = True
         if Uuid == None:
             validIdentifier = False
-            
         matches = self.getVmMatch(NewItem)
+        #print "matches", matches
         if matches == None:
-            #print "fddddddddddddddddddddxxssddddd"
-            #debugVm(NewItem)       
-            self.vmsByUuid[Uuid] = NewItem
+            #debugVm(NewItem)
+            if not validIdentifier:
+                return None
+            if not Uuid in self.vmsByUuid.keys():
+                self.vmsByUuid[Uuid] = NewItem
             matches = self.getVmMatch(NewItem)
+        
         for UuidNow in self.vmsByUuid.keys():
             CurrentUuId = self.vmsByUuid[UuidNow].libvirtUuid.get()
             if CurrentUuId != UuidNow:
-                #print 'naughty',CurrentUuId , UuidNow
-                #debugVm(self.vmsByUuid[UuidNow]) 
-                
                 del self.vmsByUuid[UuidNow]
         if not Uuid in self.vmsByUuid.keys():
             self.vmsByUuid[Uuid] = matches
-        NewItem.update(self.vmsByUuid[Uuid])
+        #NewItem.update(self.vmsByUuid[Uuid])
         self.vmsByUuid[Uuid]
         return self.vmsByUuid[Uuid]
          
@@ -188,6 +348,15 @@ class vhostMdl:
             validIdentifier = False
         matches = self.getVmMatch(NewItem)
         if matches == None:
+            vmModel = vmMdl()
+            
+            #vmModel.libvirtName.update(Name)
+            Uuid = NewItem.libvirtUuid.get()
+            if Uuid != None:
+                vmModel.libvirtUuid.update(Uuid)
+            ID = NewItem.libvirtId.get()
+            if ID != None and ID != -1:
+                vmModel.libvirtId.update(ID)
             #print "fddddddddddddddddddddddddd"
             #debugVm(NewItem)
             if validIdentifier:
@@ -209,7 +378,7 @@ class vhostMdl:
         #print "OldName",OldName,"Name",Name
         if not Name in self.vmsbyName.keys():
             self.vmsbyName[Name] = matches
-        NewItem.update(self.vmsbyName[Name])
+        #NewItem.update(self.vmsbyName[Name])
         return self.vmsbyName[Name]
         
 
@@ -225,6 +394,9 @@ class LibVirtCnt(object):
     def __init__(self,connection,model):
         self.connection  = libvirt.open(str(connection))
         self.model = model
+        # Default time to wait befor assuming Shutdown has failed.
+        self.DefaultsShutdownTimeOut = 180
+        
     def updateModel(self):
         RunningDomains = self.connection.listDomainsID()
         for LibVirtRunningDomainId in RunningDomains:
@@ -244,8 +416,8 @@ class LibVirtCnt(object):
             vmModel = vmMdl()
             vmModel.libvirtName.set(Name)
             self.model.addVM(vmModel)
-        for name in self.model.vmsbyName.keys():
-            hostPtr = self.connection.lookupByName(name)
+        for Name in self.model.vmsbyName.keys():
+            hostPtr = self.connection.lookupByName(Name)
             Uuid = hostPtr.UUIDString()
             #print 'ssssssssss',Uuid
             vmModel = vmMdl()
@@ -261,36 +433,112 @@ class LibVirtCnt(object):
             vmModel.libvirtCpuTime.update(cpuTime)
             self.model.addVM(vmModel)
         
-    def getLibVrtPtr(self,vm):
-        #debugModel(self.model)
-        #print vm.libvirtName.get()
-        #print "getLibVrtPtr",vm.libvirtName.get()
-        vmDetails = self.model.getVmMatch(vm)
-        if vmDetails != None:
-            return vmDetails
-        libvirtId = vm.libvirtId.get()
-        if libvirtId != None:
-            return libvirtId
-        #print 'tong',vm
-        libvirtUuid = vm.libvirtUuid.get()
-        if libvirtUuid != None:
-            return libvirtUuid
-        libvirtName = vm.libvirtName.get()
-        if libvirtName != None:
-            return self.model.vmsbyName[libvirtName]
-        self.conection.updateModel()
-        return None
+    def getLibVrtPtr(self,match):
+        # Match is a VM from one of the lists
+        Uuid = str(match.libvirtUuid.get())
+        if Uuid in self.model.vmsByUuid.keys():
+            #print 'found Uuid',Uuid
+            ptr = self.connection.lookupByUUIDString(Uuid)
+            if ptr != None:
+                return ptr
+        ID = match.libvirtId.get()
+        if ID in self.model.lookupByID.keys():
+            #print 'found ID',ID
+            ptr = self.connection.lookupByID(LibVirtRunningDomainId)
+            if ptr != None:
+                return ptr
+        Name = match.vmsbyName.get()
+        if Name in self.model.vmsbyName.keys():
+            #print 'found Name',Name
+            ptr = self.connection.lookupByName(LibVirtRunningDomainId)
+            if ptr != None:
+                return ptr
+        
     
     def vmStart(self,vm):
-        vmDetails = self.getLibVrtPtr(vm)
-       
+        #debugVm(vm)
+        match = self.model.getVmMatch(vm)
+        if match == None:
+            return None
+        #debugVm(match)
+        self.updateModel()
+        currentState = match.libvirtState.get()
+        #VIR_DOMAIN_NOSTATE= 0: no state
+        #VIR_DOMAIN_RUNNING= 1: the domain is running
+        #VIR_DOMAIN_BLOCKED= 2: the domain is blocked on resource
+        #VIR_DOMAIN_PAUSED= 3: the domain is paused by user
+        #VIR_DOMAIN_SHUTDOWN= 4: the domain is being shut down
+        #VIR_DOMAIN_SHUTOFF= 5: the domain is shut off
+        #VIR_DOMAIN_CRASHED= 6: the domain is crashed
+        if currentState in [1,2]:
+            return match
+        
+        vmDetails = self.getLibVrtPtr(match)
         if vmDetails == None:
-            return
-        #print "here",vmDetails
+            return None
+        MorToBeDone = True
         
+        while MorToBeDone:
+            
+            rc = vmDetails.create()
+            self.updateModel()
+            currentState = match.libvirtState.get()
+            if currentState in [1,2]:
+                break
+            time.sleep(1)
+            if currentState in [1,2]:
+                break
+            
+        #debugVm(vmDetails)
+    def vmStop(self,vm):
+        match = self.model.getVmMatch(vm)
+        if match == None:
+            return None
+        self.updateModel()
+        currentState = match.libvirtState.get()     
+        #VIR_DOMAIN_NOSTATE= 0: no state
+        #VIR_DOMAIN_RUNNING= 1: the domain is running
+        #VIR_DOMAIN_BLOCKED= 2: the domain is blocked on resource
+        #VIR_DOMAIN_PAUSED= 3: the domain is paused by user
+        #VIR_DOMAIN_SHUTDOWN= 4: the domain is being shut down
+        #VIR_DOMAIN_SHUTOFF= 5: the domain is shut off
+        #VIR_DOMAIN_CRASHED= 6: the domain is crashed
+        if not currentState in (1,2,3):
+            return match
+        counter = 0
+        timeout = self.DefaultsShutdownTimeOut
+        vmDetails = self.getLibVrtPtr(match)
+        if vmDetails == None:
+            return None
+   
+        while currentState in (1,2,3):
+            counter += 1
+            if counter < timeout:
+                try:
+                    rc = vmDetails.shutdown()
+                    #print rc
+                except libvirt.libvirtError, E:
+                    currentState = match.libvirtState.get()
+                    print "exception thrownddd" , E
+                    vmDetails = self.getLibVrtPtr(match)
+            else:
+                self.logger.warning("Timed out shutting down domain")
+                counter = 0
+                #print "timed Out"
+                rc = vmDetails.destroy()
+                #print rc
+            
+            time.sleep(1)
+            currentState = match.libvirtState.get()
+            (currentState,maxMem,memory,nrVirtCpu,cpuTime) =  vmDetails.info()
+            #print (currentState,maxMem,memory,nrVirtCpu,cpuTime) 
+            match.libvirtState.update(currentState)
+            match.libvirtMem.update(memory)
+            match.libvirtMaxMem.update(maxMem)
+            match.libvirtNrVirtCpu.update(nrVirtCpu)
+            match.libvirtCpuTime.update(cpuTime)
+                
         
-
-
 def tester(conection,model):
     vmModel = vmMdl()
     vmModel.libvirtName.set(Name)
@@ -392,7 +640,7 @@ class virtualHostContainerLibVirt(cinterface.virtualHostContainer):
                         
     def libvirtImport(self,conection):
        
-        print "libvirtImport",str(conection)
+        #print "libvirtImport",str(conection)
         self.conection = libvirt.open(str(conection))
         mytestmodel = vhostMdl()
         LibvirtUpdate(self.conection,mytestmodel)
