@@ -17,6 +17,20 @@ try:
 except ImportError:
     from elementtree.ElementTree  import Element, SubElement, dump,tostring
 
+# Note this methos may not be needed    
+def VitualHostsList():
+    cmd="xm list | sed -e 's/  */ /g'"
+    (rc,cmdoutput) = commands.getstatusoutput(cmd)
+    output = {}
+    counter = 0
+    for line in cmdoutput.split('\n'):
+        if counter > 0:
+            section = line.split(' ')
+	    if len(section) > 5:
+	        #output[section[0]] = [section[1],section[2],section[3],section[4],section[5],section[6]]
+		output[section[0]] = [section[1],section[2],section[3],section[4],section[5]]
+        counter += 1
+    return output
 
 
 
