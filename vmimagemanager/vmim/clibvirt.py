@@ -53,6 +53,7 @@ class vmMdl:
         libvirtName = self.libvirtName.get()
         if libvirtName != None:
             destination.libvirtName.update(libvirtName)
+        #print libvirtName
         libvirtId = self.libvirtId.get()
         if libvirtId != None:
             destination.libvirtId.update(libvirtId)
@@ -83,6 +84,7 @@ class vhostMdl:
         self.vmsByUuid.addCbPost(self.callbackKey,self._onUuidPost)
 
     def getVmMatch(self,vmModel):
+        
         Uuid = vmModel.libvirtUuid.get()
         if Uuid in self.vmsByUuid:
             return self.vmsByUuid[Uuid]
@@ -90,9 +92,13 @@ class vhostMdl:
         if ID in self.vmsbyId:
             return self.vmsbyId[ID]
         Name = vmModel.libvirtName.get()
+        if Name in self.vmsbyName:
+            return self.vmsbyName[Name]
+        debugVm(vmModel)
         return None
 
     def addVM(self,vmModel):
+        debugVm(vmModel)
         match = self.getVmMatch(vmModel)
         if match != None:
             vmModel.update(match)
@@ -107,62 +113,128 @@ class vhostMdl:
         
     def _onIdPost(self,NewItem):
         identifier = NewItem.libvirtId.get()
-        if identifier != None:
-            match = self.getVmMatch(NewItem)
-            if match != None:
-                NewItem.update(match)
-                return
-            self.vmsbyId[identifier] = NewItem
+        print "_onUuidPost" ,identifier
+        if identifier == None:
             return
-        for key in self.vmsbyId:
-            if self.vmsbyId[key] == NewItem:
-                del self.vmsbyId[key]
+        if not identifier in self.vmsbyId.keys():        
+            self.vmsbyId[identifier] = NewItem
+        NewItem.update(self.vmsbyId[identifier])
+        return self.vmsbyId[identifier]
+    
+    
+        identifier = NewItem.libvirtId.get()
+        if identifier == -1:
+            return
+        print "_onIdPost" ,identifier
+        
+        match = self.getVmMatch(NewItem)
+        if match != None:
+            NewItem.update(match)
+            return
+
+        self.vmsbyId[identifier] = NewItem
+        return
+        
             
     def _onUuidPost(self,NewItem):
         Uuid = NewItem.libvirtUuid.get()
-        if Uuid != None:
-            match = self.getVmMatch(NewItem)
-            if match != None:
-                NewItem.update(match)
-                return
+        print "_onUuidPost" ,Uuid
+        if Uuid == None:
+            return
+        if not Uuid in self.vmsByUuid.keys():        
             self.vmsByUuid[Uuid] = NewItem
-        for key in self.vmsByUuid:
-            if self.vmsByUuid[key] == NewItem:
-                del self.vmsByUuid[key]
+        NewItem.update(self.vmsByUuid[Uuid])
+        return self.vmsByUuid[Uuid]
+         
+
         
     def _onNamePost(self,NewItem):
         Name = NewItem.libvirtName.get()
-        if Name != None:
-            match = self.getVmMatch(NewItem)
-            if match != None:
-                NewItem.update(match)
-                return
+        print "_onNamePost" ,Name
+        if Name == None:
+            return
+        if not Name in self.vmsbyName.keys():
+            print 'ddd' , Name  
             self.vmsbyName[Name] = NewItem
-        for key in self.vmsbyName:
-            if self.vmsbyName[key] == NewItem:
-                del self.vmsbyName[key]
+        NewItem.update(self.vmsbyName[Name])
+        return self.vmsbyName[Name]
+        
+        
+
+class LibVirtConnection:
+    def __init__(self,connectionstring):
+        self.connectionstring = str(connectionstring)
+        self.connection = libvirt.open(self.connectionstring)
+        
+
 
 
 class LibVirtCnt(object):
     def __init__(self,connection,model):
-        self.connection = connection
+        self.connection  = libvirt.open(str(connection))
         self.model = model
-    def getLibVrtPtr(self,vm):
-        vmDetails = self.model.getVmMatch(vm)
-        if vmDetails == None:
-            return None
-        
-        libvirtId = vmDetails.libvirtId.get()
-        if libvirtId != None:
-            print 'ddd;'
+    def updateModel(self):
+        RunningDomains = self.connection.listDomainsID()
+        for LibVirtRunningDomainId in RunningDomains:
+            hostPtr = self.connection.lookupByID(LibVirtRunningDomainId)
+            Name = hostPtr.name()
+            Uuid = hostPtr.UUIDString()
+            ID = hostPtr.ID()
+            vmModel = vmMdl()
+            vmModel.libvirtName.set(Name)
+            vmModel.libvirtUuid.set(Uuid)
+            vmModel.libvirtId.set(ID)
+            self.model.addVM(vmModel)
             
-        libvirtUuid = vmDetails.libvirtUuid.get()
-        libvirtName = vmDetails.libvirtName.get()
-        hostPtr = conection.lookupByName(name)
+        #debugModel(self.model)
+        DefinedDomains = set(self.connection.listDefinedDomains())
+        for Name in DefinedDomains.difference(self.model.vmsbyName.keys()):
+            vmModel = vmMdl()
+            vmModel.libvirtName.set(Name)
+            self.model.addVM(vmModel)
+        for name in self.model.vmsbyName.keys():
+            hostPtr = self.connection.lookupByName(name)
+            Uuid = hostPtr.UUIDString()
+            print 'ssssssssss',Uuid
+            vmModel = vmMdl()
+            ID = hostPtr.ID()
+            vmModel.libvirtName.update(Name)
+            vmModel.libvirtUuid.update(Uuid)
+            vmModel.libvirtId.update(ID)
+            (state,maxMem,memory,nrVirtCpu,cpuTime) =  hostPtr.info()
+            vmModel.libvirtState.update(state)
+            vmModel.libvirtMaxMem.update(maxMem)
+            vmModel.libvirtMem.update(memory)
+            vmModel.libvirtNrVirtCpu.update(nrVirtCpu)
+            vmModel.libvirtCpuTime.update(cpuTime)
+            self.model.addVM(vmModel)
+        
+    def getLibVrtPtr(self,vm):
+        debugModel(self.model)
+        #print vm.libvirtName.get()
+        #print "getLibVrtPtr",vm.libvirtName.get()
+        vmDetails = self.model.getVmMatch(vm)
+        if vmDetails != None:
+            return vmDetails
+        libvirtId = vm.libvirtId.get()
+        if libvirtId != None:
+            return libvirtId
+        #print 'tong',vm
+        libvirtUuid = vm.libvirtUuid.get()
+        if libvirtUuid != None:
+            return libvirtUuid
+        libvirtName = vm.libvirtName.get()
+        if libvirtName != None:
+            return self.model.vmsbyName[libvirtName]
+        self.conection.updateModel()
+        return None
+    
     def vmStart(self,vm):
         vmDetails = self.getLibVrtPtr(vm)
+       
         if vmDetails == None:
             return
+        print "here",vmDetails
         
         
 
@@ -207,14 +279,26 @@ def LibvirtUpdate(conection,model):
         ThisObj.libvirtMem.update(memory)
         ThisObj.libvirtNrVirtCpu.update(nrVirtCpu)
         ThisObj.libvirtCpuTime.update(cpuTime)
-        
+
+
+def debugVm(Vm):
+    message = "debugVm.Name:%s" % Vm.libvirtName.get()
+    Uuid = Vm.libvirtUuid.get()
+    if Uuid != None:
+        message += "\nUuid:%s" % ( Uuid)
+    ID = Vm.libvirtId.get()
+    if ID != None:
+        message += "\nID:%s" % ( Uuid)
+    print message
+
+
 def debugModel(model):
     for item in model.vmsByUuid.keys():
-        print "By UUID %s=%s,%s" % (model.vmsByUuid[item].libvirtName.get(),
+        print "By UUID %s?%s=%s,%s" % (item,model.vmsByUuid[item].libvirtName.get(),
             model.vmsByUuid[item].libvirtUuid.get(),
             model.vmsByUuid[item])
     for item in model.vmsbyName.keys():
-        print "By Name %s=%s" % (model.vmsbyName[item].libvirtName.get(),
+        print "By Name %s?%s=%s" % (item,model.vmsbyName[item].libvirtName.get(),
             model.vmsbyName[item].libvirtUuid.get())
     for item in model.vmsbyId.keys():
         print "By Id %s=%s" % (model.vmsbyId[item].libvirtName.get(),
@@ -254,9 +338,10 @@ class virtualHostContainerLibVirt(cinterface.virtualHostContainer):
                             #print e
                             #raise e
                         
-    def libvirtImport(self):
-        self.VmHostServer
-        self.conection = libvirt.open(str(self.VmHostServer))
+    def libvirtImport(self,conection):
+       
+        print "libvirtImport",str(conection)
+        self.conection = libvirt.open(str(conection))
         mytestmodel = vhostMdl()
         LibvirtUpdate(self.conection,mytestmodel)
         libvirtKnonVms = set(mytestmodel.vmsbyName.keys())
@@ -276,5 +361,6 @@ class virtualHostContainerLibVirt(cinterface.virtualHostContainer):
             libvirtdConnection = self.conection.lookupByName(Name)
             cfgDict["HostName"]  = Name
             fred =  self.virtualHostGenerator(cfgDict)
+        
         
         return True

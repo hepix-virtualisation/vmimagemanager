@@ -16,6 +16,7 @@ import libvirt
 import cdisk
 
 import clock
+
         
 class virtualhost(clock.DiscLocking):
     def __init__(self):

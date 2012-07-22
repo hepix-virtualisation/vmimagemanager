@@ -18,6 +18,8 @@ import cvirthost
 
 import clibvirt
 
+from clibvirt import vmMdl, vhostMdl, LibVirtCnt, LibVirtConnection
+
 
 if __name__ == "__main__":
     pass
@@ -149,18 +151,30 @@ def start():
     if os.path.isfile(ConfigFile):
         lcfg2c = cui.HostContainerLoadConfigFile(HostContainer,ConfigFile)
         if False == lcfg2c:
+            logger.fatal("Error: Configuration File '%s' not read." % (ConfigFile))
             sys.exit(1)
         
     else:
         logger.fatal("Error: Configuration File '%s' not found" % (ConfigFile))
         sys.exit(1)
-    HostContainer.libvirtImport()
+    
+    connectionstring = str(HostContainer.VmHostServer)
+    print connectionstring
+    HostContainer.libvirtImport(connectionstring)
     
     HostContainer.cfgHostsLoad()
     HostContainer.libVirtExport()
     #print "scxxC"
     
+    libvirtHost = vhostMdl()
     
+    lbvtCon = LibVirtConnection(connectionstring)
+    print "connectionstring",connectionstring
+    libvirtControl = LibVirtCnt(connectionstring,libvirtHost)
+    vmtostart = vmMdl()
+    vmtostart.libvirtName.set("debianTesting")
+    libvirtControl.updateModel()
+    libvirtControl.vmStart(vmtostart)
     
     #print "cxxC"
     
