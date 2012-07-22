@@ -78,23 +78,29 @@ class vhostMdl:
     def __init__(self):
         self.callbackKey = GenKey()
         self.vmsbyName = ObservableDict()
-        self.vmsbyName.addCbPost(self.callbackKey,self._onNamePost)
         self.vmsbyId = ObservableDict()
         self.vmsByUuid = ObservableDict()
-        self.vmsByUuid.addCbPost(self.callbackKey,self._onUuidPost)
+        
 
     def getVmMatch(self,vmModel):
-        
         Uuid = vmModel.libvirtUuid.get()
-        if Uuid in self.vmsByUuid:
-            return self.vmsByUuid[Uuid]
+        if Uuid != None:
+            if Uuid in self.vmsByUuid:
+                return self.vmsByUuid[Uuid]
+            else:
+                return None
         ID = vmModel.libvirtId.get()
-        if ID in self.vmsbyId:
-            return self.vmsbyId[ID]
+        if ID != None and ID != -1:
+            if ID in self.vmsbyId:
+                return self.vmsbyId[ID]
+            else:
+                return None
         Name = vmModel.libvirtName.get()
-        if Name in self.vmsbyName:
-            return self.vmsbyName[Name]
-        debugVm(vmModel)
+        if Name != None:
+            if Name in self.vmsbyName:
+                return self.vmsbyName[Name]
+            else:
+                return None
         return None
 
     def addVM(self,vmModel):
@@ -113,52 +119,95 @@ class vhostMdl:
         
     def _onIdPost(self,NewItem):
         identifier = NewItem.libvirtId.get()
-        print "_onUuidPost" ,identifier
+        validIdentifier = True
         if identifier == None:
-            return
-        if not identifier in self.vmsbyId.keys():        
+            validIdentifier = False
+        if identifier == -1:
+            validIdentifier = False
+        #print "_onIdPdddddddddddddost" ,identifier
+        matches = self.getVmMatch(NewItem)
+        if matches == None:
+            #print "fddddddddddddddddddddxxssddddd"
+            #debugVm(NewItem)   
             self.vmsbyId[identifier] = NewItem
+            matches = self.vmsbyId[identifier]
+        OldId = matches.libvirtId.get()
+        
+        if OldId != None:
+            #print 'herere;',debugVm(matches)
+            if OldId != identifier:
+                if OldId in self.vmsbyId.keys():
+                    if validIdentifier:
+                        self.vmsbyId[identifier] = self.vmsbyId[OldId]
+                    del self.vmsbyId[OldId]
+        if not validIdentifier:
+            return None
+          
+        if not identifier in self.vmsbyId.keys():
+            self.vmsbyId[identifier] = matches
+        
         NewItem.update(self.vmsbyId[identifier])
+        
         return self.vmsbyId[identifier]
     
-    
-        identifier = NewItem.libvirtId.get()
-        if identifier == -1:
-            return
-        print "_onIdPost" ,identifier
-        
-        match = self.getVmMatch(NewItem)
-        if match != None:
-            NewItem.update(match)
-            return
-
-        self.vmsbyId[identifier] = NewItem
-        return
         
             
     def _onUuidPost(self,NewItem):
         Uuid = NewItem.libvirtUuid.get()
-        print "_onUuidPost" ,Uuid
+        #print "_onUuidPost" ,Uuid
+        validIdentifier = True
         if Uuid == None:
-            return
-        if not Uuid in self.vmsByUuid.keys():        
+            validIdentifier = False
+            
+        matches = self.getVmMatch(NewItem)
+        if matches == None:
+            #print "fddddddddddddddddddddxxssddddd"
+            debugVm(NewItem)       
             self.vmsByUuid[Uuid] = NewItem
+            matches = self.getVmMatch(NewItem)
+        for UuidNow in self.vmsByUuid.keys():
+            CurrentUuId = self.vmsByUuid[UuidNow].libvirtUuid.get()
+            if CurrentUuId != UuidNow:
+                print 'naughty',CurrentUuId , UuidNow
+                debugVm(self.vmsByUuid[UuidNow]) 
+                debugVm(self.vmsByUuid[UuidNow]) 
+                del self.vmsByUuid[UuidNow]
+        if not Uuid in self.vmsByUuid.keys():
+            self.vmsByUuid[Uuid] = matches
         NewItem.update(self.vmsByUuid[Uuid])
+        self.vmsByUuid[Uuid]
         return self.vmsByUuid[Uuid]
          
 
         
     def _onNamePost(self,NewItem):
         Name = NewItem.libvirtName.get()
-        print "_onNamePost" ,Name
+        #print "_onNamePost" ,Name
+        validIdentifier = True
         if Name == None:
-            return
-        if not Name in self.vmsbyName.keys():
-            print 'ddd' , Name  
+            validIdentifier = False
+        matches = self.getVmMatch(NewItem)
+        if matches == None:
+            #print "fddddddddddddddddddddddddd"
+            debugVm(NewItem)
             self.vmsbyName[Name] = NewItem
+            matches = self.vmsbyName[Name]
+        OldName = matches.libvirtName.get()
+        if OldName != None:
+            #print 'herere;',debugVm(matches)
+            if OldName != Name:
+                if OldName in self.vmsbyName.keys():
+                    if validIdentifier:
+                        self.vmsbyName[Name] = self.vmsbyName[OldName]
+                    del self.vmsbyName[OldName]
+        if not validIdentifier:
+            return None
+                
+        #print "OldName",OldName,"Name",Name
+        if not Name in self.vmsbyName.keys():
+            self.vmsbyName[Name] = matches
         NewItem.update(self.vmsbyName[Name])
         return self.vmsbyName[Name]
-        
         
 
 class LibVirtConnection:
@@ -181,9 +230,9 @@ class LibVirtCnt(object):
             Uuid = hostPtr.UUIDString()
             ID = hostPtr.ID()
             vmModel = vmMdl()
-            vmModel.libvirtName.set(Name)
-            vmModel.libvirtUuid.set(Uuid)
-            vmModel.libvirtId.set(ID)
+            vmModel.libvirtName.update(Name)
+            vmModel.libvirtUuid.update(Uuid)
+            vmModel.libvirtId.update(ID)
             self.model.addVM(vmModel)
             
         #debugModel(self.model)
@@ -234,7 +283,7 @@ class LibVirtCnt(object):
        
         if vmDetails == None:
             return
-        print "here",vmDetails
+        #print "here",vmDetails
         
         
 
@@ -288,7 +337,7 @@ def debugVm(Vm):
         message += "\nUuid:%s" % ( Uuid)
     ID = Vm.libvirtId.get()
     if ID != None:
-        message += "\nID:%s" % ( Uuid)
+        message += "\nID:%s" % ( ID)
     print message
 
 
@@ -301,8 +350,8 @@ def debugModel(model):
         print "By Name %s?%s=%s" % (item,model.vmsbyName[item].libvirtName.get(),
             model.vmsbyName[item].libvirtUuid.get())
     for item in model.vmsbyId.keys():
-        print "By Id %s=%s" % (model.vmsbyId[item].libvirtName.get(),
-            model.vmsbyId[item].libvirtUuid.get())
+        print "By Id %s?%s=%s" % (item,model.vmsbyId[item].libvirtName.get(),
+            model.vmsbyId[item].libvirtId.get())
 
 class virtualHostContainerLibVirt(cinterface.virtualHostContainer):
     def __init__(self):
