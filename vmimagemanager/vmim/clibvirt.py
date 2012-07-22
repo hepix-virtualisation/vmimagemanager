@@ -113,6 +113,10 @@ class vhostMdl:
                 NewItem.update(match)
                 return
             self.vmsbyId[identifier] = NewItem
+            return
+        for key in self.vmsbyId:
+            if self.vmsbyId[key] == NewItem:
+                del self.vmsbyId[key]
             
     def _onUuidPost(self,NewItem):
         Uuid = NewItem.libvirtUuid.get()
@@ -122,6 +126,9 @@ class vhostMdl:
                 NewItem.update(match)
                 return
             self.vmsByUuid[Uuid] = NewItem
+        for key in self.vmsByUuid:
+            if self.vmsByUuid[key] == NewItem:
+                del self.vmsByUuid[key]
         
     def _onNamePost(self,NewItem):
         Name = NewItem.libvirtName.get()
@@ -131,6 +138,9 @@ class vhostMdl:
                 NewItem.update(match)
                 return
             self.vmsbyName[Name] = NewItem
+        for key in self.vmsbyName:
+            if self.vmsbyName[key] == NewItem:
+                del self.vmsbyName[key]
 
 def tester(conection,model):
     vmModel = vmMdl()
@@ -173,7 +183,7 @@ def LibvirtUpdate(conection,model):
         ThisObj.libvirtNrVirtCpu.update(nrVirtCpu)
         ThisObj.libvirtCpuTime.update(cpuTime)
         
-    
+def debugModel(model):
     for item in model.vmsByUuid.keys():
         print "By UUID %s=%s,%s" % (model.vmsByUuid[item].libvirtName.get(),
             model.vmsByUuid[item].libvirtUuid.get(),
@@ -224,36 +234,22 @@ class virtualHostContainerLibVirt(cinterface.virtualHostContainer):
         self.conection = libvirt.open(str(self.VmHostServer))
         mytestmodel = vhostMdl()
         LibvirtUpdate(self.conection,mytestmodel)
-        
-        
-        
-        
-        
-        
-        
-        #print "libvirtImport" + str(dir(self.conection))
-        #print self.conection.listDevices()
-        #print self.conection.listDomainsID()
-        self.KnownHosts = []
-        libVirtNames = self.conection.listDefinedDomains()
-        #print "libVirtNames=%s"  % (libVirtNames)
+        libvirtKnonVms = set(mytestmodel.vmsbyName.keys())
+        #print libvirtKnonVms.difference(self.hostlist)
+        #print len(self.hostlist)
         TmpHostNames = []
         for libVritId in self.hostlist:
             TmpHostNames.append(libVritId.HostName)
-        #print "TmpHostNames" + str(TmpHostNames)
-         
-        for Name in libVirtNames:
-            if not Name in TmpHostNames:
-                cfgDict = {}
-                cfgDict["Connection"] = self.conection
-                #if has(libVritId
-                #sif not libVritId
-                libvirtdConnection = self.conection.lookupByName(Name)
-                cfgDict["HostName"]  = Name
-                fred =  self.virtualHostGenerator(cfgDict)
-                #print fred
-                #Host.libvirtObj = libvirt.open(self.VmHostServer)
-                #print "sdfsfhjkf"
-                #self.hostlist.append(Host)
-            #print len(self.hostlist)
+        
+        
+        for Name in libvirtKnonVms.difference(TmpHostNames):
+            cfgDict = {}
+            cfgDict["Connection"] = self.conection
+            #if has(libVritId
+            #sif not libVritId
+            
+            libvirtdConnection = self.conection.lookupByName(Name)
+            cfgDict["HostName"]  = Name
+            fred =  self.virtualHostGenerator(cfgDict)
+        
         return True
