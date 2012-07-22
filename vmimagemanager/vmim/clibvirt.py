@@ -21,7 +21,11 @@ from observable import GenKey, Observable, ObservableDict
 
 class vmMdl:
     def __init__(self):
+        # Three indexable ways
         self.libvirtName = Observable(None)
+        self.libvirtId = Observable(None)
+        self.libvirtUuid = Observable(None)
+        
         #VIR_DOMAIN_NOSTATE= 0: no state
         #VIR_DOMAIN_RUNNING= 1: the domain is running
         #VIR_DOMAIN_BLOCKED= 2: the domain is blocked on resource
@@ -30,23 +34,98 @@ class vmMdl:
         #VIR_DOMAIN_SHUTOFF= 5: the domain is shut off
         #VIR_DOMAIN_CRASHED= 6: the domain is crashed
         self.libvirtState = Observable(0)
+        self.libvirtMem = Observable(None)
         self.libvirtMaxMem = Observable(None)
         self.libvirtNrVirtCpu = Observable(None)
         self.libvirtCpuTime = Observable(None)
-        self.libvirtId = Observable(None)
-        self.libvirtUuid = Observable(None)
         
+    def assign(self,destination):
+        destination.libvirtName.update(self.libvirtName.get())
+        destination.libvirtId.update(self.libvirtId.get())
+        destination.libvirtUuid.update(self.libvirtUuid.get())
+        destination.libvirtState.update(self.libvirtState.get())
+        destination.libvirtMem.update(self.libvirtMem.get())
+        destination.libvirtMaxMem.update(self.libvirtMaxMem.get())
+        destination.libvirtNrVirtCpu.update(self.libvirtNrVirtCpu.get())
+        destination.libvirtCpuTime.update(self.libvirtCpuTime.get())
+        
+    def update(self,destination):
+        libvirtName = self.libvirtName.get()
+        if libvirtName != None:
+            destination.libvirtName.update(libvirtName)
+        libvirtId = self.libvirtId.get()
+        if libvirtId != None:
+            destination.libvirtId.update(libvirtId)
+        libvirtUuid = self.libvirtUuid.get()
+        if libvirtUuid != None:
+            destination.libvirtUuid.update(libvirtUuid)
+        libvirtState = self.libvirtState.get()
+        if libvirtState != None:
+            destination.libvirtState.update(libvirtState)
+        libvirtMaxMem = self.libvirtId.get()
+        if libvirtMaxMem != None:
+            destination.libvirtMaxMem.update(libvirtMaxMem)
+        libvirtNrVirtCpu = self.libvirtNrVirtCpu.get()
+        if libvirtNrVirtCpu != None:
+            destination.libvirtNrVirtCpu.update(libvirtNrVirtCpu)
+        libvirtCpuTime = self.libvirtCpuTime.get()
+        if libvirtId != None:
+            destination.libvirtCpuTime.update(libvirtCpuTime)
+        
+       
 class vhostMdl:
     def __init__(self):
+        self.callbackKey = GenKey()
         self.vmsbyName = ObservableDict()
+        self.vmsbyName.addCbPost(self.callbackKey,self._onNamePost)
         self.vmsbyId = ObservableDict()
         self.vmsByUuid = ObservableDict()
+        self.vmsByUuid.addCbPost(self.callbackKey,self._onUuidPost)
+
+    def getVmMatch(self,vmModel):
+        Uuid = vmModel.libvirtUuid.get()
+        if Uuid in self.vmsByUuid:
+            return self.vmsByUuid[Uuid]
+        ID = vmModel.libvirtId.get()
+        if ID in self.vmsbyId:
+            return self.vmsbyId[ID]
+        Name = vmModel.libvirtName.get()
+        return None
+
+    def addVM(self,vmModel):
+        print 'sssssssssssssssssssss'
+        match = self.getVmMatch(vmModel)
+        if match != None:
+            vmModel.update(match)
+            return match
+        print 'sdasdasdasdasd'
+        newOne = vmMdl()
         
+        newOne.libvirtUuid.addCallback(self.callbackKey,self._onUuidPost)
+        vmModel.update(newOne)
+        return newOne
+        
+        
+        
+    def _onUuidPost(self,key):
+        print "DfddddddddddddddfD"
+    def _onNamePost(self,key):
+        print 'dsdddddddddddddd'
+        if key in self.vmsbyName.keys():
+            print "can find out more"
+
+
+def tester(conection,model):
+    vmModel = vmMdl()
+    vmModel.libvirtName.set(Name)
+    model.vmsbyName[Name] = vmModel
+
+    
 def LibvirtUpdate(conection,model):
+    
     RunningDomains = conection.listDomainsID()
     for LibVirtRunningDomainId in RunningDomains:
         hostPtr = conection.lookupByID(LibVirtRunningDomainId)
-        print dir(hostPtr)
         Name = hostPtr.name()
         Uuid = hostPtr.UUIDString()
         ID = hostPtr.ID()
@@ -54,19 +133,40 @@ def LibvirtUpdate(conection,model):
         vmModel.libvirtName.set(Name)
         vmModel.libvirtUuid.set(Uuid)
         vmModel.libvirtId.set(ID)
-        model.vmsbyName[Name] = vmModel
-        model.vmsbyId[ID] = vmModel
-        model.vmsByUuid[Uuid] = vmModel
+        model.addVM(vmModel)
         
     DefinedDomains = set(conection.listDefinedDomains())
     for Name in DefinedDomains.difference(model.vmsbyName.keys()):
         vmModel = vmMdl()
         vmModel.libvirtName.set(Name)
-        model.vmsbyName[Name] = vmModel
+        model.addVM(vmModel)
     for name in model.vmsbyName.keys():
         hostPtr = conection.lookupByName(name)
+        Uuid = hostPtr.UUIDString()
+        
+        ID = hostPtr.ID()
+        ThisObj = model.vmsbyName[name]
+        ThisObj.libvirtName.update(Name)
+        ThisObj.libvirtUuid.update(Uuid)
+        print "Uuid",Uuid
+        ThisObj.libvirtId.update(ID)
         (state,maxMem,memory,nrVirtCpu,cpuTime) =  hostPtr.info()
-        vmModel.libvirtState.update(state)
+        ThisObj.libvirtState.update(state)
+        ThisObj.libvirtMaxMem.update(maxMem)
+        ThisObj.libvirtMem.update(memory)
+        ThisObj.libvirtNrVirtCpu.update(nrVirtCpu)
+        ThisObj.libvirtCpuTime.update(cpuTime)
+        
+    for item in model.vmsByUuid.keys():
+        print "By UUID %s=%s,%s" % (model.vmsByUuid[item].libvirtName.get(),
+            model.vmsByUuid[item].libvirtUuid.get(),
+            model.vmsByUuid[item])
+    for item in model.vmsbyName.keys():
+        print "By Name %s=%s" % (model.vmsbyName[item].libvirtName.get(),
+            model.vmsbyName[item].libvirtUuid.get())
+    for item in model.vmsbyId.keys():
+        print "By Id %s=%s" % (model.vmsbyId[item].libvirtName.get(),
+            model.vmsbyId[item].libvirtUuid.get())
 
 class virtualHostContainerLibVirt(cinterface.virtualHostContainer):
     def __init__(self):
@@ -82,9 +182,7 @@ class virtualHostContainerLibVirt(cinterface.virtualHostContainer):
                 if not hasattr(self.hostlist[x],"libvirtObj"):
                     self.hostlist[x].libvirtObj = self.conection.lookupByName(self.hostlist[x].HostName)
             except libvirt.libvirtError, e:
-                #print "errot=%s" %(e)
                 if (e.get_error_code() == 42):
-                    #print "sdfDSF"
                     self.hostlist[x].cfgApply()
                     self.hostlist[x].RealiseDevice()
                     

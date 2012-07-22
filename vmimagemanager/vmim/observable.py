@@ -40,6 +40,7 @@ class Observable:
 class ObservableDict( UserDict.DictMixin):
     def __init__(self):
         self._dict = {}
+        self.callbacks = {}
 
     def __getitem__(self, item):
         self.callbacks = {}
@@ -47,26 +48,29 @@ class ObservableDict( UserDict.DictMixin):
             raise KeyError("Item '%s' does not exist" % item)
         return self._dict[item]
         
-    def addCallback(self, key, func):
+    def addCbPost(self, key, func):
+        
         self.callbacks[key] = func
-
-    def delCallback(self, key):
+        print self,self.callbacks
+    def delCbPost(self, key):
         del self.callback[key]
     
-    def _docallbacks(self,key):
+    def _doCbPost(self,key):
+        print "doingcallbacks for" ,self, self.callbacks
         for func in self.callbacks:
-            self.callbacks[func]()
+            print 'ssss'
+            self.callbacks[func](key)
 
     def __setitem__(self, item, value):
         if item in self:
             del self[item]
         self._dict[item] = value
-        self._docallbacks(item)
+        self._doCbPost(item)
 
     def __delitem__(self, item):
         if not item in self._dict:
             raise KeyError("Item '%s' does not exist" % item)
-        self._docallbacks(item)
+        self._doCbPost(item)
 
     def keys(self):
         return self._dict.keys()
