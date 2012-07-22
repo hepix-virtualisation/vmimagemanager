@@ -142,6 +142,31 @@ class vhostMdl:
             if self.vmsbyName[key] == NewItem:
                 del self.vmsbyName[key]
 
+
+class LibVirtCnt(object):
+    def __init__(self,connection,model):
+        self.connection = connection
+        self.model = model
+    def getLibVrtPtr(self,vm):
+        vmDetails = self.model.getVmMatch(vm)
+        if vmDetails == None:
+            return None
+        
+        libvirtId = vmDetails.libvirtId.get()
+        if libvirtId != None:
+            print 'ddd;'
+            
+        libvirtUuid = vmDetails.libvirtUuid.get()
+        libvirtName = vmDetails.libvirtName.get()
+        hostPtr = conection.lookupByName(name)
+    def vmStart(self,vm):
+        vmDetails = self.getLibVrtPtr(vm)
+        if vmDetails == None:
+            return
+        
+        
+
+
 def tester(conection,model):
     vmModel = vmMdl()
     vmModel.libvirtName.set(Name)
