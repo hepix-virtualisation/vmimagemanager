@@ -69,7 +69,7 @@ class virtualhost(clock.DiscLocking):
                 if Field in self.DcgDict.keys():
                     FoundFields.append(Field)
             if len(FoundFields) == 0:
-                self.logger.debug("%s has teh following fields set %s" % (self.DcgDict["HostName"]),FoundFields)
+                self.logger.debug("%s has the following fields set %s" % (self.DcgDict["HostName"],FoundFields))
             for Field in FoundFields:
                 if ("HostRootSpace" in self.DcgDict.keys()):
                     self.logger.warning("%s has incomplete disk settings."% (self.DcgDict["HostName"]))
