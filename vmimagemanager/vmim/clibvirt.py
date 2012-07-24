@@ -436,42 +436,6 @@ def tester(conection,model):
     vmModel.libvirtName.set(Name)
     model.vmsbyName[Name] = vmModel
 
-    
-def LibvirtUpdate(conection,model):
-    
-    RunningDomains = conection.listDomainsID()
-    for LibVirtRunningDomainId in RunningDomains:
-        hostPtr = conection.lookupByID(LibVirtRunningDomainId)
-        Name = hostPtr.name()
-        Uuid = hostPtr.UUIDString()
-        ID = hostPtr.ID()
-        vmModel = vmMdl()
-        vmModel.libvirtName.set(Name)
-        vmModel.libvirtUuid.set(Uuid)
-        vmModel.libvirtId.set(ID)
-        model.addVM(vmModel)
-        
-    DefinedDomains = set(conection.listDefinedDomains())
-    for Name in DefinedDomains.difference(model.vmsbyName.keys()):
-        vmModel = vmMdl()
-        vmModel.libvirtName.set(Name)
-        model.addVM(vmModel)
-    for name in model.vmsbyName.keys():
-        hostPtr = conection.lookupByName(name)
-        Uuid = hostPtr.UUIDString()
-        vmModel = vmMdl()
-        ID = hostPtr.ID()
-        ThisObj = model.vmsbyName[name]
-        ThisObj.libvirtName.update(Name)
-        ThisObj.libvirtUuid.update(Uuid)
-        ThisObj.libvirtId.update(ID)
-        (state,maxMem,memory,nrVirtCpu,cpuTime) =  hostPtr.info()
-        ThisObj.libvirtState.update(state)
-        ThisObj.libvirtMaxMem.update(maxMem)
-        ThisObj.libvirtMem.update(memory)
-        ThisObj.libvirtNrVirtCpu.update(nrVirtCpu)
-        ThisObj.libvirtCpuTime.update(cpuTime)
-
 
 def debugVm(Vm):
     message = "debugVm.Name:%s" % Vm.libvirtName.get()
@@ -530,12 +494,14 @@ class virtualHostContainerLibVirt(cinterface.virtualHostContainer):
                             #print e
                             #raise e
                         
-    def libvirtImport(self,conection):
+    def libvirtImport(self,conectionStr):
        
         #print "libvirtImport",str(conection)
-        self.conection = libvirt.open(str(conection))
+        
+        self.conection = libvirt.open(str(conectionStr))
         mytestmodel = vhostMdl()
-        LibvirtUpdate(self.conection,mytestmodel)
+        libvirtCon = LibVirtCnt(conectionStr,mytestmodel)
+        libvirtCon.updateModel()
         libvirtKnonVms = set(mytestmodel.vmsbyName.keys())
         #print libvirtKnonVms.difference(self.hostlist)
         #print len(self.hostlist)
@@ -549,8 +515,10 @@ class virtualHostContainerLibVirt(cinterface.virtualHostContainer):
             cfgDict["Connection"] = self.conection
             #if has(libVritId
             #sif not libVritId
-            
-            libvirtdConnection = self.conection.lookupByName(Name)
+            model = vmMdl()
+            model.libvirtName.update(Name)
+            match = mytestmodel.getVmMatch(model)
+            libvirtdConnection = libvirtCon.getLibVrtPtr(match)
             cfgDict["HostName"]  = Name
             fred =  self.virtualHostGenerator(cfgDict)
         
