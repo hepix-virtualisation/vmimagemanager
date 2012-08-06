@@ -17,6 +17,8 @@ import cdisk
 
 import clock
 
+
+from vmctrlfacade import diskFacade
         
 class virtualhost(clock.DiscLocking):
     def __init__(self):
@@ -37,6 +39,7 @@ class virtualhost(clock.DiscLocking):
         self.DcgDict = {}
         
         
+        
     def __init__(self,properties):
         self.logger = logging.getLogger("vmimagemanager.virtualhost")
         self.DcgDict = {}
@@ -53,13 +56,14 @@ class virtualhost(clock.DiscLocking):
     def RealiseDevice(self):
         found = False
         if ("HostRootSpace" in self.DcgDict.keys()) and ("HostSwapSpace" in self.DcgDict.keys()):
-            self.logger.debug("sebug=%s" % (self.DcgDict))
+            self.logger.error("sebug=%s" % (self.DcgDict))
             self.DiskSubsystem = cdisk.VirtualHostDiskPartitionsShared(self.DcgDict)
             
             found = True
             #self.logger.debug("setting  self.DiskSubsystem %s to VirtualHostDiskPartitionsShared" % self.HostName)
             
         if ("HostDisk" in self.DcgDict.keys()) and ("HostPartition" in self.DcgDict.keys()):
+            print 'sdfsdfsdf'
             self.DiskSubsystem = cdisk.VirtualHostDiskKpartx(self.DcgDict)
             found = True
             #self.logger.debug("setting  self.DiskSubsystem %s to " % self.HostName)        

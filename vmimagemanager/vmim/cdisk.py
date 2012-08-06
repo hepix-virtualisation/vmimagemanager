@@ -19,7 +19,7 @@ except ImportError:
 
 
 
-
+from vmctrlfacade import diskFacade
 
 
 
@@ -140,6 +140,16 @@ class VirtualHostDiskKpartx(VirtualHostDiskPartitionsShared):
         self.HostPartition = int(properties["HostPartition"])
         self.HostDisk = properties["HostDisk"]
         self.CanMount = True
+        
+        
+        self.df = diskFacade()
+        self.df.disk = 'kpartx'
+        self.df.path = properties["HostDisk"]
+        self.df.target = properties["MountPoint"]
+        self.df.partitionNo = int(properties["HostPartition"])
+        
+        
+        
     def GetPartitionList(self):
         pass
     def MountIs(self):
