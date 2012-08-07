@@ -1,15 +1,11 @@
-import os
-import logging, logging.config
-import commands
-
-class vmStoreTgz(object):
+class vmStoreCpiobz(object):
     def __init__(self):
-        self.log = logging.getLogger("vmStoreTgz.vmStoreTgz") 
-    
+        self.log = logging.getLogger("vmStoreCpiobz.vmStoreCpiobz") 
+     
     def imageStore(self,diskFacade,storeName):
-        
+        self.log.error("NOT IMPLEMENETED")
         diskFacade.mount()
-        cmd = "tar -zcspf %s/%s --exclude=lost+found -C %s ." % (self.storePath,storeName,diskFacade.target)
+        cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/%s/" % (diskFacade.target,self.storePath,storeName)
         self.log.debug("running command %s" % ( cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
@@ -21,6 +17,7 @@ class vmStoreTgz(object):
         self.log.debug("ran command.")
         return True
     def imageRestore(self,diskFacade,storeName):
+        self.log.error("NOT IMPLEMENETED")
         foundImages = self.imageList()
         if not storeName in foundImages:
             self.log.error("Image '%s' not found" % (storeName))
@@ -29,7 +26,7 @@ class vmStoreTgz(object):
         diskFacade.clear()
         diskFacade.mount()
         ImageName = os.path.join(self.storePath,storeName)
-        cmd = "tar -zxf %s --exclude=lost+found   -C %s" % (ImageName,diskFacade.target)   
+        cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,diskFacade.target)
         self.log.debug('cmd=%s' % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
@@ -41,6 +38,8 @@ class vmStoreTgz(object):
         return True
     def imageList(self):
         output = []
+        if self.storePath == None:
+            return output
         if not os.path.isdir(self.storePath):
             self.log.warning("Store Path '%s' does not exist",self.storePath)
         else:

@@ -6,6 +6,7 @@ import logging
 
 from vmstoreTgz import vmStoreTgz
 from vmStoreRsync import vmStoreRsync
+from vmStoreCpiobz import vmStoreCpiobz
 def Property(func):
     return property(**func())
 

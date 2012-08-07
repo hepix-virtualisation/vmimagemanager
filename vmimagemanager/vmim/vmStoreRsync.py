@@ -19,7 +19,7 @@ class vmStoreRsync(object):
             self.log.error(message)
             return rc
         self.log.debug("ran command.")
-
+        return True
     def imageRestore(self,diskFacade,storeName):
         foundImages = self.imageList()
         if not storeName in foundImages:
