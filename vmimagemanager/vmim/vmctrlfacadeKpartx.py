@@ -15,7 +15,7 @@ class diskMounterKpartX(diskMounterBaseClass):
     def __init__(self):
         diskMounterBaseClass.__init__(self)
         self.requireAtribs = set(['_target','_partitionNo','_path'])
-        self.logger = logging.getLogger("vmimagemanager.VirtualHostDiskpartitionNoNoNosShared") 
+        self.logger = logging.getLogger("vmimagemanager.diskMounterKpartX") 
         self.HostRootSpace = None
         
     @Property
@@ -111,10 +111,7 @@ class diskMounterKpartX(diskMounterBaseClass):
         correct = None
         #self.logger.debug("DiskPartitionD=%s" % (DiskPartitionD))
         for item in DiskPartitionD:
-        
-            #print item['Number']
-            if int(item['Number']) == self.partitionNo:
-                
+            if int(item['Number']) == self.partitionNo:    
                 correct = item
         if correct == None:
             partitionList = []
@@ -179,7 +176,7 @@ class diskMounterKpartX(diskMounterBaseClass):
             currentState += 2
         
         if currentState != oldState:
-            self.log.info("statechange=%s->%s" % (oldState,currentState))
+            self.log.debug("statechange=%s->%s" % (oldState,currentState))
             self.state.set(currentState)
         return currentState    
     
