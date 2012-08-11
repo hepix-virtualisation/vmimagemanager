@@ -1,6 +1,7 @@
 from observable import Observable
 from diskMounterAbstract import diskMounterBaseClass
 from vmctrlfacadeKpartx import diskMounterKpartX
+from vmDiskLvm import diskMounterLvm
 import types
 
 import logging
@@ -9,7 +10,6 @@ import logging
 
 def Property(func):
     return property(**func())
-
 
 
 
@@ -33,6 +33,8 @@ class diskFacade(object):
             self._diskName = name
             if name == "kpartx":
                 self._uploaderImp = diskMounterKpartX()
+            elif name == "lvm":
+                self._uploaderImp = diskMounterLvm()
             else:
                 del(self._uploaderImp)
             if hasattr(self, '_uploaderImp'):
@@ -131,11 +133,70 @@ class diskFacade(object):
         def fdel(self):
             del self._partitionNo
         return locals()
-    
 
-    def __init__(self) :
-        pass
+    @Property
+    def lvmVolume():
+        doc = "The LvmRaw on the file system to be mounted"
+        def fget(self):
+            if hasattr(self, '_uploaderImp'):
+                if self._uploaderImp != None:
+                    if hasattr(self._uploaderImp,'lvmVolume'):
+                        return self._uploaderImp.lvmVolume
+                    else:
+                        return None
+            return self._lvmVolume
+
+        def fset(self, lvmVolume):
+            self._lvmVolume = lvmVolume
+            if hasattr(self, '_uploaderImp'):
+                if self._uploaderImp != None:
+                    self._uploaderImp.lvmVolume = lvmVolume
+        def fdel(self):
+            del self._lvmVolume
+        return locals()
     
+    @Property
+    def lvmSnapShot():
+        doc = "The lvmSnapShot on the file system to be mounted"
+        def fget(self):
+            if hasattr(self, '_uploaderImp'):
+                if self._uploaderImp != None:
+                    if hasattr(self._uploaderImp,'lvmSnapShot'):
+                        return self._uploaderImp.lvmSnapShot
+                    else:
+                        return None
+            return self._lvmSnapShot
+
+        def fset(self, lvmSnapShot):
+            self._lvmSnapShot = lvmSnapShot
+            if hasattr(self, '_uploaderImp'):
+                if self._uploaderImp != None:
+                    self._uploaderImp.lvmSnapShot = lvmSnapShot
+        def fdel(self):
+            del self._lvmSnapShot
+        return locals()
+        
+    @Property
+    def lvmVolumeGroup():
+        doc = "The LVM Volume Group that we are using."
+        def fget(self):
+            if hasattr(self, '_uploaderImp'):
+                if self._uploaderImp != None:
+                    if hasattr(self._uploaderImp,'lvmVolumeGroup'):
+                        return self._uploaderImp.lvmVolumeGroup
+                    else:
+                        return None
+            return self._lvmVolumeGroup
+
+        def fset(self, lvmVolumeGroup):
+            self._lvmVolumeGroup = lvmVolumeGroup
+            if hasattr(self, '_uploaderImp'):
+                if self._uploaderImp != None:
+                    self._uploaderImp.lvmVolumeGroup = lvmVolumeGroup
+        def fdel(self):
+            del self._lvmVolumeGroup
+        return locals()
+
     def mount(self):
         self.readMtab()
         if hasattr(self, '_uploaderImp'):
@@ -189,11 +250,17 @@ if __name__ == "__main__" :
     import time
     logging.basicConfig(level=logging.DEBUG)
     df = diskFacade()
-    df.disk = 'kpartx'
-    df.path = '/var/lib/libvirt/images/lenny.img'
-    df.target = "/tmp/foo"
-    df.partitionNo = 1
+    #df.disk = 'kpartx'
+    #df.path = '/var/lib/libvirt/images/lenny.img'
+    #df.target = "/tmp/foo"
+    #df.partitionNo = 1
+    
     #print df.partitionNo
+    df = diskFacade()
+    df.disk = 'lvm'
+    df.lvmVolumeGroup = 'fusion'
+    df.lvmVolume = 'first'
+    df.target = "/mnt/first"
     
     df.mount()
     # Backgroun processes occure in the kernel, to make linux more useable,
