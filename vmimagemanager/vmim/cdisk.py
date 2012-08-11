@@ -19,7 +19,7 @@ except ImportError:
 
 
 
-from vmctrlfacade import diskFacade
+from vmDisk import diskFacade
 
 
 

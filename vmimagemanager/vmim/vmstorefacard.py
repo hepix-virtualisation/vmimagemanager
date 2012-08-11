@@ -80,7 +80,7 @@ class vmStoreFacade(object):
     
 if __name__ == "__main__" :
     import time
-    from vmctrlfacade import diskFacade
+    from vmDisk import diskFacade
     logging.basicConfig(level=logging.DEBUG)
     
     df = diskFacade()

@@ -18,7 +18,7 @@ import cdisk
 import clock
 
 
-from vmctrlfacade import diskFacade
+from vmDisk import diskFacade
         
 class virtualhost(clock.DiscLocking):
     def __init__(self):
