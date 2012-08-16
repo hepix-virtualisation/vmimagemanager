@@ -45,7 +45,7 @@ class lvmControl:
             self.logger.warning(' Cant mount The Disk "%s" has no partitons' % (self.path))
             return False
         Keys = ouputLines[0].split('vmDiskLm')
-        self.logger.debug( 'Keys=%s' % (Keys))
+        #self.logger.debug( 'Keys=%s' % (Keys))
         lenKeys = len(Keys)
         foundlist = []
         for i in range(1,ouputLinesLen):
