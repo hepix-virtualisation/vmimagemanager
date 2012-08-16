@@ -13,7 +13,7 @@ def Property(func):
 
 diskTypes = { "tgz" : vmStoreTgz ,
     'rsync' : vmStoreRsync,
-    'cpioZ' : vmStoreCpiobz}
+    'cpio.bz' : vmStoreCpiobz}
 
 
 
@@ -80,10 +80,13 @@ class vmStoreFacade(object):
     
 if __name__ == "__main__" :
     import time
+    import sys
     from vmDisk import diskFacade
     logging.basicConfig(level=logging.DEBUG)
     
     df = diskFacade()
+    
+    
     df.disk = 'kpartx'
     df.path = '/var/lib/libvirt/images/lenny.img'
     
@@ -92,6 +95,17 @@ if __name__ == "__main__" :
     df.readMtab()
     
     sf = vmStoreFacade()
+    
+    sf.storeFormat = 'cpio.bz'
+    sf.storePath = '/server/store'
+    sf.imageStore(df,'fred.cpio.bz')
+    df.readMtab()
+    sf.imageRestore(df,'fred.cpio.bz')
+    df.readMtab()
+    df.release()
+    #sys.exit(1)
+    
+    
     sf.storeFormat = 'rsync'
     sf.storePath = '/server/store'
     print sf.imageList()
