@@ -35,8 +35,6 @@ class vmStoreCpiobz(object):
             return
         diskFacade.clear()
         diskFacade.mount()
-        ImageName = os.path.join(self.storePath,storeName)
-        cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,diskFacade.target)
         targetPath = os.path.join(self.storePath,storeName)
         cmd = "cd %s; bzcat %s |cpio -i" % (diskFacade.target,targetPath)
         self.log.debug('cmd=%s' % (cmd))
