@@ -26,7 +26,6 @@ class vmStoreRsync(object):
             self.log.error("Image '%s' not found" % (storeName))
             self.log.error("These images exist '%s'" % (foundImages))
             return
-        diskFacade.clear()
         diskFacade.mount()
         ImageName = os.path.join(self.storePath,storeName)
         cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,diskFacade.target)
