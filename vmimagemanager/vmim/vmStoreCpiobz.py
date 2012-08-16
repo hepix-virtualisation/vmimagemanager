@@ -1,11 +1,22 @@
+from diskMounterAbstract import diskMounterBaseClass
+import os
+import logging, logging.config
+import commands
+import sys
+
+import string
+
+
 class vmStoreCpiobz(object):
     def __init__(self):
         self.log = logging.getLogger("vmStoreCpiobz.vmStoreCpiobz") 
      
     def imageStore(self,diskFacade,storeName):
-        self.log.error("NOT IMPLEMENETED")
         diskFacade.mount()
-        cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/%s/" % (diskFacade.target,self.storePath,storeName)
+        targetPath = os.path.join(self.storePath,storeName)
+        #cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/%s/" % (diskFacade.target,self.storePath,storeName)
+        #cmd = "tar -zcspf %s/%s --exclude=lost+found -C %s ." % (self.storePath,storeName,diskFacade.target)
+        cmd = "cd %s; find . -print |cpio -o -Hnewc |bzip2 -9 -z -q -f > %s" % (diskFacade.target,targetPath)
         self.log.debug("running command %s" % ( cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
@@ -17,7 +28,6 @@ class vmStoreCpiobz(object):
         self.log.debug("ran command.")
         return True
     def imageRestore(self,diskFacade,storeName):
-        self.log.error("NOT IMPLEMENETED")
         foundImages = self.imageList()
         if not storeName in foundImages:
             self.log.error("Image '%s' not found" % (storeName))
@@ -27,6 +37,8 @@ class vmStoreCpiobz(object):
         diskFacade.mount()
         ImageName = os.path.join(self.storePath,storeName)
         cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,diskFacade.target)
+        targetPath = os.path.join(self.storePath,storeName)
+        cmd = "cd %s; bzcat %s |cpio -i" % (diskFacade.target,targetPath)
         self.log.debug('cmd=%s' % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
