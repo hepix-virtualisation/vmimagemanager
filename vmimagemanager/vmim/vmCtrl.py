@@ -1,7 +1,7 @@
 import logging, logging.config
 from observable import GenKey, Observable, ObservableDict
 
-
+from vmDisk import diskFacade
 
 import ConfigParser
 
@@ -11,6 +11,7 @@ from ConfigModel import vmModel , mainModel
 
 from ConfigFileView import ConfigFile1
             
+import vmstorefacard
 
 class vmStoreManager(object):
     def __init__(self,cfgModel):
@@ -29,8 +30,6 @@ class vmState(object):
         print (host,action)
         inputs = vmMdl()
         inputs.libvirtName.set(host)
-        
-        #ptr = self.libVirtControler.getLibVrtPtr(inputs)
         if action in ["kill"]:
             self.libVirtControler.Kill(inputs)
         if action in ["extract","insert","store","restore","down"]:
@@ -38,8 +37,17 @@ class vmState(object):
         if action in ["extract"]:
             self.diskModelByHostName.Extract(inputs)
         if action in ["store"]:
-            print 'here'
-            
+            print 'here',self.cfgModel
+            df = diskFacade()
+            df.disk = 'kpartx'
+            df.path = '/var/lib/libvirt/images/lenny.img'
+
+            df.target = "/tmp/foo"
+            df.partitionNo = 1
+            df.readMtab()
+            sf.imageStore(df,'fred.rsync')
+            df.readMtab()
+            sf = vmStoreFacade()
             #self.diskModelByHostName.StoreHost(inputs)
         if action in ["restore"]:
             self.diskModelByHostName.RestoreHost(inputs)
