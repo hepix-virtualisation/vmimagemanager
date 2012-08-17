@@ -380,8 +380,8 @@ class LibVirtCnt(object):
             time.sleep(1)
             if currentState in [1,2]:
                 break
-            
-        #debugVm(vmDetails)
+
+
     def vmStop(self,vm):
         match = self.model.getVmMatch(vm)
         if match == None:
