@@ -1,5 +1,4 @@
 import logging, logging.config
-# I shoudl make my own GenKeyFunction Later
 from observable import GenKey, Observable, ObservableDict
 import ConfigParser, os
 
@@ -8,32 +7,9 @@ from ConfigParserJson import jsonConfigParser
 
 import ConfigParser
 
+from clibvirt import vmMdl, vhostMdl, LibVirtCnt, LibVirtConnection
 
-
-class vmModel(object):
-    def __init__(self):
-        self.CfgHostName = Observable(None)
-        self.CfgRoot = Observable(None)
-        self.CfgSwap = Observable(None)
-        self.CfgMountPoint = Observable(None)
-        self.CfgMac = Observable(None)
-        self.CfgDiskImage = Observable(None)
-        self.CfgDiskImagePartition = Observable(None)
-        self.CfgListed = Observable(None)
-class mainModel(object):
-    def __init__(self):
-        
-        self.libvirtConStr = Observable(None)
-        
-        self.defaultPathExtracts = Observable(None)
-        self.defaultPathImages = Observable(None)
-        self.defaultPathMount = Observable(None)
-        self.vmbyName = ObservableDict()
-        
-    
-
-
-
+from ConfigModel import vmModel , mainModel
 
 
 
@@ -307,7 +283,7 @@ class vmControl(object):
         self.log = logging.getLogger("vmStoreRsync.vmStoreRsync") 
         self.mainModel = mainModel()
         self.mainModel.libvirtConStr.addCallback(self.callbackKey,self._onlibvirtConStr)
-        
+        self.libVirtModel = vhostMdl()
         
         
     def setConectionString(self):
@@ -319,13 +295,15 @@ class vmControl(object):
         config = ConfigFile1(self.mainModel)
         return config.upDateModel(configfile)
     
-    def LoadlibVirt(self,conString):
-        print "ddddd"
         
     def _onlibvirtConStr(self):
-        print "onlibvirtConStr",self.mainModel.libvirtConStr.get()
+        connectionStr = self.mainModel.libvirtConStr.get()
+        self.libVirtControler = LibVirtCnt(connectionStr,self.libVirtModel)
+        self.libVirtControler.updateModel()
+        
+        #libvirtKnonVmsName = set(self.libVirtModel.vmsbyName.keys())
     
-                
+
 
 if __name__ == "__main__" :
     logging.basicConfig(level=logging.DEBUG)
