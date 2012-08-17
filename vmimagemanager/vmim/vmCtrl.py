@@ -3,28 +3,11 @@ import logging, logging.config
 from observable import GenKey, Observable, ObservableDict
 import ConfigParser, os
 
+
+from ConfigParserJson import jsonConfigParser
+
 import ConfigParser
 
-import sys
-
-if float(sys.version[:3]) >= 2.6:
-    import json
-else:
-    # python 2.4 or 2.5 can also import simplejson
-    # as working alternative to the json included.
-    import simplejson as json
-
-class jsonConfigParser(ConfigParser.SafeConfigParser):
-    def __init__(self):
-        self.log = logging.getLogger("vmCtrl.jsonConfigParser")
-        ConfigParser.SafeConfigParser.__init__(self)
-    def getJson(self,section,option):
-        value = self.get(section,option)
-        try:
-            return json.loads(value)
-        except ValueError:
-            self.log.warning("Could not parse value from section '%s' and key '%s'" % (SectionVm,option))
-            return None
 
 
 class vmModel(object):
@@ -36,20 +19,18 @@ class vmModel(object):
         self.CfgMac = Observable(None)
         self.CfgDiskImage = Observable(None)
         self.CfgDiskImagePartition = Observable(None)
-
+        self.CfgListed = Observable(None)
 class mainModel(object):
     def __init__(self):
-        self.callbackKey = GenKey()
+        
         self.libvirtConStr = Observable(None)
-        self.libvirtConStr.addCallback(self.callbackKey,self._onlibvirtConStr)
-
+        
         self.defaultPathExtracts = Observable(None)
         self.defaultPathImages = Observable(None)
         self.defaultPathMount = Observable(None)
         self.vmbyName = ObservableDict()
         
-    def _onlibvirtConStr(self):
-        print "onlibvirtConStr"
+    
 
 
 
@@ -299,18 +280,22 @@ class ConfigFile1(object):
         
          # Now process the vms 
         ReadVmSet = set(ReadVmList)
-       
+        
         vmSections = []
         
         for section in configurationSections:
             if section[:8] == u'vmim.vm.':
                 vmSections.append(section)
+        CfgVmList = []
         for sectrion in vmSections:
             enabled = sectrion in ReadVmSet
             result = _upDateModelVm(self,sectrion,config)
-            print result
-            
-            
+            if result != None:
+                self.model.vmbyName[result].CfgListed.update(enabled)
+                CfgVmList.append(result)
+        CfgVmSet = set(CfgVmList)
+        print "a" ,CfgVmSet.difference(CfgVmList)
+        print "b" ,ReadVmSet.difference(CfgVmSet)
             
             
             
@@ -318,10 +303,13 @@ class ConfigFile1(object):
 
 class vmControl(object):
     def __init__(self):
+        self.callbackKey = GenKey()
         self.log = logging.getLogger("vmStoreRsync.vmStoreRsync") 
         self.mainModel = mainModel()
+        self.mainModel.libvirtConStr.addCallback(self.callbackKey,self._onlibvirtConStr)
         
-    
+        
+        
     def setConectionString(self):
         libvirtCon = LibVirtCnt(conectionStr,mytestmodel)
         libvirtCon.updateModel()
@@ -331,6 +319,11 @@ class vmControl(object):
         config = ConfigFile1(self.mainModel)
         return config.upDateModel(configfile)
     
+    def LoadlibVirt(self,conString):
+        print "ddddd"
+        
+    def _onlibvirtConStr(self):
+        print "onlibvirtConStr",self.mainModel.libvirtConStr.get()
     
                 
 
@@ -338,4 +331,4 @@ if __name__ == "__main__" :
     logging.basicConfig(level=logging.DEBUG)
     Control = vmControl()
     Control.LoadConfigCfg('vmimagemanager.cfg')
-    
+    print Control.mainModel.vmbyName[u'hudson-slave-vm01.desy.de'].CfgMountPoint.get()
