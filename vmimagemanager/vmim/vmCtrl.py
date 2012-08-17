@@ -12,12 +12,64 @@ from ConfigModel import vmModel , mainModel
 from ConfigFileView import ConfigFile1
             
 
+class vmStoreManager(object):
+    def __init__(self,cfgModel):
+        self.cfgModel = cfgModel
+        
+
+
 class vmState(object):
     def __init__(self,libVirtControler,cfgModel):
         self.libVirtControler = libVirtControler
         self.cfgModel = cfgModel
-    def wibble(self):
-        print 'dddd'
+        self.ActionMappings = {'release' : self.actionRelease}
+        self.diskModelByHostName = {}
+    def _processAction(self,host,action):
+        self.updateDiskModelByHostName()
+        print (host,action)
+        inputs = vmMdl()
+        inputs.libvirtName.set(host)
+        
+        #ptr = self.libVirtControler.getLibVrtPtr(inputs)
+        if action in ["kill"]:
+            self.libVirtControler.Kill(inputs)
+        if action in ["extract","insert","store","restore","down"]:
+            self.libVirtControler.vmStop(inputs)
+        if action in ["extract"]:
+            self.diskModelByHostName.Extract(inputs)
+        if action in ["store"]:
+            print 'here'
+            
+            #self.diskModelByHostName.StoreHost(inputs)
+        if action in ["restore"]:
+            self.diskModelByHostName.RestoreHost(inputs)
+        if action in ["insert"]:
+            self.diskModelByHostName.Insert()
+        if action in ["extract","insert","store","restore","up"]:
+            self.libVirtControler.vmStart(inputs)
+        
+    def process(self,instructions):
+        
+        for host in instructions['hostdetails']:
+            for action in instructions['actions']:
+                
+                    self._processAction(instructions['hostdetails'][host],action)
+
+    def updateDiskModelByHostName(self):
+        self.libVirtControler.updateModel()
+        self.HostsSetlibvirt = set(self.libVirtControler.model.vmsbyName.keys())
+        self.HostsSetlibvirt = set(self.cfgModel.vmbyName.keys())
+        
+        
+        chgSet = set(self.cfgModel.vmbyName.keys())
+        setToAdded = set(self.cfgModel.vmbyName.keys())
+        
+        print "chgSet",        chgSet
+    def actionRelease(self,host):
+        self.updateDiskModelByHostName()
+        print host
+        print self.diskModelByHostName   
+            
 
 class vmControl(object):
     def __init__(self):
@@ -41,7 +93,8 @@ class vmControl(object):
     def Process(self,instructions):
         if not 'vmControl' in instructions.keys():
             return False
-        ProcessState = vmState(self.libVirtControler,self.cfgModel)
+        self.ProcessState = vmState(self.libVirtControler,self.cfgModel)
+        self.ProcessState.process(instructions['vmControl'])
         return True
 
 
@@ -51,7 +104,17 @@ if __name__ == "__main__" :
     Control.LoadConfigCfg('vmimagemanager.cfg')
     print Control.cfgModel.vmbyName[u'hudson-slave-vm01.desy.de'].CfgMountPoint.get()
     instructions = { 'vmControl' : { 'actions' : ['release','up'],
-        'hosts' : ['vmname'],
+        'hostdetails' : {
+            'vmname' : { 'storeName' : 'vmControlTest' }
+            },
+     }
+    }
+    Control.Process(instructions)
+    instructions = { 'vmControl' : { 'actions' : ['down','store'],
+        'format' : ['rsync'],
+        'hostdetails' : {
+            'vmname' : { 'storeName' : 'vmControlTest' }
+            },
      }
     }
     Control.Process(instructions)
