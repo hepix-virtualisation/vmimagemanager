@@ -20,8 +20,6 @@ import cinterface
 
 import cvirthost
 
-import clibvirt
-
 
 #for line in file('vmimagemanager.dict'):
 #    cfg = eval(line)
