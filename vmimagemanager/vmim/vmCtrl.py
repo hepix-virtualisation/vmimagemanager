@@ -33,7 +33,7 @@ class StorageControler(object):
         if hostname in matchset:
             return self.diskFacardDict[hostname]
         return None
-    def storeBy(self,hostname,storename):
+    def store(self,hostname,storename):
         self.UpdateFromModel()
         hostDetails = diskFacade()
         hostDetails.disk = self.cfgModel.vmbyName[hostname].CfgDiskType.get()
@@ -41,7 +41,7 @@ class StorageControler(object):
         hostDetails.target = self.cfgModel.vmbyName[hostname].CfgMountPoint.get()
         hostDetails.partitionNo = self.cfgModel.vmbyName[hostname].CfgDiskImagePartition.get()
         self.Storage.imageStore(hostDetails,storename)
-        print 'ddd'
+        
     def release(self,hostname):
         hostDetails = diskFacade()
         hostDetails.disk = self.cfgModel.vmbyName[hostname].CfgDiskType.get()
@@ -80,7 +80,7 @@ class vmState(object):
             self.StorageCntl.Storage.storeFormat = hostInfo[hostName]['storeFormat']
             
             
-            self.StorageCntl.storeBy(hostName,hostInfo[hostName]['storeName'])
+            self.StorageCntl.store(hostName,hostInfo[hostName]['storeName'])
             
         if action in ["restore"]:
             self.diskModelByHostName.RestoreHost(inputs)
