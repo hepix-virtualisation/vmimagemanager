@@ -13,11 +13,11 @@ class vmModel(object):
         self.CfgDiskImage = Observable(None)
         self.CfgDiskImagePartition = Observable(None)
         self.CfgListed = Observable(None)
+        self.CfgDiskType = Observable(None)
 
 
 
-
-class mainModel(object):
+class CfgModel(object):
     def __init__(self):
         self.libvirtConStr = Observable(None)        
         self.defaultPathExtracts = Observable(None)
