@@ -20,8 +20,9 @@ class diskFacade(object):
     Should be robust for setting the impleemntation or attributes
     in any order."""
     def __init__(self):
-        self._uploaderImp = None
-
+        self._target = None
+        self._path = None
+        
     @Property
     def disk():
         doc = "diskFacade type"
