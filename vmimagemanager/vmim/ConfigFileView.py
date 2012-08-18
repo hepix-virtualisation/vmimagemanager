@@ -3,7 +3,7 @@ from ConfigParserJson import jsonConfigParser
 
 import os
 
-from ConfigModel import vmModel , mainModel
+from ConfigModel import vmModel , CfgModel
 
 class ConfigFile1(object):
     def __init__(self,model):
@@ -152,6 +152,7 @@ class ConfigFile1(object):
             self.model.vmbyName[DefaultHostName].CfgMac.update(DefnitionMac)
             self.model.vmbyName[DefaultHostName].CfgDiskImage.update(DefnitionDiskImage)
             self.model.vmbyName[DefaultHostName].CfgDiskImagePartition.update(DefnitionDiskImagePartition)
+            self.model.vmbyName[DefaultHostName].CfgDiskType.update(DefnitionDiskType)
             return DefaultHostName
             
             
