@@ -133,7 +133,7 @@ class diskMounterKpartX(diskMounterBaseClass):
             self.logger.error('Failed "%s"' % (cmd))
             self.logger.error(cmdoutput)
             self.logger.error('Return Code=%s' % (rc))
-            sys.exit(1)
+            return rc
         rc = self._parseKpartxOutput(cmdoutput)
         self.mounted.mounted(self.HostRootSpace,self.target)
         return rc
