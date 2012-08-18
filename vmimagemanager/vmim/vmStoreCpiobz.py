@@ -12,7 +12,12 @@ class vmStoreCpiobz(object):
         self.log = logging.getLogger("vmStoreCpiobz.vmStoreCpiobz") 
      
     def imageStore(self,diskFacade,storeName):
+        if self.storePath == None:
+            self.log.error("storePath not set")
+            return False
         diskFacade.mount()
+        
+            
         targetPath = os.path.join(self.storePath,storeName)
         #cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/%s/" % (diskFacade.target,self.storePath,storeName)
         #cmd = "tar -zcspf %s/%s --exclude=lost+found -C %s ." % (self.storePath,storeName,diskFacade.target)
