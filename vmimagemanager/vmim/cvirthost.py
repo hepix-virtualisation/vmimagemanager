@@ -63,7 +63,6 @@ class virtualhost(clock.DiscLocking):
             #self.logger.debug("setting  self.DiskSubsystem %s to VirtualHostDiskPartitionsShared" % self.HostName)
             
         if ("HostDisk" in self.DcgDict.keys()) and ("HostPartition" in self.DcgDict.keys()):
-            print 'sdfsdfsdf'
             self.DiskSubsystem = cdisk.VirtualHostDiskKpartx(self.DcgDict)
             found = True
             #self.logger.debug("setting  self.DiskSubsystem %s to " % self.HostName)        
