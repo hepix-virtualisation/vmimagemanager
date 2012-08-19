@@ -8,46 +8,6 @@ from __version__ import version
 def usage():
     print "usage"
 
-def start():
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.INFO)
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    
-    ch.setFormatter(formatter)
-    #add ch to logger
-    
-    logging.basicConfig(level=logging.WARNING)
-    vmimlog = logging.getLogger("vmimagemanager")
-    #vmimlog.setLevel(logging.DEBUG)
-    vmimlog.addHandler(ch)
-    
-    InstallPrefix="/"
-
-    ConfigFile = ""
-
-    Fillocations = ['/etc/vmimagemanager/vmimagemanager.cfg']
-
-    for fileName in Fillocations:
-	    if True == os.path.isfile(fileName):
-		    ConfigFile = fileName
-		    break
-    if len(ConfigFile) == 0:
-	    ConfigFile = Fillocations[0]
-    logger = logging.getLogger("vmimagemanager")
-    
-    #create formatter
-    debugFileName = None
-    #logging.config.fileConfig("logging.conf")
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "b:s:r:e:i:c:D:C:udlLhvkzypfm", ["box=", "store=","restore=","extract=","insert=","config=","cpu","up","down","list-boxes","list-images","help","version","kill","tgz",c,"rsync","print-config","free","locked"])
-    except :
-        usage()
-        logger.error('Command line option error')
-        sys.exit(1)
-    
-
-
-
 
 
 def main():
@@ -70,7 +30,7 @@ def main():
     p.add_option('-z', '--tgz', action ='store_true',help='Logfile configuration file.', metavar='LOGFILE')
     p.add_option('-y', '--rsync', action ='store_true',help='Event application to launch.', metavar='EVENT')
     p.add_option('-w', '--cpio-bzip', action ='store_true',help='Event application to launch.', metavar='EVENT')
-    
+    p.add_option('--lvm', action ='store_true',help='Event application to launch.', metavar='EVENT')
     p.add_option('-o', '--print-config', action ='append',help='Export File.', metavar='OUTPUTFILE')
     p.add_option('--logfile', action ='store',help='Logfile configuration file.', metavar='LOGFILE')
     
@@ -80,7 +40,10 @@ def main():
     # OptionValues
     logFile = None
     actions = set()
+    actionsrequiring_selections = set([])
+    cmdFormatOptions = set([])
     ConfigurationFilePath = '/etc/vmimagemanager/vmimagemanager.cfg'
+    
     
     DefaultConfigurationPath = None
     if 'VMIM_CFG' in os.environ:
@@ -123,16 +86,21 @@ def main():
         store = options.store
     if options.list_boxes:
         store = options.store
+        actions.add("list_images")
     if options.list_images:
         store = options.store
+        actions.add("list_images")
     if options.kill:
         store = options.store
     if options.tgz:
         store = options.store
+        cmdFormatOptions.add("tar_gz")
     if options.rsync:
         store = options.store
+        cmdFormatOptions.add("rsync")
     if options.cpio_bzip:
         store = options.store
+        cmdFormatOptions.add("cpio_bzip")
     if options.print_config:
         store = options.store
 
@@ -143,42 +111,20 @@ def main():
     if len(actions) > 1:
         log.error("More than one action selected.")
         sys.exit(1)
-    if format_needed and len(output_format_selected) == 0:
-        log.error("No output format selected")
-        sys.exit(1)
 
-    # 1.1 Initate DB
-    database = db_controler(databaseConnectionString)
-    # 1.2 Set up callbacks
-    if eventExecutionString != None:
-        EventInstance = EventObj(eventExecutionString)
-        database.callbackEventImageNew = EventInstance.eventImageNew
-    
-    # 2 Initate CA's to manage files
-    if anchor_needed:
-        if certDir == None:
-            certDir = "/etc/grid-security/certificates/"
-            log.info("Defaulting Certificate directory to '%s'" % (certDir))
-        database.setup_trust_anchor(certDir)
+
 
     # Handle conflicting actions
     actions_req_sel = actionsrequiring_selections.intersection(actions)
 
     actions_req_sel_len = len(actions_req_sel)
     if actions_req_sel_len == 1:
-        if len(subscriptions_selected) == 0:
-            log.error('No selections made.')
-            sys.exit(1)
+        log.error('No selections made.')
+        sys.exit(1)
     if actions_req_sel_len > 1:
         log.error('Conflicting functions.')
         sys.exit(1)
     # Handle conflicting identifiers
-
-    selectors_types = inputformats.intersection(input_format_selected)
-    selectors_types_len = len(selectors_types)
-    if selectors_types_len > 1:
-        log.error('Conflicting selectors.')
-        sys.exit(1)
 
 
 

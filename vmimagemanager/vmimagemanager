@@ -5,6 +5,6 @@
 ##
 ##So, you don't need anything special - no fancy path tricks.
 
-import vmim.vmimagemanager
+import vmim.cmCmdLine
 
-vmim.vmimagemanager.start()
+vmim.cmCmdLine.main()
