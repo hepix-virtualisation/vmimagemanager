@@ -85,7 +85,7 @@ class vmState(object):
         
     def _processAction(self,hostInfo,action):
         self.updateDiskModelByHostName()
-        print 'xxxxxxxxxx',hostInfo,action
+        #print 'xxxxxxxxxx',hostInfo,action
         inputs = vmMdl()
         keys = hostInfo.keys()
         #print keys
