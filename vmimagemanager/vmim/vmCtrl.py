@@ -49,6 +49,14 @@ class StorageControler(object):
         hostDetails.target = self.cfgModel.vmbyName[hostname].CfgMountPoint.get()
         hostDetails.partitionNo = self.cfgModel.vmbyName[hostname].CfgDiskImagePartition.get()
         hostDetails.release()
+    def listImages(self):
+        output = {}
+        # Dirty hack shodul check each host get its image list and merge.
+        StoreFacade = vmStoreFacade()
+        StoreFacade.storePath = self.cfgModel.defaultPathImages.get()
+        StoreFacade.storeFormat = "rsync"
+        
+        return StoreFacade.imageList()
 
 class vmState(object):
     actionsReqBoxes = set(['up','down','store','restore','extract','insert','kill'])
@@ -94,13 +102,32 @@ class vmState(object):
         if action in ["extract","insert","store","restore","up"]:
             self.StorageCntl.release(hostName)
             self.libVirtControler.vmStart(inputs)
+    def _processBoxesList(self):
+        output = {}
+        for item in self.libVirtControler.model.vmsbyName.keys():
+            output[item] = {'libVirtName' : item}
+        return {'listBox' : output }
+    def _processImageList(self):
+        output = {'listImages' : self.StorageCntl.listImages()}
+        
+        return output
+        
         
     def process(self,instructions):
-        
-        
-        for host in instructions['hostdetails'].keys():
-            for action in instructions['actions']:
-                
+        reqStats = self.actionsReqStats.intersection(instructions['actions'])
+        lenReqStats = len(reqStats)
+        if lenReqStats > 0:
+            #print "reqStats",reqStats
+            if 'list_boxes' in reqStats:
+                return self._processBoxesList()
+            if 'list_images' in reqStats:
+                return self._processImageList()
+        reqBoxes = self.actionsReqBoxes.intersection(instructions['actions'])
+        lenReqBoxes = len(reqBoxes)
+        if lenReqBoxes > 0:
+            output = {}
+            for host in instructions['hostdetails'].keys():
+                for action in instructions['actions']:
                     self._processAction({ host :instructions['hostdetails'][host]},action)
 
     def updateDiskModelByHostName(self):
@@ -112,7 +139,7 @@ class vmState(object):
         chgSet = set(self.cfgModel.vmbyName.keys())
         setToAdded = set(self.cfgModel.vmbyName.keys())
         
-        print "chgSet",        chgSet
+        #print "chgSet",        chgSet
        
 
 class vmControl(object):
@@ -136,13 +163,13 @@ class vmControl(object):
 
     def Process(self,instructions):
         if not isinstance( instructions, dict ):
-            return False
+            return None
         if not 'vmControl' in instructions.keys():
-            return False
+            return None
         ting = StorageControler(self.cfgModel)
         self.ProcessState = vmState(self.libVirtControler,self.cfgModel,ting)
-        self.ProcessState.process(instructions['vmControl'])
-        return True
+        return {'vmControl' : self.ProcessState.process(instructions['vmControl'])}
+        
 
 
 if __name__ == "__main__" :
