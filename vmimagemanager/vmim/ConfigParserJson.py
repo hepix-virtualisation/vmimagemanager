@@ -19,5 +19,5 @@ class jsonConfigParser(ConfigParser.SafeConfigParser):
         try:
             return json.loads(value)
         except ValueError:
-            self.log.warning("Could not parse value from section '%s' and key '%s'" % (SectionVm,option))
+            self.log.warning("Could not parse json value from section '%s' and key '%s'" % (section,option))
             return None
