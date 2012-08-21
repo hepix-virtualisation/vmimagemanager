@@ -263,8 +263,6 @@ class ConfigFile1(object):
                 self.model.vmbyName[result].CfgListed.update(enabled)
                 CfgVmList.append(result)
         CfgVmSet = set(CfgVmList)
-        print "a" ,CfgVmSet.difference(CfgVmList)
-        print "b" ,ReadVmSet.difference(CfgVmSet)
             
             
             
