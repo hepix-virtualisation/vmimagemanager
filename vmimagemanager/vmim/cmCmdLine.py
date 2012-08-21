@@ -114,7 +114,7 @@ def main():
     if options.rsync:
         cmdFormatOptions.add("rsync")
     if options.cpio_bzip:
-        cmdFormatOptions.add("cpio.bz")
+        cmdFormatOptions.add("cpio.bz2")
     if options.print_config:
         print_config = True
 

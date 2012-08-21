@@ -13,7 +13,7 @@ def Property(func):
 
 diskTypes = { "tgz" : vmStoreTgz ,
     'rsync' : vmStoreRsync,
-    'cpio.bz' : vmStoreCpiobz}
+    'cpio.bz2' : vmStoreCpiobz}
 
 
 
@@ -32,7 +32,6 @@ class vmStoreFacade(object):
             return self._diskName
 
         def fset(self, storeFormat):
-            print storeFormat
             self._storeFormat = storeFormat
             if storeFormat in diskTypes.keys():
                 self._uploaderImp = diskTypes[storeFormat]()
@@ -98,11 +97,11 @@ if __name__ == "__main__" :
     
     sf = vmStoreFacade()
     
-    sf.storeFormat = 'cpio.bz'
+    sf.storeFormat = 'cpio.bz2'
     sf.storePath = '/server/store'
-    sf.imageStore(df,'fred.cpio.bz')
+    sf.imageStore(df,'fred.cpio.bz2')
     df.readMtab()
-    sf.imageRestore(df,'fred.cpio.bz')
+    sf.imageRestore(df,'fred.cpio.bz2')
     df.readMtab()
     df.release()
     #sys.exit(1)

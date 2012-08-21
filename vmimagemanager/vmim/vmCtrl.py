@@ -67,7 +67,7 @@ class StorageControler(object):
         StoreFacade = vmStoreFacade()
         for path in pthInfo.keys():
             StoreFacade.storePath = path
-            for format in ["rsync",'cpio.bz',"tgz"]:
+            for format in ["rsync",'cpio.bz2',"tgz"]:
                 StoreFacade.storeFormat = format
                 foundImages = StoreFacade.imageList()
                 pthInfo[pth]['images'][format] = foundImages
@@ -207,7 +207,7 @@ if __name__ == "__main__" :
         'hostdetails' : {
             'vmname' : { 'storeName' : 'vmControlTest.cpio.bz2' ,
                 'libVirtName' : 'vmname',
-                'storeFormat' : 'cpio.bz',}
+                'storeFormat' : 'cpio.bz2',}
             },
      }
     }
