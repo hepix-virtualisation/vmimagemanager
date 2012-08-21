@@ -51,12 +51,28 @@ class StorageControler(object):
         hostDetails.release()
     def listImages(self):
         output = {}
-        # Dirty hack shodul check each host get its image list and merge.
+        availablepaths = set()
+        pthInfo = {}
+        allHosts = self.cfgModel.vmbyName.keys()
+        if len(allHosts) == 0:
+            availablepaths.add(self.cfgModel.defaultPathImages.get())
+            pthInfo[self.cfgModel.defaultPathImages.get()] = []
+        for host in allHosts:
+            availablepaths.add(self.cfgModel.vmbyName[host].CfgPathImages.get())
+            pth = self.cfgModel.vmbyName[host].CfgPathImages.get()
+            if not pth in pthInfo.keys():
+                pthInfo[pth] = { 'hosts' : [], 'images' : {}}
+            pthInfo[pth]['hosts'].append(host)
+        pathImages = {}
         StoreFacade = vmStoreFacade()
-        StoreFacade.storePath = self.cfgModel.defaultPathImages.get()
-        StoreFacade.storeFormat = "rsync"
-        
-        return StoreFacade.imageList()
+        for path in pthInfo.keys():
+            StoreFacade.storePath = path
+            for format in ["rsync",'cpio.bz',"tgz"]:
+                StoreFacade.storeFormat = format
+                foundImages = StoreFacade.imageList()
+                pthInfo[pth]['images'][format] = foundImages
+        return pthInfo
+
 
 class vmState(object):
     actionsReqBoxes = set(['up','down','store','restore','extract','insert','kill'])
