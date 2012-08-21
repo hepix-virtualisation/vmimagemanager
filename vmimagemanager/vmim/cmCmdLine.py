@@ -210,7 +210,7 @@ def main():
             }
         }
 
-    Control.Process(instructions)
+    print Control.Process(instructions)
 
 if __name__ == "__main__":
     main()
