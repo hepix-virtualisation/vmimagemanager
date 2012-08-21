@@ -133,6 +133,29 @@ def main():
     if (lenActions_req_sel > 0) and (lenBoxes == 0):
         log.error('Box selections are reqired with these actions:%s.', string.join(actionsReqBoxes,','))
         sys.exit(1)
+    
+    
+    
+    availableBoxes = []
+    if lenBoxes > 0:
+        instructions = {'vmControl': {
+            'actions': ['list_boxes'],
+            'hostdetails': {},
+            }
+        }
+        boxStruct = Control.Process(instructions)
+        print "boxStruct",boxStruct
+        setOfBoxes = set()
+        for key in boxStruct['vmControl']['listBox'].keys():
+            name = boxStruct['vmControl']['listBox'][key]['libVirtName']
+            setOfBoxes.add(name)
+        for ThisBox in box:
+            if ThisBox in setOfBoxes:
+                availableBoxes.append(ThisBox)
+            else:
+                log.error("Ignoring actions for unregistered box '%s'" % (ThisBox))    
+        
+    lenAvailableBoxes = len(availableBoxes)
     lenCmdFormatOptions = len(cmdFormatOptions)
     
     needStorageFormat = actionsReqStorageFormat.intersection(actions)
@@ -149,20 +172,20 @@ def main():
     needStorageName = actionsReqStorageName.intersection(actions)
     lenNeedStorageName = len(needStorageName)
     if lenNeedStorageName > 0:
-        if (lenBoxes != lenStore):
-            if (lenBoxes > lenStore):
+        if (lenAvailableBoxes != lenStore):
+            if (lenAvailableBoxes > lenStore):
                 log.error('More boxes than storage names.')
-            if (lenBoxes < lenStore):
+            if (lenAvailableBoxes < lenStore):
                 log.error('More storage names then boxes.')
             sys.exit(1)
     
     needStorageExtracts = actionsReqStorageExtracts.intersection(actions)
     lenNeedStorageExtracts = len(needStorageExtracts)
     if lenNeedStorageExtracts > 0:
-        if (lenBoxes != lenStore):
-            if (lenBoxes > lenStore):
+        if (lenAvailableBoxes != lenStore):
+            if (lenAvailableBoxes > lenStore):
                 log.error('More boxes than storage names.')
-            if (lenBoxes < lenStore):
+            if (lenAvailableBoxes < lenStore):
                 log.error('More storage names then boxes.')
             sys.exit(1)
     
@@ -170,10 +193,10 @@ def main():
     needStorageInsert = actionsReqStorageInsert.intersection(actions)
     lenNeedStorageInsert = len(needStorageInsert)
     if lenNeedStorageInsert > 0:
-        if (lenBoxes != lenStore):
-            if (lenBoxes > lenStore):
+        if (lenAvailableBoxes != lenStore):
+            if (lenAvailableBoxes > lenStore):
                 log.error('More boxes than storage names.')
-            if (lenBoxes < lenStore):
+            if (lenAvailableBoxes < lenStore):
                 log.error('More storage names then boxes.')
             sys.exit(1)
     
@@ -190,9 +213,7 @@ def main():
     if "down" in actions:
         actionsList.append("down")
     hostdetails = {}
-    
-    
-    for index in range(lenBoxes):
+    for index in range(lenAvailableBoxes):
         thisBox = box[index]
         boxdetails = {'libVirtName' : thisBox,
                 'storeFormat' : 'rsync',}
@@ -209,7 +230,6 @@ def main():
             'hostdetails' : hostdetails
             }
         }
-
     print Control.Process(instructions)
 
 if __name__ == "__main__":
