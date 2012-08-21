@@ -97,22 +97,18 @@ class vmState(object):
         if action in ["kill"]:
             self.libVirtControler.Kill(inputs)
         if action in ["extract","insert","store","restore","down"]:
-            
-            print 'shoudl be going down'
             self.libVirtControler.vmStop(inputs)
         if action in ["extract"]:
             self.diskModelByHostName.Extract(inputs)
             self.StorageCntl.Storage.storeFormat = hostInfo[hostName]['storeFormat']
             
         if action in ["store"]:
-            print 'here', hostName , hostInfo
             self.StorageCntl.Storage.storeFormat = hostInfo[hostName]['storeFormat']
-            
-            
             self.StorageCntl.store(hostName,hostInfo[hostName]['storeName'])
             
         if action in ["restore"]:
-            self.diskModelByHostName.RestoreHost(inputs)
+            self.StorageCntl.Storage.storeFormat = hostInfo[hostName]['storeFormat']
+            self.StorageCntl.restore(hostName,hostInfo[hostName]['storeName'])
         if action in ["insert"]:
             self.diskModelByHostName.Insert()
         if action in ["extract","insert","store","restore","up"]:
@@ -140,6 +136,7 @@ class vmState(object):
                 return self._processImageList()
         reqBoxes = self.actionsReqBoxes.intersection(instructions['actions'])
         lenReqBoxes = len(reqBoxes)
+        print reqBoxes,instructions['actions']
         if lenReqBoxes > 0:
             output = {}
             for host in instructions['hostdetails'].keys():
