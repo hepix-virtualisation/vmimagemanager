@@ -80,7 +80,7 @@ def main():
         box = options.box
     if options.store:
         store = options.store
-        print "sssssssss",store
+        actions.add("store")
     if options.restore:
         restore = options.restore
     if options.insert:
@@ -130,14 +130,11 @@ def main():
     lenBoxes = len(box)
     lenStore = len(store)
     
-    if (lenActions_req_sel > 0) and (lenBoxes == 0):
-        log.error('Box selections are reqired with these actions:%s.', string.join(actionsReqBoxes,','))
-        sys.exit(1)
     
     
     
     availableBoxes = []
-    if lenBoxes > 0:
+    if (lenActions_req_sel > 0):
         instructions = {'vmControl': {
             'actions': ['list_boxes'],
             'hostdetails': {},
@@ -156,6 +153,14 @@ def main():
                 log.error("Ignoring actions for unregistered box '%s'" % (ThisBox))    
         
     lenAvailableBoxes = len(availableBoxes)
+    
+    
+    if (lenActions_req_sel > 0) and (lenAvailableBoxes == 0):
+        log.error('Box selections are reqired with these actions:%s.', string.join(actionsReqBoxes,','))
+        sys.exit(1)
+    
+    
+    
     lenCmdFormatOptions = len(cmdFormatOptions)
     
     needStorageFormat = actionsReqStorageFormat.intersection(actions)
@@ -217,7 +222,7 @@ def main():
         thisBox = box[index]
         boxdetails = {'libVirtName' : thisBox,
                 'storeFormat' : 'rsync',}
-        if lenNeedStorageInsert > 0:
+        if lenNeedStorageName > 0:
             boxdetails['storeName'] = store[index]
         if lenNeedStorageInsert > 0:
             boxdetails['storeInsert'] = store[index]
