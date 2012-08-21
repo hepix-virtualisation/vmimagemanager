@@ -217,6 +217,9 @@ def main():
         actionsList.append("up")
     if "down" in actions:
         actionsList.append("down")
+    if "store" in actions:
+        actionsList.append("store")
+    
     hostdetails = {}
     for index in range(lenAvailableBoxes):
         thisBox = box[index]
@@ -229,12 +232,13 @@ def main():
         if lenNeedStorageExtracts > 0:
             boxdetails['storeExtract'] = store[index]
         
-        print 'yyyyyyyyy',boxdetails
+        
         hostdetails[thisBox] = boxdetails
     instructions = { 'vmControl' : { 'actions' : actionsList,
             'hostdetails' : hostdetails
             }
         }
+    print 'yyyyyyyyy',instructions
     print Control.Process(instructions)
 
 if __name__ == "__main__":
