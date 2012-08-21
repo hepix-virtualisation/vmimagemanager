@@ -44,7 +44,6 @@ class StorageControler(object):
         
     def release(self,hostname):
         hostDetails = diskFacade()
-        print self.cfgModel.vmbyName[hostname]
         hostDetails.disk = self.cfgModel.vmbyName[hostname].CfgDiskType.get()
         hostDetails.path = self.cfgModel.vmbyName[hostname].CfgDiskImage.get()
         hostDetails.target = self.cfgModel.vmbyName[hostname].CfgMountPoint.get()
@@ -52,11 +51,14 @@ class StorageControler(object):
         hostDetails.release()
 
 class vmState(object):
+    actionsReqBoxes = set(['up','down','store','restore','extract','insert','kill'])
+    actionsReqStats = set(['list_images','list_boxes'])
     def __init__(self,libVirtControler,cfgModel,StorageCntl):
         self.libVirtControler = libVirtControler
         self.cfgModel = cfgModel
         self.StorageCntl = StorageCntl
         self.diskModelByHostName = {}
+        
     def _processAction(self,hostInfo,action):
         self.updateDiskModelByHostName()
         print 'xxxxxxxxxx',hostInfo,action
@@ -94,7 +96,7 @@ class vmState(object):
             self.libVirtControler.vmStart(inputs)
         
     def process(self,instructions):
-        print instructions
+        
         
         for host in instructions['hostdetails'].keys():
             for action in instructions['actions']:
@@ -133,6 +135,8 @@ class vmControl(object):
         self.libVirtControler.updateModel()
 
     def Process(self,instructions):
+        if not isinstance( instructions, dict ):
+            return False
         if not 'vmControl' in instructions.keys():
             return False
         ting = StorageControler(self.cfgModel)
