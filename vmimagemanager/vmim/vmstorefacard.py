@@ -32,11 +32,13 @@ class vmStoreFacade(object):
             return self._diskName
 
         def fset(self, storeFormat):
+            print storeFormat
             self._storeFormat = storeFormat
             if storeFormat in diskTypes.keys():
                 self._uploaderImp = diskTypes[storeFormat]()
             else:
-                del(self._uploaderImp)
+                if hasattr(self, '_uploaderImp'):
+                    del(self._uploaderImp)
             if hasattr(self, '_uploaderImp'):
                 self._uploaderImp.storePath = self._storePath
                 
