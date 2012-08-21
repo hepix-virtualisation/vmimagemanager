@@ -22,7 +22,7 @@ class vmStoreFacade(object):
     Should be robust for setting the impleemntation or attributes
     in any order."""
     def __init__(self):
-        self._uploaderImp = None
+        pass
 
     @Property
     def storeFormat():
@@ -38,7 +38,7 @@ class vmStoreFacade(object):
             else:
                 del(self._uploaderImp)
             if hasattr(self, '_uploaderImp'):
-                self._uploaderImp.storePath = self.storePath
+                self._uploaderImp.storePath = self._storePath
                 
         def fdel(self):
             del self._diskName
