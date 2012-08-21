@@ -105,7 +105,7 @@ def main():
     if options.list_images:
         actions.add("list_images")
     if options.kill:
-        pass
+        actions.add("kill")
     if options.tgz:
         cmdFormatOptions.add("tar_gz")
     if options.rsync:
