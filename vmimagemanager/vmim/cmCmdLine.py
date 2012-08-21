@@ -141,6 +141,9 @@ def main():
         actionsList.append("list_images")
     if "up" in actions:
         actionsList.append("up")
+    if "down" in actions:
+        actionsList.append("down")
+    
     hostdetails = {}
     for thisBox in box:
         print thisBox

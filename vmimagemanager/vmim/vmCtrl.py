@@ -59,7 +59,7 @@ class vmState(object):
         self.diskModelByHostName = {}
     def _processAction(self,hostInfo,action):
         self.updateDiskModelByHostName()
-        #print (hostInfo,action)
+        print 'xxxxxxxxxx',hostInfo,action
         inputs = vmMdl()
         keys = hostInfo.keys()
         #print keys
@@ -71,6 +71,8 @@ class vmState(object):
         if action in ["kill"]:
             self.libVirtControler.Kill(inputs)
         if action in ["extract","insert","store","restore","down"]:
+            
+            print 'shoudl be going down'
             self.libVirtControler.vmStop(inputs)
         if action in ["extract"]:
             self.diskModelByHostName.Extract(inputs)
@@ -92,6 +94,7 @@ class vmState(object):
             self.libVirtControler.vmStart(inputs)
         
     def process(self,instructions):
+        print instructions
         
         for host in instructions['hostdetails'].keys():
             for action in instructions['actions']:
