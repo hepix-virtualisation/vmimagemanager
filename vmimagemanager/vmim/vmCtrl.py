@@ -233,3 +233,12 @@ if __name__ == "__main__" :
      }
     }
     Control.Process(instructions)
+    instructions = {'vmControl': {'actions': ['list_images'],
+        'hostdetails': {},
+        }
+    }
+    instructions = {'vmControl': {'actions': ['list_boxes'],
+        'hostdetails': {},
+        }
+    }
+    print Control.Process(instructions)
