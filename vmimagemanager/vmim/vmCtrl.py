@@ -44,6 +44,7 @@ class StorageControler(object):
         
     def release(self,hostname):
         hostDetails = diskFacade()
+        print self.cfgModel.vmbyName[hostname]
         hostDetails.disk = self.cfgModel.vmbyName[hostname].CfgDiskType.get()
         hostDetails.path = self.cfgModel.vmbyName[hostname].CfgDiskImage.get()
         hostDetails.target = self.cfgModel.vmbyName[hostname].CfgMountPoint.get()

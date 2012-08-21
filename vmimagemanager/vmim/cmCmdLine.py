@@ -2,7 +2,7 @@ import os
 import logging, logging.config
 import sys
 import optparse
-
+import vmCtrl
 
 from __version__ import version 
 def usage():
@@ -39,13 +39,14 @@ def main():
     options, arguments = p.parse_args()
     # OptionValues
     logFile = None
+    box = []
     actions = set()
     actionsrequiring_selections = set([])
     cmdFormatOptions = set([])
     ConfigurationFilePath = '/etc/vmimagemanager/vmimagemanager.cfg'
     
+    Control = vmCtrl.vmControl()
     
-    DefaultConfigurationPath = None
     if 'VMIM_CFG' in os.environ:
         ConfigurationFilePath = os.environ['VMIM_CFG']
     if 'VMIM_LOG_CONF' in os.environ:
@@ -76,17 +77,24 @@ def main():
         insert = options.insert
     if options.extract:
         extract = options.extract
-    if options.config:
-        config = options.config
+    if options.config != None:
+        if os.path.isfile(str(options.logfile)):
+            ConfigurationFilePath = str(options.config)
+        else:
+            log.error("Configuration file '%s' was not found." % (options.logfile))
+            sys.exit(1)
+        
     if options.cpu:
         cpu = options.cpu
     if options.up:
         store = options.store
+        actions.add("up")
     if options.down:
         store = options.store
+        actions.add("down")
     if options.list_boxes:
         store = options.store
-        actions.add("list_images")
+        actions.add("list_boxes")
     if options.list_images:
         store = options.store
         actions.add("list_images")
@@ -112,25 +120,37 @@ def main():
         log.error("More than one action selected.")
         sys.exit(1)
 
-
-
+    Control.LoadConfigCfg(ConfigurationFilePath)
     # Handle conflicting actions
     actions_req_sel = actionsrequiring_selections.intersection(actions)
 
-    actions_req_sel_len = len(actions_req_sel)
-    if actions_req_sel_len == 1:
+    lenCmdFormatOptions = len(cmdFormatOptions)
+    if lenCmdFormatOptions == 1:
         log.error('No selections made.')
         sys.exit(1)
-    if actions_req_sel_len > 1:
-        log.error('Conflicting functions.')
+    if lenCmdFormatOptions > 1:
+        log.error('Conflicting storage format options.')
         sys.exit(1)
     # Handle conflicting identifiers
 
 
+    actionsList = []
+    if "list_images" in actions:
+        actionsList.append("list_boxes")
+    if "list_images" in actions:
+        actionsList.append("list_images")
+    if "up" in actions:
+        actionsList.append("up")
+    hostdetails = {}
+    for thisBox in box:
+        print thisBox
+        hostdetails[thisBox] = {}
+    instructions = { 'vmControl' : { 'actions' : actionsList,
+            'hostdetails' : hostdetails
+            }
+        }
 
-
-
-
+    Control.Process(instructions)
 
 if __name__ == "__main__":
     main()
