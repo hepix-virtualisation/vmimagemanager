@@ -238,10 +238,9 @@ def main():
         
         
         hostdetails[thisBox] = boxdetails
-    instructions = { 'vmControl' : { 'actions' : actionsList,
-            'hostdetails' : hostdetails
-            }
-        }
+    instructions = { 'vmControl' : { 'actions' : actionsList} }
+    if len(hostdetails) > 0:
+        instructions['hostdetails'] = hostdetails
     print 'input',instructions
     print "output='%s'"% (Control.Process(instructions))
 
