@@ -3,11 +3,13 @@ import logging, logging.config
 import sys
 import optparse
 import vmCtrl
-
+import string
 from __version__ import version 
 def usage():
     print "usage"
 
+
+# User interface
 
 
 def main():
@@ -41,10 +43,17 @@ def main():
     logFile = None
     box = []
     actions = set()
-    actionsrequiring_selections = set([])
+    actionsReqBoxes = set(['up','down','store','restore','extract','insert','kill'])
+    actionsReqStorageFormat = set(['store','restore','extract','insert'])
+    actionsReqStorageName = set(['store','restore'])
+    actionsReqStorageExtracts = set(['extract'])
+    actionsReqStorageInsert = set(['insert'])
+    
     cmdFormatOptions = set([])
     ConfigurationFilePath = '/etc/vmimagemanager/vmimagemanager.cfg'
-    
+    print_config = False
+    store = []
+    cmdInserts = []
     Control = vmCtrl.vmControl()
     
     if 'VMIM_CFG' in os.environ:
@@ -71,6 +80,7 @@ def main():
         box = options.box
     if options.store:
         store = options.store
+        print "sssssssss",store
     if options.restore:
         restore = options.restore
     if options.insert:
@@ -87,30 +97,23 @@ def main():
     if options.cpu:
         cpu = options.cpu
     if options.up:
-        store = options.store
         actions.add("up")
     if options.down:
-        store = options.store
         actions.add("down")
     if options.list_boxes:
-        store = options.store
         actions.add("list_boxes")
     if options.list_images:
-        store = options.store
         actions.add("list_images")
     if options.kill:
-        store = options.store
+        pass
     if options.tgz:
-        store = options.store
         cmdFormatOptions.add("tar_gz")
     if options.rsync:
-        store = options.store
         cmdFormatOptions.add("rsync")
     if options.cpio_bzip:
-        store = options.store
         cmdFormatOptions.add("cpio_bzip")
     if options.print_config:
-        store = options.store
+        print_config = True
 
     # 1 So we have some command line validation
     if len(actions) == 0:
@@ -122,20 +125,63 @@ def main():
 
     Control.LoadConfigCfg(ConfigurationFilePath)
     # Handle conflicting actions
-    actions_req_sel = actionsrequiring_selections.intersection(actions)
-
+    actions_req_sel = actionsReqBoxes.intersection(actions)
+    lenActions_req_sel = len(actions_req_sel)
+    lenBoxes = len(box)
+    lenStore = len(store)
+    
+    if (lenActions_req_sel > 0) and (lenBoxes == 0):
+        log.error('Box selections are reqired with these actions:%s.', string.join(actionsReqBoxes,','))
+        sys.exit(1)
     lenCmdFormatOptions = len(cmdFormatOptions)
-    if lenCmdFormatOptions == 1:
-        log.error('No selections made.')
-        sys.exit(1)
-    if lenCmdFormatOptions > 1:
-        log.error('Conflicting storage format options.')
-        sys.exit(1)
+    
+    needStorageFormat = actionsReqStorageFormat.intersection(actions)
+    lenNeedStorageFormat = len(needStorageFormat)
+    if lenNeedStorageFormat > 0:
+        if (lenCmdFormatOptions == 0):
+            cmdFormatOptions.add("rsync")
+            log.info("Defaulting storage format to 'rsync'.")
+            lenCmdFormatOptions = len(cmdFormatOptions)
+        if (lenCmdFormatOptions > 1):
+            log.error('Conflicting storage format options.')
+            sys.exit(1)
+    
+    needStorageName = actionsReqStorageName.intersection(actions)
+    lenNeedStorageName = len(needStorageName)
+    if lenNeedStorageName > 0:
+        if (lenBoxes != lenStore):
+            if (lenBoxes > lenStore):
+                log.error('More boxes than storage names.')
+            if (lenBoxes < lenStore):
+                log.error('More storage names then boxes.')
+            sys.exit(1)
+    
+    needStorageExtracts = actionsReqStorageExtracts.intersection(actions)
+    lenNeedStorageExtracts = len(needStorageExtracts)
+    if lenNeedStorageExtracts > 0:
+        if (lenBoxes != lenStore):
+            if (lenBoxes > lenStore):
+                log.error('More boxes than storage names.')
+            if (lenBoxes < lenStore):
+                log.error('More storage names then boxes.')
+            sys.exit(1)
+    
+    
+    needStorageInsert = actionsReqStorageInsert.intersection(actions)
+    lenNeedStorageInsert = len(needStorageInsert)
+    if lenNeedStorageInsert > 0:
+        if (lenBoxes != lenStore):
+            if (lenBoxes > lenStore):
+                log.error('More boxes than storage names.')
+            if (lenBoxes < lenStore):
+                log.error('More storage names then boxes.')
+            sys.exit(1)
+    
     # Handle conflicting identifiers
 
-
+    
     actionsList = []
-    if "list_images" in actions:
+    if "list_boxes" in actions:
         actionsList.append("list_boxes")
     if "list_images" in actions:
         actionsList.append("list_images")
@@ -143,11 +189,22 @@ def main():
         actionsList.append("up")
     if "down" in actions:
         actionsList.append("down")
-    
     hostdetails = {}
-    for thisBox in box:
-        print thisBox
-        hostdetails[thisBox] = {}
+    
+    
+    for index in range(lenBoxes):
+        thisBox = box[index]
+        boxdetails = {'libVirtName' : thisBox,
+                'storeFormat' : 'rsync',}
+        if lenNeedStorageInsert > 0:
+            boxdetails['storeName'] = store[index]
+        if lenNeedStorageInsert > 0:
+            boxdetails['storeInsert'] = store[index]
+        if lenNeedStorageExtracts > 0:
+            boxdetails['storeExtract'] = store[index]
+        
+        print 'yyyyyyyyy',boxdetails
+        hostdetails[thisBox] = boxdetails
     instructions = { 'vmControl' : { 'actions' : actionsList,
             'hostdetails' : hostdetails
             }
