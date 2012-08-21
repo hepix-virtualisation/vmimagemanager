@@ -16,25 +16,25 @@ def main():
     log = logging.getLogger("main")
     """Runs program and handles command line options"""
     p = optparse.OptionParser(version = "%prog " + version)
-    p.add_option('-b', '--box', action ='append',help="Select 'boxes' to operate.")
-    p.add_option('-s', '--store', action ='append', help='Database Initiation string')
-    p.add_option('-r', '--restore', action ='append',help='Add endorser in your subscribe to imagelist action.')
-    p.add_option('-e', '--extract', action ='append',help='Certificate directory.', metavar='INPUTDIR')
-    p.add_option('-i', '--insert', action ='append',help='Select subscription', metavar='UUID')
-    p.add_option('-c', '--config', action ='append',help='Select subscription', metavar='URL')
-    p.add_option('--cpu', action ='store',help='Sets the output format')
-    p.add_option('-u', '--up', action ='store_true',help='Delete subscription')
-    p.add_option('-d', '--down', action ='store_true',help='Information on subscription')
-    p.add_option('-l', '--list-boxes', action ='store_true',help='Export File.', metavar='OUTPUTFILE')
-    p.add_option('-L', '--list-images', action ='store_true',help='Logfile configuration file.', metavar='LOGFILE')
+    p.add_option('-b', '--box', action ='append',help="Select box(s) to operate.")
+    p.add_option('-s', '--store', action ='append', help='Image name(s) to store for box(s)')
+    p.add_option('-r', '--restore', action ='append',help='Image name(s) to restore for box(s).')
+    p.add_option('-e', '--extract', action ='append',help='Extract name(s) to restore for box(s).')
+    p.add_option('-i', '--insert', action ='append',help='Insert name(s) to restore for box(s).')
+    p.add_option('-u', '--up', action ='store_true',help='Start boxes.')
+    p.add_option('-d', '--down', action ='store_true',help='Stop boxes.')
+    p.add_option('-l', '--list-boxes', action ='store_true',help='List Boxes.')
+    p.add_option('-L', '--list-images', action ='store_true',help='List images.')
     #p.add_option('-v', '--version', action ='store_true',help='Event application to launch.', metavar='EVENT')    
-    p.add_option('-k', '--kill', action ='store_true',help='Export File.', metavar='OUTPUTFILE')
-    p.add_option('-z', '--tgz', action ='store_true',help='Logfile configuration file.', metavar='LOGFILE')
-    p.add_option('-y', '--rsync', action ='store_true',help='Event application to launch.', metavar='EVENT')
-    p.add_option('-w', '--cpio-bzip', action ='store_true',help='Event application to launch.', metavar='EVENT')
-    p.add_option('--lvm', action ='store_true',help='Event application to launch.', metavar='EVENT')
-    p.add_option('-o', '--print-config', action ='append',help='Export File.', metavar='OUTPUTFILE')
-    p.add_option('--logfile', action ='store',help='Logfile configuration file.', metavar='LOGFILE')
+    p.add_option('-k', '--kill', action ='store_true',help='Boxes to kill. Simulates power off for box.')
+    p.add_option('-y', '--rsync', action ='store_true',help="Sets storeage options to 'rsync'. (default)")
+    p.add_option('-w', '--cpio-bzip', action ='store_true',help="Sets storeage options to 'cpio.bz2'.")
+    p.add_option('-z', '--tgz', action ='store_true',help="Sets storeage options to 'tar.gzip'.")
+    p.add_option('--lvm', action ='store_true',help="Sets storeage options to 'lvm'. (experimental)")
+    p.add_option('--cpu', action ='store',help='Sets the number of cores to start VM with. Overrides the configureds value.')
+    p.add_option('--config', action ='append',help='Read vmimagemanager configutration file', metavar='VMIM_CFG')
+    p.add_option('--print-config', action ='store',help='Write a vmimagemanager configuration file.', metavar='OUTPUTFILE')
+    p.add_option('--log-config', action ='store',help='Logfile configuration file.', metavar='LOGFILE')
     
     
     
@@ -54,6 +54,9 @@ def main():
     print_config = False
     store = []
     cmdInserts = []
+    storageFormat = None
+    
+    
     Control = vmCtrl.vmControl()
     
     if 'VMIM_CFG' in os.environ:
@@ -62,15 +65,15 @@ def main():
         logFile = os.environ['VMILS_LOG_CONF']
     
     # Set up log file
-    if options.logfile:
-        logFile = options.logfile
+    if options.log_config:
+        logFile = options.log_config
     if logFile != None:
-        if os.path.isfile(str(options.logfile)):
-            logging.config.fileConfig(options.logfile)
+        if os.path.isfile(str(options.log_config)):
+            logging.config.fileConfig(options.log_config)
         else:
             logging.basicConfig(level=logging.INFO)
             log = logging.getLogger("main")
-            log.error("Logfile configuration file '%s' was not found." % (options.logfile))
+            log.error("Logfile configuration file '%s' was not found." % (options.log_config))
             sys.exit(1)
     else:
         logging.basicConfig(level=logging.INFO)
@@ -88,10 +91,10 @@ def main():
     if options.extract:
         extract = options.extract
     if options.config != None:
-        if os.path.isfile(str(options.logfile)):
+        if os.path.isfile(str(options.log_config)):
             ConfigurationFilePath = str(options.config)
         else:
-            log.error("Configuration file '%s' was not found." % (options.logfile))
+            log.error("Configuration file '%s' was not found." % (options.config))
             sys.exit(1)
         
     if options.cpu:
@@ -107,11 +110,11 @@ def main():
     if options.kill:
         actions.add("kill")
     if options.tgz:
-        cmdFormatOptions.add("tar_gz")
+        cmdFormatOptions.add("tgz")
     if options.rsync:
         cmdFormatOptions.add("rsync")
     if options.cpio_bzip:
-        cmdFormatOptions.add("cpio_bzip")
+        cmdFormatOptions.add("cpio.bz")
     if options.print_config:
         print_config = True
 
@@ -166,13 +169,14 @@ def main():
     needStorageFormat = actionsReqStorageFormat.intersection(actions)
     lenNeedStorageFormat = len(needStorageFormat)
     if lenNeedStorageFormat > 0:
-        if (lenCmdFormatOptions == 0):
-            cmdFormatOptions.add("rsync")
-            log.info("Defaulting storage format to 'rsync'.")
-            lenCmdFormatOptions = len(cmdFormatOptions)
         if (lenCmdFormatOptions > 1):
             log.error('Conflicting storage format options.')
             sys.exit(1)
+        if (lenCmdFormatOptions == 0):
+            storageFormat = "rsync"
+            log.info("Defaulting storage format to 'rsync'.")
+        else:
+            storageFormat = cmdFormatOptions.pop()
     
     needStorageName = actionsReqStorageName.intersection(actions)
     lenNeedStorageName = len(needStorageName)
@@ -224,7 +228,7 @@ def main():
     for index in range(lenAvailableBoxes):
         thisBox = box[index]
         boxdetails = {'libVirtName' : thisBox,
-                'storeFormat' : 'rsync',}
+                'storeFormat' : storageFormat,}
         if lenNeedStorageName > 0:
             boxdetails['storeName'] = store[index]
         if lenNeedStorageInsert > 0:
