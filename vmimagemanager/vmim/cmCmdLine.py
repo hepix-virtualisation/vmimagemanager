@@ -144,7 +144,7 @@ def main():
             }
         }
         boxStruct = Control.Process(instructions)
-        print "boxStruct",boxStruct
+        #print "boxStruct",boxStruct
         setOfBoxes = set()
         for key in boxStruct['vmControl']['listBox'].keys():
             name = boxStruct['vmControl']['listBox'][key]['libVirtName']
@@ -242,8 +242,8 @@ def main():
             'hostdetails' : hostdetails
             }
         }
-    print 'yyyyyyyyy',instructions
-    print Control.Process(instructions)
+    print 'input',instructions
+    print "output='%s'"% (Control.Process(instructions))
 
 if __name__ == "__main__":
     main()
