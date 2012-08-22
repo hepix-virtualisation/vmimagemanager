@@ -4,10 +4,18 @@ import commands
 
 class vmStoreTgz(object):
     def __init__(self):
-        self.log = logging.getLogger("vmStoreTgz.vmStoreTgz") 
+        self.log = logging.getLogger("vmStoreTgz.vmStoreTgz")
+    
+    def imageList(self):
+        output = []
+        if not os.path.isdir(self.storePath):
+            self.log.warning("Store Path '%s' does not exist",self.storePath)
+        else:
+            for filename in os.listdir(self.storePath):
+                output.append(filename)
+        return output
     
     def imageStore(self,diskFacade,storeName):
-        
         diskFacade.mount()
         cmd = "tar -zcspf %s/%s --exclude=lost+found -C %s ." % (self.storePath,storeName,diskFacade.target)
         self.log.debug("running command %s" % ( cmd))
@@ -20,6 +28,7 @@ class vmStoreTgz(object):
             return rc
         self.log.debug("ran command.")
         return True
+
     def imageRestore(self,diskFacade,storeName):
         foundImages = self.imageList()
         if not storeName in foundImages:
@@ -39,12 +48,18 @@ class vmStoreTgz(object):
         
         self.log.debug('rm Ok')
         return True
-    def imageList(self):
-        output = []
-        if not os.path.isdir(self.storePath):
-            self.log.warning("Store Path '%s' does not exist",self.storePath)
-        else:
-            for filename in os.listdir(self.storePath):
-                output.append(filename)
-        return output
- 
+
+    def insertRestore(self,diskFacade,storeName):
+        diskFacade.mount()
+        InsertPath = os.path.join(self.storePath,storeName)
+        if not os.path.isfile(InsertPath):
+            self.log.error("Error: File %s is not found" % (InsertPath))
+            return None
+        cmd=  "tar -zxpsf %s --exclude=lost+found   -C %s" % (InsertPath,diskFacade.target)
+        print cmd
+        (rc,cmdoutput) = commands.getstatusoutput(cmd)
+        if rc != 0:
+            self.log.error('Failed "%s"' % (cmd))
+            self.log.error(cmdoutput)
+            self.log.error('Return Code=%s' % (rc))
+        return True
