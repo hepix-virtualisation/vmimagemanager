@@ -26,12 +26,12 @@ def main():
     p.add_option('-l', '--list-boxes', action ='store_true',help='List Boxes.')
     p.add_option('-L', '--list-images', action ='store_true',help='List images.')
     #p.add_option('-v', '--version', action ='store_true',help='Event application to launch.', metavar='EVENT')    
-    p.add_option('-k', '--kill', action ='store_true',help='Boxes to kill. Simulates power off for box.')
+    p.add_option('-k', '--kill', action ='store_true',help='Boxes to kill. Simulates power off for box.', metavar='ACTION')
     p.add_option('-y', '--rsync', action ='store_true',help="Sets storeage options to 'rsync'. (default)")
     p.add_option('-w', '--cpio-bzip', action ='store_true',help="Sets storeage options to 'cpio.bz2'.")
     p.add_option('-z', '--tgz', action ='store_true',help="Sets storeage options to 'tar.gzip'.")
     p.add_option('--lvm', action ='store_true',help="Sets storeage options to 'lvm'. (experimental)")
-    p.add_option('--cpu', action ='store',help='Sets the number of cores to start VM with. Overrides the configureds value.')
+    p.add_option('--core', action ='store',help='Sets the number of cores to start VM with. Overrides the configureds value.', metavar='CORE')
     p.add_option('--config', action ='append',help='Read vmimagemanager configutration file', metavar='VMIM_CFG')
     p.add_option('--print-config', action ='store',help='Write a vmimagemanager configuration file.', metavar='OUTPUTFILE')
     p.add_option('--log-config', action ='store',help='Logfile configuration file.', metavar='LOGFILE')
@@ -55,7 +55,7 @@ def main():
     store = []
     cmdInserts = []
     storageFormat = None
-    
+    coreOveride = None
     
     Control = vmCtrl.vmControl()
     
@@ -99,8 +99,8 @@ def main():
             log.error("Configuration file '%s' was not found." % (options.config))
             sys.exit(1)
         
-    if options.cpu:
-        cpu = options.cpu
+    if options.core:
+        coreOveride = options.core
     if options.up:
         actions.add("up")
     if options.down:
