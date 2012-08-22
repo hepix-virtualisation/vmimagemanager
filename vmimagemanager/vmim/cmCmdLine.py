@@ -224,6 +224,8 @@ def main():
         actionsList.append("down")
     if "store" in actions:
         actionsList.append("store")
+    if "insert" in actions:
+        actionsList.append("insert")
     
     hostdetails = {}
     for index in range(lenAvailableBoxes):
