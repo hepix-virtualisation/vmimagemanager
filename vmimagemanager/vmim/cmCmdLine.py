@@ -165,7 +165,6 @@ def main():
     
     
     lenCmdFormatOptions = len(cmdFormatOptions)
-    
     needStorageFormat = actionsReqStorageFormat.intersection(actions)
     lenNeedStorageFormat = len(needStorageFormat)
     if lenNeedStorageFormat > 0:
@@ -227,8 +226,9 @@ def main():
     hostdetails = {}
     for index in range(lenAvailableBoxes):
         thisBox = box[index]
-        boxdetails = {'libVirtName' : thisBox,
-                'storeFormat' : storageFormat,}
+        boxdetails = {'libVirtName' : thisBox}
+        if storageFormat != None:
+            boxdetails['storeFormat'] = storageFormat
         if lenNeedStorageName > 0:
             boxdetails['storeName'] = store[index]
         if lenNeedStorageInsert > 0:
@@ -239,6 +239,7 @@ def main():
         
         hostdetails[thisBox] = boxdetails
     instructions = { 'vmControl' : { 'actions' : actionsList} }
+    
     if len(hostdetails) > 0:
         instructions['hostdetails'] = hostdetails
     print 'input',instructions
