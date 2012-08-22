@@ -82,8 +82,8 @@ class vmState(object):
         self.cfgModel = cfgModel
         self.StorageCntl = StorageCntl
         self.diskModelByHostName = {}
-        
-    def _processAction(self,hostInfo,action):
+        self.log = logging.getLogger("vmCtrl.vmState") 
+    def _processAction(self,instructions,hostInfo,action):
         self.updateDiskModelByHostName()
         #print 'xxxxxxxxxx',hostInfo,action
         inputs = vmMdl()
@@ -126,7 +126,8 @@ class vmState(object):
         
         
     def process(self,instructions):
-        reqStats = self.actionsReqStats.intersection(instructions['actions'])
+        #print instructions
+        reqStats = self.actionsReqStats.intersection(instructions['vmControl']['actions'])
         lenReqStats = len(reqStats)
         if lenReqStats > 0:
             #print "reqStats",reqStats
@@ -134,15 +135,20 @@ class vmState(object):
                 return self._processBoxesList()
             if 'list_images' in reqStats:
                 return self._processImageList()
-        reqBoxes = self.actionsReqBoxes.intersection(instructions['actions'])
+        reqBoxes = self.actionsReqBoxes.intersection(instructions['vmControl']['actions'])
         lenReqBoxes = len(reqBoxes)
-        print reqBoxes,instructions['actions']
+        #print "ssss",reqBoxes,instructions
         if lenReqBoxes > 0:
             output = {}
+            instructionsKeys = instructions.keys()
+            if not  'hostdetails' in instructionsKeys:
+                self.log.info("No hostdetails")
+                return 
+            
             for host in instructions['hostdetails'].keys():
-                for action in instructions['actions']:
-                    self._processAction({ host :instructions['hostdetails'][host]},action)
-
+                for action in instructions['vmControl']['actions']:
+                    self._processAction(instructions,{ host :instructions['hostdetails'][host]},action)
+        return True
     def updateDiskModelByHostName(self):
         self.libVirtControler.updateModel()
         self.HostsSetlibvirt = set(self.libVirtControler.model.vmsbyName.keys())
@@ -181,7 +187,7 @@ class vmControl(object):
             return None
         ting = StorageControler(self.cfgModel)
         self.ProcessState = vmState(self.libVirtControler,self.cfgModel,ting)
-        return {'vmControl' : self.ProcessState.process(instructions['vmControl'])}
+        return {'vmControl' : self.ProcessState.process(instructions)}
         
 
 
