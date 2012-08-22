@@ -86,8 +86,10 @@ def main():
         actions.add("store")
     if options.restore:
         restore = options.restore
+        actions.add("restore")
     if options.insert:
         insert = options.insert
+        actions.add("insert")
     if options.extract:
         extract = options.extract
     if options.config != None:
@@ -122,9 +124,9 @@ def main():
     if len(actions) == 0:
         log.error("No actions selected")
         sys.exit(1)
-    if len(actions) > 1:
-        log.error("More than one action selected.")
-        sys.exit(1)
+    #if len(actions) > 1:
+    #    log.error("More than one action selected.")
+    #    sys.exit(1)
 
     Control.LoadConfigCfg(ConfigurationFilePath)
     # Handle conflicting actions
@@ -134,7 +136,7 @@ def main():
     lenStore = len(store)
     
     
-    
+    # Check Data for only sending in available boxes.
     
     availableBoxes = []
     if (lenActions_req_sel > 0):
@@ -180,20 +182,20 @@ def main():
     needStorageName = actionsReqStorageName.intersection(actions)
     lenNeedStorageName = len(needStorageName)
     if lenNeedStorageName > 0:
-        if (lenAvailableBoxes != lenStore):
-            if (lenAvailableBoxes > lenStore):
+        if (lenNeedStorageName != lenAvailableBoxes):
+            if (lenNeedStorageName > lenAvailableBoxes):
                 log.error('More boxes than storage names.')
-            if (lenAvailableBoxes < lenStore):
+            if (lenNeedStorageName < lenAvailableBoxes):
                 log.error('More storage names then boxes.')
             sys.exit(1)
     
     needStorageExtracts = actionsReqStorageExtracts.intersection(actions)
     lenNeedStorageExtracts = len(needStorageExtracts)
     if lenNeedStorageExtracts > 0:
-        if (lenAvailableBoxes != lenStore):
-            if (lenAvailableBoxes > lenStore):
+        if (lenNeedStorageExtracts != lenAvailableBoxes):
+            if (lenNeedStorageExtracts > lenAvailableBoxes):
                 log.error('More boxes than storage names.')
-            if (lenAvailableBoxes < lenStore):
+            if (lenNeedStorageExtracts < lenAvailableBoxes):
                 log.error('More storage names then boxes.')
             sys.exit(1)
     
@@ -201,11 +203,11 @@ def main():
     needStorageInsert = actionsReqStorageInsert.intersection(actions)
     lenNeedStorageInsert = len(needStorageInsert)
     if lenNeedStorageInsert > 0:
-        if (lenAvailableBoxes != lenStore):
-            if (lenAvailableBoxes > lenStore):
-                log.error('More boxes than storage names.')
-            if (lenAvailableBoxes < lenStore):
-                log.error('More storage names then boxes.')
+        if (lenNeedStorageInsert != lenAvailableBoxes):
+            if (lenNeedStorageInsert > lenAvailableBoxes):
+                log.error('More boxes than Insert.')
+            if (lenNeedStorageInsert < lenAvailableBoxes):
+                log.error('More Insert names then boxes.')
             sys.exit(1)
     
     # Handle conflicting identifiers
@@ -232,7 +234,7 @@ def main():
         if lenNeedStorageName > 0:
             boxdetails['storeName'] = store[index]
         if lenNeedStorageInsert > 0:
-            boxdetails['storeInsert'] = store[index]
+            boxdetails['storeInsert'] = insert[index]
         if lenNeedStorageExtracts > 0:
             boxdetails['storeExtract'] = store[index]
         
