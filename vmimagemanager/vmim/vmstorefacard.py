@@ -4,7 +4,7 @@ import types
 
 import logging
 
-from vmstoreTgz import vmStoreTgz
+from vmStoreTgz import vmStoreTgz
 from vmStoreRsync import vmStoreRsync
 from vmStoreCpiobz import vmStoreCpiobz
 def Property(func):
