@@ -51,11 +51,11 @@ class vmStoreRsync(object):
  
     def insertRestore(self,diskFacade,storeName):
         diskFacade.mount()
-        ExtractDir = os.path.join(self.storePath,storeName)
-        if not os.path.isdir(ExtractDir):
-            self.log.error("Error: Directory %s is not found" % (ExtractDir))
+        InsertPath = os.path.join(self.storePath,storeName)
+        if not os.path.isdir(InsertPath):
+            self.log.error("Error: Directory %s is not found" % (InsertPath))
             return None
-        cmd = "rsync -ra --numeric-ids --exclude=lost+found %s/ %s" % (ExtractDir,diskFacade.target)
+        cmd = "rsync -ra --numeric-ids --exclude=lost+found %s/ %s" % (InsertPath,diskFacade.target)
         print cmd
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
