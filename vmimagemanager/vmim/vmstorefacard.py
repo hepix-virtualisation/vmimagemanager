@@ -29,7 +29,7 @@ class vmStoreFacade(object):
         doc = "storeFormat type"
 
         def fget(self):
-            return self._diskName
+            return self._uploaderImp
 
         def fset(self, storeFormat):
             self._storeFormat = storeFormat
@@ -42,7 +42,7 @@ class vmStoreFacade(object):
                 self._uploaderImp.storePath = self._storePath
                 
         def fdel(self):
-            del self._diskName
+            del self._uploaderImp
         return locals()
     @Property
     def storePath():
@@ -70,9 +70,16 @@ class vmStoreFacade(object):
     def imageStore(self,diskFacade,storeName):
         if hasattr(self, '_uploaderImp'):
             return self._uploaderImp.imageStore(diskFacade,storeName)
+
     def imageRestore(self,diskFacade,storeName):
         if hasattr(self, '_uploaderImp'):
             return self._uploaderImp.imageRestore(diskFacade,storeName)
+    
+    def insertRestore(self,diskFacade,storeName):
+        if hasattr(self, '_uploaderImp'):        
+            return self._uploaderImp.insertRestore(diskFacade,storeName)
+        else:
+            return None
             
     def imageList(self):
         if hasattr(self, '_uploaderImp'):
