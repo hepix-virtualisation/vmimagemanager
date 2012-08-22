@@ -62,3 +62,16 @@ class vmStoreCpiobz(object):
                 output.append(filename)
         return output
  
+    def insertRestore(self,diskFacade,storeName):
+        diskFacade.mount()
+        InsertPath = os.path.join(self.storePath,storeName)
+        if not os.path.isfile(InsertPath):
+            self.log.error("Error: File %s is not found" % (InsertPath))
+            return None
+        cmd = "cd %s; bzcat %s |cpio -i" % (diskFacade.target,InsertPath)
+        (rc,cmdoutput) = commands.getstatusoutput(cmd)
+        if rc != 0:
+            self.log.error('Failed "%s"' % (cmd))
+            self.log.error(cmdoutput)
+            self.log.error('Return Code=%s' % (rc))
+        return True
