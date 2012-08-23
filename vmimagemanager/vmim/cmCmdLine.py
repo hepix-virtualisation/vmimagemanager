@@ -69,7 +69,7 @@ def main():
     logFile = None
     box = []
     actions = set()
-    actionsReqBoxes = set(['up','down','store','restore','extract','insert','kill'])
+    actionsReqBoxes = set(['up','down','store','restore','extract','insert','kill','mount','release'])
     actionsReqStorageFormat = set(['store','restore','extract','insert'])
     actionsReqStorageName = set(['store'])
     actionsReqStorageRestoreName = set(['restore'])
@@ -197,7 +197,6 @@ def main():
                 log.error("Ignoring actions for unregistered box '%s'" % (ThisBox))    
         
     lenAvailableBoxes = len(availableBoxes)
-    
     
     if (lenActions_req_sel > 0) and (lenAvailableBoxes == 0):
         log.error('Box selections are reqired with these actions:%s.', string.join(actions_req_sel,','))

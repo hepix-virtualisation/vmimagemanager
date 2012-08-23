@@ -116,7 +116,7 @@ class StorageControler(object):
 
 
 class vmState(object):
-    actionsReqBoxes = set(['up','down','store','restore','extract','insert','kill'])
+    actionsReqBoxes = set(['up','down','store','restore','extract','insert','kill','mount','release'])
     actionsReqStats = set(['list_images','list_boxes'])
     def __init__(self,libVirtControler,cfgModel,StorageCntl):
         self.libVirtControler = libVirtControler
@@ -128,7 +128,7 @@ class vmState(object):
         self.updateDiskModelByHostName()
         inputs = vmMdl()
         keys = hostInfo.keys()
-        #print keys
+        #print action
         if len(keys) != 1:
             print "oooo noooo"
             return
