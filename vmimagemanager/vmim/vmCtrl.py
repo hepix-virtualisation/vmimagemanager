@@ -137,8 +137,9 @@ class vmState(object):
         
         if action in ["kill"]:
             self.libVirtControler.Kill(inputs)
-        if action in ["extract","insert","store","restore","down"]:
+        if action in ["extract","insert","store","restore","down","mount"]:
             self.libVirtControler.vmStop(inputs)
+        if action in ["extract","insert","store","restore","mount"]:
             self.StorageCntl.mount(hostName)
         if action in ["extract"]:
             for item in hostInfo[hostName]['storeExtract']:
@@ -154,8 +155,10 @@ class vmState(object):
         if action in ["insert"]:
             for item in hostInfo[hostName]['storeInsert']:
                 self.StorageCntl.insert(hostName,item["name"],hostInfo[hostName]['storeFormat'])
-        if action in ["up"]:
+        
+        if action in ["release","up"]:
             self.StorageCntl.release(hostName)
+        if action in ["up"]:
             self.libVirtControler.vmStart(inputs)
     def _processBoxesList(self):
         output = {}

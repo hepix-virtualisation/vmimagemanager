@@ -55,6 +55,9 @@ def main():
     p.add_option('-z', '--tgz', action ='store_true',help="Sets storeage options to 'tar.gzip'.")
     p.add_option('--lvm', action ='store_true',help="Sets storeage options to 'lvm'. (experimental)")
     p.add_option('--core', action ='store',help='Sets the number of cores to start VM with. Overrides the configureds value.', metavar='CORE')
+    p.add_option('--mount', action ='store_true',help='Mount the box(es) disk.')
+    p.add_option('--release', action ='store_true',help='Release box(es) disk.')
+    
     p.add_option('--config', action ='append',help='Read vmimagemanager configutration file', metavar='VMIM_CFG')
     p.add_option('--print-config', action ='store',help='Write a vmimagemanager configuration file.', metavar='OUTPUTFILE')
     p.add_option('--log-config', action ='store',help='Logfile configuration file.', metavar='LOGFILE')
@@ -137,6 +140,10 @@ def main():
         actions.add("up")
     if options.down:
         actions.add("down")
+    if options.mount:
+        actions.add("mount")
+    if options.release:
+        actions.add("release")
     if options.list_boxes:
         actions.add("list_boxes")
     if options.list_images:
@@ -286,6 +293,11 @@ def main():
         actionsList.append("insert")
     if "up" in actions:
         actionsList.append("up")
+    if "mount" in actions:
+        actionsList.append("mount")
+    if "release" in actions:
+        actionsList.append("release")
+    
     hostdetails = {}
     for index in range(lenAvailableBoxes):
         thisBox = box[index]
