@@ -68,7 +68,8 @@ def main():
     actions = set()
     actionsReqBoxes = set(['up','down','store','restore','extract','insert','kill'])
     actionsReqStorageFormat = set(['store','restore','extract','insert'])
-    actionsReqStorageName = set(['store','restore'])
+    actionsReqStorageName = set(['store'])
+    actionsReqStorageRestoreName = set(['restore'])
     actionsReqStorageExtracts = set(['extract'])
     actionsReqStorageInsert = set(['insert'])
     actionsReqSingleBox = set(['extract'])
@@ -77,6 +78,7 @@ def main():
     print_config = False
     store = []
     cmdInserts = []
+    insert = []
     extract = []
     extractDirectory = []
     storageFormat = None
@@ -224,6 +226,15 @@ def main():
                 log.error('More storage names then boxes.')
             sys.exit(1)
     
+    needStorageRestoreName = actionsReqStorageRestoreName.intersection(actions)
+    lenNeedStorageRestoreName = len(needStorageRestoreName)
+    if lenNeedStorageRestoreName > 0:
+        if (lenNeedStorageRestoreName != lenAvailableBoxes):
+            if (lenNeedStorageRestoreName > lenAvailableBoxes):
+                log.error('More boxes than storage names.')
+            if (lenNeedStorageRestoreName < lenAvailableBoxes):
+                log.error('More storage names then boxes.')
+            sys.exit(1)
     needStorageExtracts = actionsReqStorageExtracts.intersection(actions)
     lenNeedStorageExtracts = len(needStorageExtracts)
     if lenNeedStorageExtracts > 0:
@@ -251,7 +262,9 @@ def main():
     arepairs,notpairs_a,notpairs_b = pairsNnot(extract,extractDirectory)
     for (extractName,extractDir) in arepairs:
          extractList.append({'name' : extractName, 'directory' : extractDir})
-    
+    insertList = []
+    for item in insert:
+        insertList.append({'name' : item})
     actionsList = []
     boxesExtractSet = None
     if "list_boxes" in actions:
@@ -263,6 +276,8 @@ def main():
         actionsList.append("down")
     if "store" in actions:
         actionsList.append("store")
+    if "restore" in actions:
+        actionsList.append("restore")
     if "extract" in actions:
         actionsList.append("extract")
         boxesExtractSet = []
@@ -279,8 +294,10 @@ def main():
             boxdetails['storeFormat'] = storageFormat
         if lenNeedStorageName > 0:
             boxdetails['storeName'] = store[index]
+        if lenNeedStorageRestoreName > 0:
+            boxdetails['restoreName'] = restore[index]
         if lenNeedStorageInsert > 0:
-            boxdetails['storeInsert'] = insert[index]
+            boxdetails['storeInsert'] = insertList
         if lenNeedStorageExtracts > 0:
             boxdetails['storeExtract'] = extractList
         

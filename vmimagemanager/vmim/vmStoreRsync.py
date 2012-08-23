@@ -29,6 +29,7 @@ class vmStoreRsync(object):
         diskFacade.mount()
         ImageName = os.path.join(self.storePath,storeName)
         cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s/ %s/" % (ImageName,diskFacade.target)
+        #print cmd
         self.log.debug('cmd=%s' % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
@@ -63,3 +64,18 @@ class vmStoreRsync(object):
             self.log.error(cmdoutput)
             self.log.error('Return Code=%s' % (rc))
         return True
+        
+    def insertStore(self,diskFacade,storeName,directory):
+        diskFacade.mount()
+        insertPath = os.path.join(diskFacade.target,directory.lstrip('/'))
+        if not os.path.isdir(insertPath):
+            self.log.error("Error: Extract target dir %s is not found" % (insertPath))
+            return None
+        destArchive = os.path.join(self.storePath,storeName)
+        cmd = "rsync -ra --delete --numeric-ids --exclude=lost+found %s %s" % (insertPath,destArchive)
+        (rc,cmdoutput) = commands.getstatusoutput(cmd)
+        if rc != 0:
+            logging.error('Failed "%s"' % (cmd))
+            logging.error(cmdoutput)
+            logging.error('Return Code=%s' % (rc))
+        return 0

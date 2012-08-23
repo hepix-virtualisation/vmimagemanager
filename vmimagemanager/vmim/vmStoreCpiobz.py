@@ -75,3 +75,20 @@ class vmStoreCpiobz(object):
             self.log.error(cmdoutput)
             self.log.error('Return Code=%s' % (rc))
         return True
+        
+    def insertStore(self,diskFacade,storeName,directory):
+        diskFacade.mount()
+        insertPath = os.path.join(diskFacade.target,directory.lstrip('/'))
+        if not os.path.isdir(insertPath):
+            self.log.error("Error: Extract target dir %s is not found" % (insertPath))
+            return None
+        destArchive = os.path.join(self.storePath,storeName)
+        cmd = "cd %s; find %s -print |cpio -o -Hnewc |bzip2 -9 -z -q -f > %s" % (diskFacade.target,directory,destArchive)
+        print cmd
+        return 0
+        (rc,cmdoutput) = commands.getstatusoutput(cmd)
+        if rc != 0:
+            logging.error('Failed "%s"' % (cmd))
+            logging.error(cmdoutput)
+            logging.error('Return Code=%s' % (rc))
+        return 0
