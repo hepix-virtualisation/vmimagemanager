@@ -13,6 +13,8 @@ from ConfigFileView import ConfigFile1
             
 from vmstorefacard import vmStoreFacade
 
+import magic
+import os
 
 class StorageControler(object):
     def __init__(self,cfgModel):
@@ -43,6 +45,7 @@ class StorageControler(object):
         self.Storage.imageStore(hostDetails,storename)
     def restore(self,hostname,storename):
         self.UpdateFromModel()
+        path = os.path.join(self.Storage.storePath,storename)
         hostDetails = diskFacade()
         hostDetails.disk = self.cfgModel.vmbyName[hostname].CfgDiskType.get()
         hostDetails.path = self.cfgModel.vmbyName[hostname].CfgDiskImage.get()
@@ -88,7 +91,15 @@ class StorageControler(object):
         self.Storage.storeFormat = storeformat
         self.Storage.storePath = self.cfgModel.vmbyName[hostname].CfgPathInserts.get()
         self.Storage.insertStore(hostDetails,storename,directory)
-
+    
+    
+    def returnFiileType(self,magicStr):
+        cleanstring = str.strip(magicStr)
+        splitString = dir(magicStr)
+        splitLine = cleanstring.split(', ')
+        if splitLine[0] == 'gzip compressed data':
+            return "tgz"
+        return None
 
     def listImages(self):
         output = {}
@@ -106,13 +117,26 @@ class StorageControler(object):
             pthInfo[pth]['hosts'].append(host)
         pathImages = {}
         StoreFacade = vmStoreFacade()
+        ms = magic.open(magic.MAGIC_NONE)
+        ms.load()
+        
         for path in pthInfo.keys():
-            StoreFacade.storePath = path
-            for format in ["rsync",'cpio.bz2',"tgz"]:
-                StoreFacade.storeFormat = format
-                foundImages = StoreFacade.imageList()
-                pthInfo[pth]['images'][format] = foundImages
-        return pthInfo
+            if not os.path.isdir(path):
+                continue
+            for fileName in os.listdir(path):
+                fileDetails = { 'Name' : fileName, 'Path' : path}
+                fullPath = os.path.join(path,fileName)
+                fileDetails['fullPath'] = fullPath
+                if os.path.isdir(fullPath):
+                    fileDetails["type"] = "rsync"
+                elif os.path.isfile(fullPath):
+                    magicout = ms.file(fullPath)
+                    fileType = self.returnFiileType(magicout)
+                    if fileType != None:
+                        fileDetails["type"] = fileType
+                output[fullPath] = fileDetails
+        ms.close()
+        return output
 
 
 class vmState(object):
@@ -161,10 +185,22 @@ class vmState(object):
         if action in ["up"]:
             self.libVirtControler.vmStart(inputs)
     def _processBoxesList(self):
-        output = {}
-        for item in self.libVirtControler.model.vmsbyName.keys():
-            output[item] = {'libVirtName' : item}
-        return {'listBox' : output }
+        cfgBoxes = set(self.cfgModel.vmbyName.keys())
+        livirtBoxes = set(self.libVirtControler.model.vmsbyName.keys())
+        BoxesUnion = cfgBoxes.union(livirtBoxes)
+        boxesOutput = {}
+        for item in BoxesUnion:
+            newBox = {'name': str(item)}
+            if item in livirtBoxes:
+                newBox['libvirt'] = 1
+            else:
+                newBox['libvirt'] = 0
+            if item in cfgBoxes:
+                newBox['disk'] = 1
+            else:
+                newBox['disk'] = 0
+            boxesOutput[item] = newBox
+        return {'listBox' : boxesOutput }
     def _processImageList(self):
         output = {'listImages' : self.StorageCntl.listImages()}
         
@@ -235,8 +271,26 @@ class vmControl(object):
         self.ProcessState = vmState(self.libVirtControler,self.cfgModel,ting)
         return {'vmControl' : self.ProcessState.process(instructions)}
         
-
-
+    def ListBoxes(self):
+        cfgBoxes = set(self.cfgModel.vmbyName.keys())
+        livirtBoxes = set(self.libVirtModel.vmsbyName.keys())
+        BoxesUnion = cfgBoxes.union(livirtBoxes)
+        boxesOutput = {}
+        for item in BoxesUnion:
+            newBox = {'name': str(item)}
+            if item in livirtBoxes:
+                newBox['libvirt'] = 1
+            else:
+                newBox['libvirt'] = 0
+            if item in cfgBoxes:
+                newBox['disk'] = 1
+            else:
+                newBox['disk'] = 0
+            boxesOutput[item] = newBox
+        return boxesOutput
+            
+        
+        
 if __name__ == "__main__" :
     logging.basicConfig(level=logging.DEBUG)
     Control = vmControl()

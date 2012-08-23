@@ -10,6 +10,56 @@ def usage():
 
 
 # User interface
+def displayCommandOutputListBox(Input):
+    print 'Name                                            Disk Virt'
+    print '---------------------------------------------------------'
+    for key in Input["vmControl"]["listBox"].keys():
+        name = Input["vmControl"]["listBox"][key]["name"]
+        nameLen = len(name)
+        if nameLen < 30:
+            while len(name) < 50:
+                name += " "
+        
+        line = "%s %s %s" % (name,Input["vmControl"]["listBox"][key]["disk"],Input["vmControl"]["listBox"][key]["libvirt"])
+        print line
+
+
+
+def displayCommandOutputListImages(Input):
+    print 'Name                 Directory                     Format'
+    print '---------------------------------------------------------'
+    setOfNames = set()
+    for key in Input["vmControl"]["listImages"].keys():
+        availableKeys = Input["vmControl"]["listImages"][key].keys()
+        Name = Input["vmControl"]["listImages"][key]['Name']
+        ImageType = None
+        if 'type' in availableKeys:
+            ImageType = Input["vmControl"]["listImages"][key]['type']
+        while len(Name) < 20:
+                Name += " "
+        Path = None
+        if 'Path' in availableKeys:
+            Path = Input["vmControl"]["listImages"][key]['Path']
+        while len(Path) < 30:
+                Path += " "
+        print Name,Path,ImageType
+          
+
+def displayCommandOutput(Input):
+    if not isinstance(Input,dict):
+        return
+        
+    inputkeys = Input.keys()
+    if not "vmControl" in inputkeys:
+        return
+    if not isinstance(Input["vmControl"],dict):
+        return 
+    OuputTypes = Input["vmControl"].keys()
+    if "listBox" in OuputTypes:
+        displayCommandOutputListBox(Input)
+    if "listImages" in OuputTypes:
+        displayCommandOutputListImages(Input)
+    
 
 def pairsNnot(list_a,list_b):
     len_generate_list = len(list_a)
@@ -168,6 +218,7 @@ def main():
     #    sys.exit(1)
 
     Control.LoadConfigCfg(ConfigurationFilePath)
+    
     # Handle conflicting actions
     actions_req_sel = actionsReqBoxes.intersection(actions)
     lenActions_req_sel = len(actions_req_sel)
@@ -179,23 +230,26 @@ def main():
     
     availableBoxes = []
     if (lenActions_req_sel > 0):
-        instructions = {'vmControl': {
-            'actions': ['list_boxes'],
-            'hostdetails': {},
-            }
-        }
+        instructions = {'vmControl': {'actions': ['list_boxes']}}
         boxStruct = Control.Process(instructions)
-        #print "boxStruct",boxStruct
+        print "boxStruct",boxStruct
         setOfBoxes = set()
         for key in boxStruct['vmControl']['listBox'].keys():
-            name = boxStruct['vmControl']['listBox'][key]['libVirtName']
-            setOfBoxes.add(name)
-        for ThisBox in box:
-            if ThisBox in setOfBoxes:
-                availableBoxes.append(ThisBox)
-            else:
-                log.error("Ignoring actions for unregistered box '%s'" % (ThisBox))    
+            name = boxStruct['vmControl']['listBox'][key]['name']
+            setOfBoxes.add(str(name))
+        boxesSet = set(box)
+        #print  "boxesSet",boxesSet,setOfBoxes
         
+        availableBoxes = boxesSet.intersection(setOfBoxes)
+        #print "availableBoxes",availableBoxes
+        setOfUnavailableBox = boxesSet.difference(availableBoxes)
+        
+        #print "setOfUnavailableBox",setOfUnavailableBox
+        lenSetOfUnavailableBox = len(setOfUnavailableBox)
+        if lenSetOfUnavailableBox > 0:
+            print "The following boxes do not exist:%s" % (string.join(setOfUnavailableBox,", "))
+            displayCommandOutput(boxStruct)
+            sys.exit(1)
     lenAvailableBoxes = len(availableBoxes)
     
     if (lenActions_req_sel > 0) and (lenAvailableBoxes == 0):
@@ -262,8 +316,7 @@ def main():
                 log.error('More Insert names then boxes.')
             sys.exit(1)
     
-    # Handle conflicting identifiers
-
+    
     extractList = []
     arepairs,notpairs_a,notpairs_b = pairsNnot(extract,extractDirectory)
     for (extractName,extractDir) in arepairs:
@@ -274,6 +327,8 @@ def main():
     actionsList = []
     boxesExtractSet = None
     if "list_boxes" in actions:
+        pass
+        #print Control.ListBoxes()
         actionsList.append("list_boxes")
     if "list_images" in actions:
         actionsList.append("list_images")
@@ -318,8 +373,9 @@ def main():
     
     if len(hostdetails) > 0:
         instructions['hostdetails'] = hostdetails
-    print 'input',instructions
-    print "output='%s'"% (Control.Process(instructions))
+    log.debug('input=%s' % (instructions))
+    output = Control.Process(instructions)
+    displayCommandOutput(output)
 
 if __name__ == "__main__":
     main()
