@@ -53,7 +53,7 @@ class StorageControler(object):
     def insert(self,hostname,storename,storeformat):
         self.UpdateFromModel()
         foundHost = self.findByHostName(hostname)
-        print (hostname,storename,storeformat,self.cfgModel.vmbyName[hostname].CfgPathInserts.get())
+        #print (hostname,storename,storeformat,self.cfgModel.vmbyName[hostname].CfgPathInserts.get())
         hostDetails = diskFacade()
         hostDetails.disk = self.cfgModel.vmbyName[hostname].CfgDiskType.get()
         hostDetails.path = self.cfgModel.vmbyName[hostname].CfgDiskImage.get()
@@ -62,6 +62,19 @@ class StorageControler(object):
         self.Storage.storeFormat = storeformat
         self.Storage.storePath = self.cfgModel.vmbyName[hostname].CfgPathInserts.get()
         self.Storage.insertRestore(hostDetails,storename)
+    def extract(self,hostname,storename,directory,storeformat):
+        
+        self.UpdateFromModel()
+        foundHost = self.findByHostName(hostname)
+        #print (hostname,storename,storeformat,self.cfgModel.vmbyName[hostname].CfgPathInserts.get())
+        hostDetails = diskFacade()
+        hostDetails.disk = self.cfgModel.vmbyName[hostname].CfgDiskType.get()
+        hostDetails.path = self.cfgModel.vmbyName[hostname].CfgDiskImage.get()
+        hostDetails.target = self.cfgModel.vmbyName[hostname].CfgMountPoint.get()
+        hostDetails.partitionNo = self.cfgModel.vmbyName[hostname].CfgDiskImagePartition.get()
+        self.Storage.storeFormat = storeformat
+        self.Storage.storePath = self.cfgModel.vmbyName[hostname].CfgPathInserts.get()
+        self.Storage.insertStore(hostDetails,storename,directory)
 
 
     def listImages(self):
@@ -114,9 +127,8 @@ class vmState(object):
         if action in ["extract","insert","store","restore","down"]:
             self.libVirtControler.vmStop(inputs)
         if action in ["extract"]:
-            self.diskModelByHostName.Extract(inputs)
-            self.StorageCntl.Storage.storeFormat = hostInfo[hostName]['storeFormat']
-            
+            for item in hostInfo[hostName]['storeExtract']:
+                self.StorageCntl.extract(hostName,item['name'],item['directory'],hostInfo[hostName]['storeFormat'])
         if action in ["store"]:
             self.StorageCntl.Storage.storeFormat = hostInfo[hostName]['storeFormat']
             self.StorageCntl.store(hostName,hostInfo[hostName]['storeName'])
@@ -127,7 +139,7 @@ class vmState(object):
             
         if action in ["insert"]:
             self.StorageCntl.insert(hostName,hostInfo[hostName]['storeInsert'],hostInfo[hostName]['storeFormat'])
-        if action in ["extract","store","restore","up"]:
+        if action in ["up"]:
             self.StorageCntl.release(hostName)
             self.libVirtControler.vmStart(inputs)
     def _processBoxesList(self):

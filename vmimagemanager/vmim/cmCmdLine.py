@@ -11,22 +11,45 @@ def usage():
 
 # User interface
 
+def pairsNnot(list_a,list_b):
+    len_generate_list = len(list_a)
+    len_image_list = len(list_b)
+    ocupies_generate_list = set(range(len_generate_list))
+    ocupies_image_list = set(range(len_image_list))
+    ocupies_pairs = ocupies_image_list.intersection(ocupies_generate_list)
+    diff_a = ocupies_generate_list.difference(ocupies_image_list)
+    diff_b = ocupies_image_list.difference(ocupies_generate_list)
+    arepairs = []
+    for i in ocupies_pairs:
+        arepairs.append([list_a[i],list_b[i]])
+    notpairs_a = []
+    for i in diff_a:
+        notpairs_a.append(list_a[i])
+    notpairs_b = []
+    for i in diff_b:
+        notpairs_b.append(list_b[i])
+
+    return arepairs,notpairs_a,notpairs_b
+
 
 def main():
     log = logging.getLogger("main")
     """Runs program and handles command line options"""
     p = optparse.OptionParser(version = "%prog " + version)
     p.add_option('-b', '--box', action ='append',help="Select box(s) to operate.")
-    p.add_option('-s', '--store', action ='append', help='Image name(s) to store for box(s)')
-    p.add_option('-r', '--restore', action ='append',help='Image name(s) to restore for box(s).')
-    p.add_option('-e', '--extract', action ='append',help='Extract name(s) to restore for box(s).')
-    p.add_option('-i', '--insert', action ='append',help='Insert name(s) to restore for box(s).')
     p.add_option('-u', '--up', action ='store_true',help='Start boxes.')
     p.add_option('-d', '--down', action ='store_true',help='Stop boxes.')
+    p.add_option('-k', '--kill', action ='store_true',help='Boxes to kill. Simulates power off for box.', metavar='ACTION')
     p.add_option('-l', '--list-boxes', action ='store_true',help='List Boxes.')
     p.add_option('-L', '--list-images', action ='store_true',help='List images.')
+    p.add_option('-s', '--store', action ='append', help='Image name(s) to store for box(s)')
+    p.add_option('-r', '--restore', action ='append',help='Image name(s) to restore for box(s).')
+    p.add_option('-i', '--insert', action ='append',help='Insert name(s) to restore for box(s).')
+    p.add_option('-e', '--extract', action ='append',help='Extract name(s) to restore for box(s).')
+    p.add_option('--extract-directory', action ='append',help='Extract name(s) need a target directory to store.')
+
+
     #p.add_option('-v', '--version', action ='store_true',help='Event application to launch.', metavar='EVENT')    
-    p.add_option('-k', '--kill', action ='store_true',help='Boxes to kill. Simulates power off for box.', metavar='ACTION')
     p.add_option('-y', '--rsync', action ='store_true',help="Sets storeage options to 'rsync'. (default)")
     p.add_option('-w', '--cpio-bzip', action ='store_true',help="Sets storeage options to 'cpio.bz2'.")
     p.add_option('-z', '--tgz', action ='store_true',help="Sets storeage options to 'tar.gzip'.")
@@ -48,12 +71,14 @@ def main():
     actionsReqStorageName = set(['store','restore'])
     actionsReqStorageExtracts = set(['extract'])
     actionsReqStorageInsert = set(['insert'])
-    
+    actionsReqSingleBox = set(['extract'])
     cmdFormatOptions = set([])
     ConfigurationFilePath = '/etc/vmimagemanager/vmimagemanager.cfg'
     print_config = False
     store = []
     cmdInserts = []
+    extract = []
+    extractDirectory = []
     storageFormat = None
     coreOveride = None
     
@@ -92,6 +117,11 @@ def main():
         actions.add("insert")
     if options.extract:
         extract = options.extract
+        actions.add("extract")
+    if options.extract_directory:
+        extractDirectory = options.extract_directory
+        actions.add("extract")
+        
     if options.config != None:
         if os.path.isfile(str(options.log_config)):
             ConfigurationFilePath = str(options.config)
@@ -119,7 +149,7 @@ def main():
         cmdFormatOptions.add("cpio.bz2")
     if options.print_config:
         print_config = True
-
+    
     # 1 So we have some command line validation
     if len(actions) == 0:
         log.error("No actions selected")
@@ -161,10 +191,15 @@ def main():
     
     
     if (lenActions_req_sel > 0) and (lenAvailableBoxes == 0):
-        log.error('Box selections are reqired with these actions:%s.', string.join(actionsReqBoxes,','))
+        log.error('Box selections are reqired with these actions:%s.', string.join(actions_req_sel,','))
         sys.exit(1)
-    
-    
+    actionsSingleBox = actionsReqSingleBox.intersection(actions)
+    if len(actionsSingleBox) >0 and (lenAvailableBoxes > 1):
+        log.error('Action(s) only availbale with a single box :%s.', string.join(actionsSingleBox,','))
+        sys.exit(1)
+    #if len(actions) > 1:
+    #    log.error("More than one action selected.")
+    #    sys.exit(1)
     
     lenCmdFormatOptions = len(cmdFormatOptions)
     needStorageFormat = actionsReqStorageFormat.intersection(actions)
@@ -212,21 +247,30 @@ def main():
     
     # Handle conflicting identifiers
 
+    extractList = []
+    arepairs,notpairs_a,notpairs_b = pairsNnot(extract,extractDirectory)
+    for (extractName,extractDir) in arepairs:
+         extractList.append({'name' : extractName, 'directory' : extractDir})
     
     actionsList = []
+    boxesExtractSet = None
     if "list_boxes" in actions:
         actionsList.append("list_boxes")
     if "list_images" in actions:
         actionsList.append("list_images")
-    if "up" in actions:
-        actionsList.append("up")
+    
     if "down" in actions:
         actionsList.append("down")
     if "store" in actions:
         actionsList.append("store")
+    if "extract" in actions:
+        actionsList.append("extract")
+        boxesExtractSet = []
+        
     if "insert" in actions:
         actionsList.append("insert")
-    
+    if "up" in actions:
+        actionsList.append("up")
     hostdetails = {}
     for index in range(lenAvailableBoxes):
         thisBox = box[index]
@@ -238,7 +282,7 @@ def main():
         if lenNeedStorageInsert > 0:
             boxdetails['storeInsert'] = insert[index]
         if lenNeedStorageExtracts > 0:
-            boxdetails['storeExtract'] = store[index]
+            boxdetails['storeExtract'] = extractList
         
         
         hostdetails[thisBox] = boxdetails

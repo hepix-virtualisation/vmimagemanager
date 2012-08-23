@@ -56,10 +56,25 @@ class vmStoreTgz(object):
             self.log.error("Error: File %s is not found" % (InsertPath))
             return None
         cmd=  "tar -zxpsf %s --exclude=lost+found   -C %s" % (InsertPath,diskFacade.target)
-        print cmd
+        #print cmd
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             self.log.error('Failed "%s"' % (cmd))
             self.log.error(cmdoutput)
             self.log.error('Return Code=%s' % (rc))
         return True
+
+    def insertStore(self,diskFacade,storeName,directory):
+        diskFacade.mount()
+        insertPath = os.path.join(diskFacade.target,directory.lstrip('/'))
+        if not os.path.isdir(insertPath):
+            self.log.error("Error: Extract target dir %s is not found" % (insertPath))
+            return None
+        destArchive = os.path.join(self.storePath,storeName)
+        cmd = "tar -zcpsf %s --exclude=lost+found -C %s %s" % (destArchive,diskFacade.target,directory)
+        (rc,cmdoutput) = commands.getstatusoutput(cmd)
+        if rc != 0:
+            logging.error('Failed "%s"' % (cmd))
+            logging.error(cmdoutput)
+            logging.error('Return Code=%s' % (rc))
+        return 0

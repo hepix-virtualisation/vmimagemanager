@@ -56,7 +56,7 @@ class vmStoreRsync(object):
             self.log.error("Error: Directory %s is not found" % (InsertPath))
             return None
         cmd = "rsync -ra --numeric-ids --exclude=lost+found %s/ %s" % (InsertPath,diskFacade.target)
-        print cmd
+        #print cmd
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             self.log.error('Failed "%s"' % (cmd))

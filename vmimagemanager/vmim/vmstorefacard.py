@@ -80,7 +80,11 @@ class vmStoreFacade(object):
             return self._uploaderImp.insertRestore(diskFacade,storeName)
         else:
             return None
-            
+    def insertStore(self,diskFacade,storeName,directory):
+        if hasattr(self, '_uploaderImp'):        
+            return self._uploaderImp.insertStore(diskFacade,storeName,directory)
+        else:
+            return None       
     def imageList(self):
         if hasattr(self, '_uploaderImp'):
             return self._uploaderImp.imageList()
