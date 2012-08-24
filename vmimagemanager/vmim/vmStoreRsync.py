@@ -54,7 +54,7 @@ class vmStoreRsync(object):
         diskFacade.mount()
         InsertPath = os.path.join(self.storePath,storeName)
         if not os.path.isdir(InsertPath):
-            self.log.error("Error: Directory %s is not found" % (InsertPath))
+            self.log.error("Insert Directory %s is not found" % (InsertPath))
             return None
         cmd = "rsync -ra --numeric-ids --exclude=lost+found %s/ %s" % (InsertPath,diskFacade.target)
         #print cmd
