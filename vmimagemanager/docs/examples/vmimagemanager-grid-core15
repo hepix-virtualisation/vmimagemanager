@@ -1,0 +1,144 @@
+[vmim.local]
+# 
+#'qemu:///system',"/usr/bin/kvm"
+
+#vmemulator="/usr/bin/kvm"
+vmemulator="qemu:///system"
+
+# the Generated configurations for Xen 
+# Are based on a configuration file for the templates to generate them 
+# Place to mount images
+
+mount=/mnt/vm/
+
+
+# # vmimages # #
+#
+# Sets the root for the storing of extractions of virtual maschines.
+# Please be aware that if you are auto generating extracts, say in a 
+# build server or compute farm theis directory will grow fast 
+# unless you apply a cleaning policy.
+
+vmimages=/space/vmimages/
+
+# # vmextracts # #
+#
+# Sets the root for the storing of extractions of virtual maschines.
+# Please be aware that if you are auto generating extracts, say in a 
+# build server or compute farm theis directory will grow fast 
+# unless you apply a cleaning policy.
+
+vmextracts=/space/extracts
+
+
+vmlist = ["vmim.vm.1"]
+
+
+[vmim.default]
+
+
+#Give 2 Gb Memmory
+cAlocatedMemory=597152
+vAlocatedMemory=597152
+virthost=qemu:///system
+bridge=bridge0
+
+
+
+[vmim.vm.hs.1]
+HostName="hudson-slave-vm01.desy.de"
+HostDisk="/dev/mapper/virt-hudson_slave_vm01"
+partition=1
+mac="02:11:69:22:32:21"
+
+[vmim.vm.hs.2]
+HostName="hudson-slave-vm02.desy.de"
+HostDisk="/dev/mapper/virt-hudson_slave_vm02"
+partition=1
+mac="02:11:69:22:32:12"
+
+
+[vmim.vm.hs.3]
+HostName="hudson-slave-vm03.desy.de"
+HostDisk="/dev/mapper/virt-hudson_slave_vm03"
+partition=1
+mac="02:11:69:22:32:13"
+
+
+[vmim.vm.hs.4]
+HostName="hudson-slave-vm04.desy.de"
+HostDisk="/dev/mapper/virt-hudson_slave_vm04"
+partition=1
+mac="02:11:69:22:32:14"
+
+
+[vmim.vm.hs.5]
+HostName="hudson-slave-vm05.desy.de"
+HostDisk="/dev/mapper/virt-hudson_slave_vm05"
+partition=1
+mac="02:11:69:22:32:15"
+
+
+
+[vmim.vm.hs.6]
+HostName="hudson-slave-vm06.desy.de"
+HostDisk="/var/lib/libvirt/images/hudson-slave-vm06.desy.de.img"
+partition=1
+mac="02:11:69:22:32:16"
+
+[vmim.vm.hs.7]
+HostName="hudson-slave-vm07.desy.de"
+HostDisk="/var/lib/libvirt/images/hudson-slave-vm07.desy.de.img"
+partition=1
+mac="02:11:69:22:32:17"
+
+
+[vmim.vm.hs.8]
+HostName="hudson-slave-vm08.desy.de"
+HostDisk="/var/lib/libvirt/images/hudson-slave-vm08.desy.de.imgs"
+partition=1
+mac="02:11:69:22:32:18"
+
+
+
+[vmim.vm.dev.1]
+HostName="dev-vm01.desy.de"
+HostDisk="/dev/mapper/virt-dev_vm01"
+partition=1
+mac="02:11:69:22:32:21"
+
+
+[vmim.vm.dev.2]
+HostName="dev-vm02.desy.de"
+HostDisk="/dev/mapper/virt-dev_vm02"
+partition=1
+mac="02:11:69:22:32:22"
+
+
+[vmim.vm.dev.3]
+HostName="dev-vm03.desy.de"
+HostDisk="/dev/mapper/virt-dev_vm03"
+partition=1
+mac="02:11:69:22:32:23"
+
+[vmim.vm.dev.4]
+HostName="dev-vm04.desy.de"
+HostDisk="/dev/mapper/virt-dev_vm04"
+partition=1
+mac="02:11:69:22:32:24"
+
+
+[vmim.vm.svr.1]
+HostName="hudson-virt-grid.desy.de"
+
+HostDisk="/dev/mapper/virt-hudson"
+partition=1
+mac="02:11:69:22:32:53"
+
+
+[vmim.vm.svr.rbgitpuppet.desy.de]
+HostName="rbgitpuppet.desy.de"
+
+HostDisk="/var/lib/libvirt/images/rbgitpuppet.desy.de"
+partition=1
+mac="02:11:69:22:32:25"
