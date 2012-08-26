@@ -59,6 +59,7 @@ class StorageView(object):
             NewArchive.Name.update(fileName)
             NewArchive.FullPath.update(fullpath)
             magicout = ms.file(fullpath)
+            print magicout
             NewArchive.Magic.update(magicout)
             self.store.collection[directory].addArchive(NewArchive)
         
