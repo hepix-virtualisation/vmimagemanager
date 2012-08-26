@@ -232,7 +232,7 @@ def main():
     if (lenActions_req_sel > 0):
         instructions = {'vmControl': {'actions': ['list_boxes']}}
         boxStruct = Control.Process(instructions)
-        print "boxStruct",boxStruct
+        #print "boxStruct",boxStruct
         setOfBoxes = set()
         for key in boxStruct['vmControl']['listBox'].keys():
             name = boxStruct['vmControl']['listBox'][key]['name']
