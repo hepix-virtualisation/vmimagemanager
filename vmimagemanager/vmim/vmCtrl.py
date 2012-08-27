@@ -22,7 +22,7 @@ class StorageControler(object):
         self.diskFacardDict = {}
         self.Storage = vmStoreFacade()
         self.UpdateFromModel()
-        
+        self.log = logging.getLogger("vmCtrl.StorageControler") 
     def UpdateFromModel(self):
         self.Storage.storePath = self.cfgModel.defaultPathImages.get()
         itemsByName = self.cfgModel.vmbyName.keys()
@@ -45,7 +45,8 @@ class StorageControler(object):
         self.Storage.imageStore(hostDetails,storename)
     def restore(self,hostname,storename):
         self.UpdateFromModel()
-        path = os.path.join(self.Storage.storePath,storename)
+        insertDir = self.cfgModel.vmbyName[hostname].CfgPathImages.get()
+        path = os.path.join(insertDir,storename)
         hostDetails = diskFacade()
         hostDetails.disk = self.cfgModel.vmbyName[hostname].CfgDiskType.get()
         hostDetails.path = self.cfgModel.vmbyName[hostname].CfgDiskImage.get()
@@ -67,7 +68,19 @@ class StorageControler(object):
         hostDetails.partitionNo = self.cfgModel.vmbyName[hostname].CfgDiskImagePartition.get()
         hostDetails.mount()
     def insert(self,hostname,storename,storeformat):
+        insertDir = self.cfgModel.vmbyName[hostname].CfgPathInserts.get()
+        insertPath = os.path.join(insertDir,storename)
+        if not os.path.isfile(insertPath):
+            self.log.error("No such file '%s'" % insertPath)
+            return
+        ms = magic.open(magic.MAGIC_NONE)
+        ms.load()
+        magicout = ms.file(insertPath)
+        fileType = self.returnFiileType(magicout)
+        if fileType != None:
+            storeformat = fileType
         self.UpdateFromModel()
+        
         foundHost = self.findByHostName(hostname)
         #print (hostname,storename,storeformat,self.cfgModel.vmbyName[hostname].CfgPathInserts.get())
         hostDetails = diskFacade()

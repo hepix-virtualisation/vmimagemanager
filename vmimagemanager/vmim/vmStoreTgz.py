@@ -50,13 +50,14 @@ class vmStoreTgz(object):
         return True
 
     def insertRestore(self,diskFacade,storeName):
+        self.log.error("%s------------%s" % (diskFacade,storeName))
         diskFacade.mount()
         InsertPath = os.path.join(self.storePath,storeName)
         if not os.path.isfile(InsertPath):
             self.log.error("Error: File %s is not found" % (InsertPath))
             return None
         cmd=  "tar -zxpsf %s --exclude=lost+found   -C %s" % (InsertPath,diskFacade.target)
-        #print cmd
+        print cmd
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             self.log.error('Failed "%s"' % (cmd))
