@@ -44,6 +44,9 @@ class StorageControler(object):
         hostDetails.partitionNo = self.cfgModel.vmbyName[hostname].CfgDiskImagePartition.get()
         self.Storage.imageStore(hostDetails,storename)
     def restore(self,hostname,storename):
+        if not hostname in self.cfgModel.vmbyName.keys():
+            self.log.warning("No configuration for '%s'" % (hostname))
+            return
         self.UpdateFromModel()
         insertDir = self.cfgModel.vmbyName[hostname].CfgPathImages.get()
         path = os.path.join(insertDir,storename)
@@ -54,6 +57,9 @@ class StorageControler(object):
         hostDetails.partitionNo = self.cfgModel.vmbyName[hostname].CfgDiskImagePartition.get()
         self.Storage.imageRestore(hostDetails,storename)    
     def release(self,hostname):
+        if not hostname in self.cfgModel.vmbyName.keys():
+            self.log.warning("No configuration for '%s'" % (hostname))
+            return
         hostDetails = diskFacade()
         hostDetails.disk = self.cfgModel.vmbyName[hostname].CfgDiskType.get()
         hostDetails.path = self.cfgModel.vmbyName[hostname].CfgDiskImage.get()
@@ -61,6 +67,9 @@ class StorageControler(object):
         hostDetails.partitionNo = self.cfgModel.vmbyName[hostname].CfgDiskImagePartition.get()
         hostDetails.release()
     def mount(self,hostname):
+        if not hostname in self.cfgModel.vmbyName.keys():
+            self.log.warning("No configuration for '%s'" % (hostname))
+            return
         hostDetails = diskFacade()
         hostDetails.disk = self.cfgModel.vmbyName[hostname].CfgDiskType.get()
         hostDetails.path = self.cfgModel.vmbyName[hostname].CfgDiskImage.get()
@@ -79,6 +88,9 @@ class StorageControler(object):
         fileType = self.returnFiileType(magicout)
         if fileType != None:
             storeformat = fileType
+        if not hostname in self.cfgModel.vmbyName.keys():
+            self.log.warning("No configuration for '%s'" % (hostname))
+            return
         self.UpdateFromModel()
         
         foundHost = self.findByHostName(hostname)
@@ -92,7 +104,9 @@ class StorageControler(object):
         self.Storage.storePath = self.cfgModel.vmbyName[hostname].CfgPathInserts.get()
         self.Storage.insertRestore(hostDetails,storename)
     def extract(self,hostname,storename,directory,storeformat):
-        
+        if not hostname in self.cfgModel.vmbyName.keys():
+            self.log.warning("No configuration for '%s'" % (hostname))
+            return
         self.UpdateFromModel()
         foundHost = self.findByHostName(hostname)
         #print (hostname,storename,storeformat,self.cfgModel.vmbyName[hostname].CfgPathInserts.get())
