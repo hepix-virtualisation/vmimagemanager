@@ -2,7 +2,7 @@
 import logging
 
 
-from archiveModel import archiveStore,archiveCollection,archive
+from archiveModel import archiveStore,archiveCollection,archiveInstance
 
 from vmstorefacard import vmStoreFacade
 import magic
@@ -113,6 +113,7 @@ class StorageView(object):
 class archiveCollectionView(object):
     def __init__(self,Collection):
         self.collection = Collection
+        #print type(Collection)
         self.log = logging.getLogger("Events")
     
     def update(self):
@@ -128,7 +129,8 @@ class archiveCollectionView(object):
             ms.load()
             for fileName in files2make:
                 fullpath = "%s/%s" %(path,fileName)
-                NewArchive = archive()
+
+                NewArchive = archiveInstance()
                 NewArchive.Name.update(fileName)
                 NewArchive.Name.update(fileName)
                 NewArchive.FullPath.update(fullpath)
@@ -153,6 +155,61 @@ class archiveCollectionView(object):
             return None
         return self.collection.archives[ImageName]
 
+
+class archiveStoreView(object):
+    def __init__(self,store):
+        self.store = store
+        #print type(Collection)
+        self.log = logging.getLogger("Events")
+
+    def addDirectory(self,directory):
+        if not os.path.isdir(directory):
+            self.log.warning("Directory does not exist:%s" %(directory))
+            return
+        setOfPaths = self.store.collection.keys()
+        if directory in setOfPaths:
+            return self.store.collection[directory]
+        output = archiveCollection()
+        output.path.update(directory)
+        self.store.addCollection(output)
+        return output
+
+    def updateImagesCfg(self,config):
+        self.log.warning("updateCfg not finished.") 
+        hostNames = config.vmbyName.keys()
+        hostMappingPathImages = {}
+        for host in hostNames:
+            path = config.vmbyName[host].CfgPathImages.get()
+            if path == None:
+                continue
+            if not path in hostMappingPathImages.keys():
+                hostMappingPathImages[path] = set([])
+            hostMappingPathImages[path].add(host)
+        known = set(self.store.collection.keys())
+        found = set(hostMappingPathImages.keys())
+        collections2make = found.difference(known)
+        for collections in collections2make:
+            self.addDirectory(collections)
+        
+        found = hostMappingPathImages
+    def listImages(self):
+        output = {}
+        for item in self.store.collection.keys():
+            collectionstuff = archiveCollectionView( self.store.collection[item])
+            collectionstuff.update()
+            images = {}
+            for image in self.store.collection[item].archives.keys():
+                newArchive = self.store.collection[item].archives[image]
+                fullPath = newArchive.FullPath.get()
+                details = {'Path': newArchive.Directory.get(),
+                    'fullPath': newArchive.FullPath.get(), 
+                    'type': newArchive.Format.get(), 
+                    'Name': newArchive.Name.get()}, 
+                images[fullPath] = details
+            output[item] = images
+        return output
+    
+
 class StorageControler(object):
     def __init__(self,cfgModel):
         self.log = logging.getLogger("StorageControler")
@@ -165,10 +222,18 @@ class StorageControler(object):
         self.viewInserts = StorageView(self.mdlInserts)
         self.mdlCfg = cfgModel
     
-    def getImageMdl(self,host,image):
-        if not hasattr(self,"mdlCfg"):
-            self.log.error("No model set")
+        
+        
+
+    def hasHost(self,hostname):
+        keys = self.mdlCfg.vmbyName.keys()
+        if not host in keys:
+            self.log.error("Host not configured")
             return None
+        return self.mdlCfg.vmbyName[hostname]
+    
+    def getImageMdl(self,host,image):
+        
         keys = self.mdlCfg.vmbyName.keys()
         if not host in keys:
             self.log.error("Host not configured")
@@ -187,9 +252,7 @@ class StorageControler(object):
         return directoryView.imageInDirectory(image)
         
     def getExtractMdl(self,host,image):
-        if not hasattr(self,"mdlCfg"):
-            self.log.error("No model set")
-            return None
+        
         keys = self.mdlCfg.vmbyName.keys()
         if not host in keys:
             self.log.error("Host not configured")
@@ -207,9 +270,7 @@ class StorageControler(object):
         return directoryView.imageInDirectory(image)
         
     def getInsertsMdl(self,host,image):
-        if not hasattr(self,"mdlCfg"):
-            self.log.error("No model set")
-            return None
+        
         keys = self.mdlCfg.vmbyName.keys()
         if not host in keys:
             self.log.error("Host not configured")
@@ -232,9 +293,31 @@ class StorageControler(object):
             self.log.error("No model set")
         
         self.mdlCfg.vmbyName.keys()
+    def updateImages(self):
+        # reads the models.
+        outputer = archiveStoreView(self.mdlImages)
+        outputer.updateImagesCfg(self.mdlCfg)
+            
+    def catImages(self):
+        
+        
+        outputer = archiveStoreView(self.mdlImages)
+        
+        #example output
+        #{'vmControl': 
+        #  {'listImages': { '/server/vmstore/images/frog.rsync': 
+        #       {'Path': u'/server/vmstore/images/', 'fullPath': u'/server/vmstore/images/frog.rsync', 'type': 'rsync', 'Name': u'frog.rsync'}, 
+        #                   '/server/vmstore/images/fred.cpio.tgz': 
+        #       {'Path': u'/server/vmstore/images/', 'fullPath': u'/server/vmstore/images/fred.cpio.tgz', 'type': 'tgz', 'Name': u'fred.cpio.tgz'}, 
+        #   '/server/vmstore/images/fred.rsync': 
+        #       {'Path': u'/server/vmstore/images/', 'fullPath': u'/server/vmstore/images/fred.rsync', 'type': 'rsync', 'Name': u'fred.rsync'}, 
+        #                   '/server/vmstore/images/fred.cpio.bzip': 
+        #       {'Path': u'/server/vmstore/images/', 'fullPath': u'/server/vmstore/images/fred.cpio.bzip', 'type': 'tgz', 'Name': u'fred.cpio.bzip'}}}}
+        
+        #for item in store.
+        output = {'listImages': outputer.listImages()}
+        return output
 
-    def debug(self):
-        print 
 
 if __name__ == "__main__" :
     import time
@@ -251,3 +334,5 @@ if __name__ == "__main__" :
     print "Magic",archive.Magic.get()
     print "Format ",archive.Format.get()
     print "Directory ",archive.Directory.get()
+    sc.updateImages()
+    print "catImages", sc.catImages()

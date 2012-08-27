@@ -10,7 +10,7 @@ formatMap = { "directory" : "rsync" ,
     'gzip compressed data': "tgz"}
 
 
-class archive(object):
+class archiveInstance(object):
     
     def __init__(self):
         self.Name = Observable(None)
@@ -40,10 +40,10 @@ class archiveCollection(object):
         self.path = Observable(None)
         self.archives = ObservableDict()
     def addArchive(self,archiveAdd):
-        if not isinstance(archiveAdd,archive):
+        if not isinstance(archiveAdd,archiveInstance):
             return
         CollectionKeys = set(self.archives.keys())
-        newCollection = archive()
+        newCollection = archiveInstance()
         newName = archiveAdd.Name.get()
         if newName in CollectionKeys:
             return self.archives[newName]

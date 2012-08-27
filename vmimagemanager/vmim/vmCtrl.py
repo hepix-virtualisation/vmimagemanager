@@ -144,7 +144,9 @@ class vmControl(object):
             return None
         ting = StorageControler(self.cfgModel)
         self.ProcessState = vmState(self.libVirtControler,self.cfgModel,ting)
-        return {'vmControl' : self.ProcessState.process(instructions)}
+        output = {'vmControl' : self.ProcessState.process(instructions)}
+        print output
+        return output
         
     def ListBoxes(self):
         cfgBoxes = set(self.cfgModel.vmbyName.keys())
