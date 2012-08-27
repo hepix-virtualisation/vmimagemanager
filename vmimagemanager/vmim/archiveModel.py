@@ -15,6 +15,7 @@ class archive(object):
         self.Magic = Observable(None)
         self.Format = Observable(None)
         self.Directory = Observable(None)
+        self.Type = Observable(None)
         
     def update(self,source):
         self.Name.update(source.Name.get())

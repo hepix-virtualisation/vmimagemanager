@@ -50,20 +50,22 @@ class StorageView(object):
         if os.path.isdir(directory):
             filelist = set(os.listdir(directory))
         files2make = filelist.difference(known)
-        for fileName in files2make:
+        if len(files2make) > 0:
             ms = magic.open(magic.MAGIC_NONE)
             ms.load()
-            fullpath = "%s/%s" %(directory,fileName)
-            NewArchive = archive()
-            NewArchive.Name.update(fileName)
-            NewArchive.Name.update(fileName)
-            NewArchive.FullPath.update(fullpath)
-            magicout = ms.file(fullpath)
-            print magicout
-            NewArchive.Magic.update(magicout)
-            self.store.collection[directory].addArchive(NewArchive)
+            for fileName in files2make:
+                fullpath = "%s/%s" %(directory,fileName)
+                NewArchive = archive()
+                NewArchive.Name.update(fileName)
+                NewArchive.Name.update(fileName)
+                NewArchive.FullPath.update(fullpath)
+                magicout = ms.file(fullpath)
+                NewArchive.Magic.update(magicout)
+                self.store.collection[directory].addArchive(NewArchive)
+            ms.close()
         
         self.log.error("no directoryListing=%s" % (directory))
+        
     def addDirectory(self,directory):
         if not os.path.isdir(directory):
             return
@@ -83,14 +85,21 @@ class StorageView(object):
         pathhostmapping = {}
         output = {}
         cfgPaths = set()
+        cfgInserts = set()
+        
         pthInfo = {}
         wooblebird = set()
         allHosts = Cfg.vmbyName.keys()
+        
         if len(allHosts) == 0:
             cfgPaths = set(Cfg.defaultPathImages.get())
+            cfgInserts = set(Cfg.defaultPathInserts.get())
         for host in allHosts:
             path = Cfg.vmbyName[host].CfgPathImages.get()
             cfgPaths.add(path)
+            insert = Cfg.vmbyName[host].CfgPathInserts.get()
+            cfgInserts.add(insert)
+            
             hostpathmapping[host] = path
            
         #
@@ -101,46 +110,23 @@ class StorageView(object):
         for direct in keys2make:
             self.addDirectory(direct)
             self.directoryUpdate(direct)
-        keys2del = currentKeys.difference(cfgPaths)
-        #print "keys2del=%s" % (keys2del)
-        for direct in keys2del:
-            self.directoryDel(direct)
         
         
-        pathImages = {}
-        StoreFacade = vmStoreFacade()
-        ms = magic.open(magic.MAGIC_NONE)
-        ms.load()
-        
-        for path in pthInfo.keys():
-            if not os.path.isdir(path):
-                continue
-            for fileName in os.listdir(path):
-                fileDetails = { 'Name' : fileName, 'Path' : path}
-                fullPath = os.path.join(path,fileName)
-                fileDetails['fullPath'] = fullPath
-                if os.path.isdir(fullPath):
-                    fileDetails["type"] = "rsync"
-                elif os.path.isfile(fullPath):
-                    magicout = ms.file(fullPath)
-                    fileType = self.returnFiileType(magicout)
-                    if fileType != None:
-                        fileDetails["type"] = fileType
-                output[fullPath] = fileDetails
-        ms.close()
-        return output
-        
+   
 
 class StorageControler(object):
     def __init__(self):
-        self.model = archiveStore()
-        self.view = StorageView(self.model)
+        self.Images = archiveStore()
+        self.Extracts = archiveStore()
+        
+        self.view = StorageView(self.Images,self.Extracts)
 
 
     def updateFromCfgMdel(self,cfgModel):
         self.view.updateCfg(cfgModel)
 
-
+    def debug(self):
+        print self.model.collection.keys()
 
 if __name__ == "__main__" :
     import time
@@ -153,3 +139,4 @@ if __name__ == "__main__" :
     config.upDateModel("/etc/vmimagemanager/vmimagemanager.cfg")
     sc = StorageControler()
     sc.updateFromCfgMdel(thisCfgModel)
+    sc.debug()
