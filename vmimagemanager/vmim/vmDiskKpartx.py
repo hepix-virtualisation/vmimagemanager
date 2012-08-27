@@ -211,24 +211,23 @@ class diskMounterKpartX(diskMounterBaseClass):
             return False
         return True
     def release(self):
+        #self.updateFromMtab()
         if not self._hasAtribs():
             self.logger.debug("does not have required atribs.")
             return False
         currentState = self.state.get()
-        if ((currentState & 2) == 0):
-            return True
-        cmd="umount %s" % (self.HostRootSpace)
-        self.logger.debug("Running command %s" % (cmd))
-        (rc,cmdoutput) = commands.getstatusoutput(cmd)
-        if rc != 0:
-            self.logger.error('Command "%s" Failed' % (cmd))
-            self.logger.error('rc=%s,output=%s' % (rc,cmdoutput))
-            self.logger.error('shoudl set statue unknown')
-            return True
-        self.logger.debug('umount Ok')
-        
-        
-        cmd = 'kpartx -p vmim -d %s' % ( self.HostRootSpace)
+        if ((currentState & 2) != 0):
+
+            cmd="umount %s" % (self.HostRootSpace)
+            self.logger.debug("Running command %s" % (cmd))
+            (rc,cmdoutput) = commands.getstatusoutput(cmd)
+            if rc != 0:
+                self.logger.error('Command "%s" Failed' % (cmd))
+                self.logger.error('rc=%s,output=%s' % (rc,cmdoutput))
+                self.logger.error('shoudl set statue unknown')
+                return True
+            self.logger.debug('umount Ok')
+        cmd = 'kpartx -p vmim -d %s' % ( self.path)
         self.logger.debug("Running command %s" % (cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
@@ -236,9 +235,10 @@ class diskMounterKpartX(diskMounterBaseClass):
             self.logger.error(cmdoutput)
             self.logger.error('Return Code=%s' % (rc))
             self.logger.error('shoudl set statue unknown')
+            
             return
         self.logger.debug('kpartx Ok')
-        return
+        return True
     def _clearImplRm(self):
         if hasattr(self, 'formatstring'):
             return self.format()
