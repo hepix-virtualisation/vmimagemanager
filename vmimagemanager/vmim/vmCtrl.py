@@ -203,7 +203,6 @@ if __name__ == "__main__" :
      }
     }
     Control.Process(instructions)
-    print 'dfsdfsdf'
     instructions = { 'vmControl' : { 'actions' : ['down'],
         'hostdetails' : {
             'vmname' : { 'storeName' : 'vmControlTest' }

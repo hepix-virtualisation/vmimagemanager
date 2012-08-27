@@ -6,6 +6,9 @@
 # I shoudl make my own GenKeyFunction Later
 from observable import GenKey, Observable, ObservableDict
 
+formatMap = { "directory" : "rsync" ,
+    'gzip compressed data': "tgz"}
+
 
 class archive(object):
     
@@ -15,7 +18,7 @@ class archive(object):
         self.Magic = Observable(None)
         self.Format = Observable(None)
         self.Directory = Observable(None)
-        self.Type = Observable(None)
+        self.Magic.addCallback(self,self.OnMagic)
         
     def update(self,source):
         self.Name.update(source.Name.get())
@@ -23,6 +26,14 @@ class archive(object):
         self.Magic.update(source.Magic.get())
         self.Format.update(source.Format.get())
         self.Directory.update(source.Directory.get())
+    
+    def OnMagic(self):
+        format = None
+        
+        magicString = self.Magic.get()
+        if magicString in formatMap.keys():
+            format = formatMap[magicString]
+        self.Format.update(format)
 
 class archiveCollection(object):
     def __init__(self):
@@ -37,6 +48,7 @@ class archiveCollection(object):
         if newName in CollectionKeys:
             return self.archives[newName]
         newCollection.update(archiveAdd)
+        newCollection.Directory.update(self.path.get())
         self.archives[newName] = newCollection
         return self.archives[newName]
 

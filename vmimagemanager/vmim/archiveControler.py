@@ -19,10 +19,7 @@ class StorageView(object):
         if splitLine[0] == 'gzip compressed data':
             return "tgz"
         return None
-    
-    
-    
-    
+
     def getSetOfFiles(self,directory):
         output = set([])
         foundPaths = self.getSetOfPaths()
@@ -68,6 +65,7 @@ class StorageView(object):
         
     def addDirectory(self,directory):
         if not os.path.isdir(directory):
+            self.log.warning("Directory does not exist:%s" %(directory))
             return
         setOfPaths = self.getSetOfPaths()
         if directory in setOfPaths:
@@ -86,11 +84,9 @@ class StorageView(object):
         output = {}
         cfgPaths = set()
         cfgInserts = set()
-        
         pthInfo = {}
         wooblebird = set()
         allHosts = Cfg.vmbyName.keys()
-        
         if len(allHosts) == 0:
             cfgPaths = set(Cfg.defaultPathImages.get())
             cfgInserts = set(Cfg.defaultPathInserts.get())
@@ -99,7 +95,6 @@ class StorageView(object):
             cfgPaths.add(path)
             insert = Cfg.vmbyName[host].CfgPathInserts.get()
             cfgInserts.add(insert)
-            
             hostpathmapping[host] = path
            
         #
@@ -110,23 +105,138 @@ class StorageView(object):
         for direct in keys2make:
             self.addDirectory(direct)
             self.directoryUpdate(direct)
+
+    
+
+
+
+class archiveCollectionView(object):
+    def __init__(self,Collection):
+        self.collection = Collection
+        self.log = logging.getLogger("Events")
+    
+    def update(self):
+        path = self.collection.path.get()
+        if not os.path.isdir(path):
+            self.log.warning("Invalid Directory:%s"  % (path))
+            return None
+        listDir = set(os.listdir(path))
+        knownImageNames = set(self.collection.archives.keys())
+        files2make = listDir.difference(knownImageNames)
+        if len(files2make) > 0:
+            ms = magic.open(magic.MAGIC_NONE)
+            ms.load()
+            for fileName in files2make:
+                fullpath = "%s/%s" %(path,fileName)
+                NewArchive = archive()
+                NewArchive.Name.update(fileName)
+                NewArchive.Name.update(fileName)
+                NewArchive.FullPath.update(fullpath)
+                magicout = ms.file(fullpath)
+                NewArchive.Magic.update(magicout)
+                self.collection.addArchive(NewArchive)
+            ms.close()
         
-        
-   
+            
+    def imageInDirectory(self,ImageName):
+        if ImageName == None:
+            self.log.error("Image Names None")
+            return None
+        knownImageNames = self.collection.archives.keys()
+        if not ImageName in knownImageNames:
+            # Maybe the first time for cleared cache
+            self.update()
+            knownImageNames = self.collection.archives.keys()
+        if not ImageName in knownImageNames:
+            # Updated the directory and still not here:
+            self.log.error("No model setsssssssssss")
+            return None
+        return self.collection.archives[ImageName]
 
 class StorageControler(object):
-    def __init__(self):
-        self.Images = archiveStore()
-        self.Extracts = archiveStore()
+    def __init__(self,cfgModel):
+        self.log = logging.getLogger("StorageControler")
+        self.mdlImages = archiveStore()
+        self.mdlExtracts = archiveStore()
+        self.mdlInserts = archiveStore()
         
-        self.view = StorageView(self.Images,self.Extracts)
-
+        self.viewImages = StorageView(self.mdlImages)
+        self.viewExtracts = StorageView(self.mdlExtracts)
+        self.viewInserts = StorageView(self.mdlInserts)
 
     def updateFromCfgMdel(self,cfgModel):
-        self.view.updateCfg(cfgModel)
+        self.mdlCfg = cfgModel
+    
+    def getImageMdl(self,host,image):
+        if not hasattr(self,"mdlCfg"):
+            self.log.error("No model set")
+            return None
+        keys = self.mdlCfg.vmbyName.keys()
+        if not host in keys:
+            self.log.error("Host not configured")
+            return None
+        ImagePath = self.mdlCfg.vmbyName[host].CfgPathImages.get()
+        #self.mdlCfg.vmbyName[host].CfgPathExtracts.get()
+        #self.mdlCfg.vmbyName[host].CfgPathInserts.get()
+        if ImagePath == None:
+            self.log.error("File Path for Image.")
+            return None
+        directoryDetails = self.viewImages.addDirectory(ImagePath)
+        if directoryDetails == None:
+            self.log.error("directoryDetails not found.")
+            return None
+        directoryView = archiveCollectionView(directoryDetails)
+        return directoryView.imageInDirectory(image)
+        
+    def getExtractMdl(self,host,image):
+        if not hasattr(self,"mdlCfg"):
+            self.log.error("No model set")
+            return None
+        keys = self.mdlCfg.vmbyName.keys()
+        if not host in keys:
+            self.log.error("Host not configured")
+            return None
+        ImagePath = self.mdlCfg.vmbyName[host].CfgPathExtracts.get()
+        #self.mdlCfg.vmbyName[host].CfgPathInserts.get()
+        if ImagePath == None:
+            self.log.error("File Path for Image.")
+            return None
+        directoryDetails = self.viewExtracts.addDirectory(ImagePath)
+        if directoryDetails == None:
+            self.log.error("directoryDetails not found.")
+            return None
+        directoryView = archiveCollectionView(directoryDetails)
+        return directoryView.imageInDirectory(image)
+        
+    def getInsertsMdl(self,host,image):
+        if not hasattr(self,"mdlCfg"):
+            self.log.error("No model set")
+            return None
+        keys = self.mdlCfg.vmbyName.keys()
+        if not host in keys:
+            self.log.error("Host not configured")
+            return None
+        ImagePath = self.mdlCfg.vmbyName[host].CfgPathInserts.get()
+        if ImagePath == None:
+            self.log.error("File Path for Image.")
+            return None
+        directoryDetails = self.viewInserts.addDirectory(ImagePath)
+        if directoryDetails == None:
+            self.log.error("directoryDetails not found.")
+            return None
+        directoryView = archiveCollectionView(directoryDetails)
+        return directoryView.imageInDirectory(image)
+       
+            
+    
+    def formatBtHostImage(self,host,image):
+        if not hasattr(self,"mdlCfg"):
+            self.log.error("No model set")
+        
+        self.mdlCfg.vmbyName.keys()
 
     def debug(self):
-        print self.model.collection.keys()
+        print 
 
 if __name__ == "__main__" :
     import time
@@ -137,6 +247,10 @@ if __name__ == "__main__" :
     thisCfgModel = CfgModel()
     config = ConfigFile1(thisCfgModel)
     config.upDateModel("/etc/vmimagemanager/vmimagemanager.cfg")
-    sc = StorageControler()
+    sc = StorageControler(thisCfgModel)
     sc.updateFromCfgMdel(thisCfgModel)
-    sc.debug()
+    archive = sc.getImageMdl("vmname","fred.rsync")
+    print "FullPath",archive.FullPath.get()
+    print "Magic",archive.Magic.get()
+    print "Format ",archive.Format.get()
+    print "Directory ",archive.Directory.get()
