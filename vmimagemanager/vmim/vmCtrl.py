@@ -14,14 +14,17 @@ import os
 
 from vmStoreControl import StorageControler
 
+from archiveControler import archControler
+
 class vmState(object):
     actionsReqBoxes = set(['up','down','store','restore','extract','insert','kill','mount','release'])
     actionsReqStats = set(['list_images','list_boxes'])
-    def __init__(self,libVirtControler,cfgModel,StorageCntl):
+    def __init__(self,libVirtControler,cfgModel,StorageCntl,archiveStore):
         self.libVirtControler = libVirtControler
         self.cfgModel = cfgModel
         self.StorageCntl = StorageCntl
         self.diskModelByHostName = {}
+        self.archiveStore = archiveStore
         self.log = logging.getLogger("vmCtrl.vmState") 
     def _processAction(self,instructions,hostInfo,action):
         self.updateDiskModelByHostName()
@@ -77,8 +80,7 @@ class vmState(object):
             boxesOutput[item] = newBox
         return {'listBox' : boxesOutput }
     def _processImageList(self):
-        output = {'listImages' : self.StorageCntl.listImages()}
-        
+        output = {'listImages' : self.archiveStore.catImagesOldFormat()}
         return output
         
         
@@ -125,7 +127,7 @@ class vmControl(object):
         self.cfgModel = CfgModel()
         self.cfgModel.libvirtConStr.addCallback(self.callbackKey,self._onlibvirtConStr)
         self.libVirtModel = vhostMdl()
-
+        self.archiveStore = archControler(self.cfgModel)
     def LoadConfigCfg(self,configfile):
         config = ConfigFile1(self.cfgModel)
         return config.upDateModel(configfile)
@@ -143,7 +145,8 @@ class vmControl(object):
         if not 'vmControl' in instructions.keys():
             return None
         ting = StorageControler(self.cfgModel)
-        self.ProcessState = vmState(self.libVirtControler,self.cfgModel,ting)
+        self.archiveStore.updateImages()
+        self.ProcessState = vmState(self.libVirtControler,self.cfgModel,ting,self.archiveStore)
         output = {'vmControl' : self.ProcessState.process(instructions)}
         print output
         return output
@@ -165,7 +168,7 @@ class vmControl(object):
                 newBox['disk'] = 0
             boxesOutput[item] = newBox
         return boxesOutput
-            
+    
         
         
 if __name__ == "__main__" :

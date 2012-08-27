@@ -43,6 +43,7 @@ class archiveCollection(object):
         if not isinstance(archiveAdd,archiveInstance):
             return
         CollectionKeys = set(self.archives.keys())
+        print CollectionKeys
         newCollection = archiveInstance()
         newName = archiveAdd.Name.get()
         if newName in CollectionKeys:
@@ -65,7 +66,7 @@ class archiveStore(object):
         newCollection = archiveCollection()
         newCollectionPath = archive.path.get()
         if newCollectionPath in CollectionKeys:
-            return self.collection[archive]
+            return self.collection[newCollectionPath]
         newCollection.path.update(newCollectionPath)
         self.collection[newCollectionPath] = newCollection
         return self.collection[newCollectionPath]

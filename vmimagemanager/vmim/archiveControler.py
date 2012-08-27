@@ -170,9 +170,12 @@ class archiveStoreView(object):
         if directory in setOfPaths:
             return self.store.collection[directory]
         output = archiveCollection()
-        output.path.update(directory)
-        self.store.addCollection(output)
-        return output
+        newinfo = self.store.addCollection(output)
+        if newinfo == None:
+            self.log.error("Failed to add:%s" %(output))
+            return
+        newinfo.path.update(directory)
+        return newinfo
 
     def updateImagesCfg(self,config):
         self.log.warning("updateCfg not finished.") 
@@ -195,6 +198,7 @@ class archiveStoreView(object):
     def listImages(self):
         output = {}
         for item in self.store.collection.keys():
+            print "item", item
             collectionstuff = archiveCollectionView( self.store.collection[item])
             collectionstuff.update()
             images = {}
@@ -209,10 +213,30 @@ class archiveStoreView(object):
             output[item] = images
         return output
     
+    def listImagesCompat(self):
+        foundImages = set([])
+        output = {}
+        
+        for item in self.store.collection.keys():
+            print "item", item
+            collectionstuff = archiveCollectionView( self.store.collection[item])
+            collectionstuff.update()
+            images = {}
+            for image in self.store.collection[item].archives.keys():
+                newArchive = self.store.collection[item].archives[image]
+                fullPath = newArchive.FullPath.get()
+                details = {'Path': newArchive.Directory.get(),
+                    'fullPath': newArchive.FullPath.get(), 
+                    'type': newArchive.Format.get(), 
+                    'Name': newArchive.Name.get()}
+                images[fullPath] = details
+            output = images
+        return output
+    
 
-class StorageControler(object):
+class archControler(object):
     def __init__(self,cfgModel):
-        self.log = logging.getLogger("StorageControler")
+        self.log = logging.getLogger("archControler")
         self.mdlImages = archiveStore()
         self.mdlExtracts = archiveStore()
         self.mdlInserts = archiveStore()
@@ -272,6 +296,7 @@ class StorageControler(object):
     def getInsertsMdl(self,host,image):
         
         keys = self.mdlCfg.vmbyName.keys()
+        
         if not host in keys:
             self.log.error("Host not configured")
             return None
@@ -298,23 +323,23 @@ class StorageControler(object):
         outputer = archiveStoreView(self.mdlImages)
         outputer.updateImagesCfg(self.mdlCfg)
             
-    def catImages(self):
-        
-        
+    def catImages2(self):
         outputer = archiveStoreView(self.mdlImages)
-        
-        #example output
-        #{'vmControl': 
-        #  {'listImages': { '/server/vmstore/images/frog.rsync': 
-        #       {'Path': u'/server/vmstore/images/', 'fullPath': u'/server/vmstore/images/frog.rsync', 'type': 'rsync', 'Name': u'frog.rsync'}, 
-        #                   '/server/vmstore/images/fred.cpio.tgz': 
-        #       {'Path': u'/server/vmstore/images/', 'fullPath': u'/server/vmstore/images/fred.cpio.tgz', 'type': 'tgz', 'Name': u'fred.cpio.tgz'}, 
-        #   '/server/vmstore/images/fred.rsync': 
-        #       {'Path': u'/server/vmstore/images/', 'fullPath': u'/server/vmstore/images/fred.rsync', 'type': 'rsync', 'Name': u'fred.rsync'}, 
-        #                   '/server/vmstore/images/fred.cpio.bzip': 
-        #       {'Path': u'/server/vmstore/images/', 'fullPath': u'/server/vmstore/images/fred.cpio.bzip', 'type': 'tgz', 'Name': u'fred.cpio.bzip'}}}}
-        
-        #for item in store.
+        output = outputer.listImages()
+        return output
+
+    def catImagesOldFormat(self):
+        outputer = archiveStoreView(self.mdlImages)
+        output = outputer.listImagesCompat()
+        return output
+
+
+    def catInserts(self):
+        outputer = archiveStoreView(self.mdlImages)
+        output = {'listImages': outputer.listImages()}
+        return output
+    def catExtracts(self):
+        outputer = archiveStoreView(self.mdlImages)
         output = {'listImages': outputer.listImages()}
         return output
 
@@ -328,11 +353,11 @@ if __name__ == "__main__" :
     thisCfgModel = CfgModel()
     config = ConfigFile1(thisCfgModel)
     config.upDateModel("/etc/vmimagemanager/vmimagemanager.cfg")
-    sc = StorageControler(thisCfgModel)
+    sc = archControler(thisCfgModel)
     archive = sc.getImageMdl("vmname","fred.rsync")
-    print "FullPath",archive.FullPath.get()
-    print "Magic",archive.Magic.get()
-    print "Format ",archive.Format.get()
-    print "Directory ",archive.Directory.get()
+    print "FullPath:%s" % (archive.FullPath.get())
+    print "Magic:%s" % (archive.Magic.get())
+    print "Format:%s" % (archive.Format.get())
+    print "Directory:%s" % (archive.Directory.get())
     sc.updateImages()
     print "catImages", sc.catImages()
