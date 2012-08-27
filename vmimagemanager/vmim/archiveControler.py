@@ -163,8 +163,6 @@ class StorageControler(object):
         self.viewImages = StorageView(self.mdlImages)
         self.viewExtracts = StorageView(self.mdlExtracts)
         self.viewInserts = StorageView(self.mdlInserts)
-
-    def updateFromCfgMdel(self,cfgModel):
         self.mdlCfg = cfgModel
     
     def getImageMdl(self,host,image):
@@ -248,7 +246,6 @@ if __name__ == "__main__" :
     config = ConfigFile1(thisCfgModel)
     config.upDateModel("/etc/vmimagemanager/vmimagemanager.cfg")
     sc = StorageControler(thisCfgModel)
-    sc.updateFromCfgMdel(thisCfgModel)
     archive = sc.getImageMdl("vmname","fred.rsync")
     print "FullPath",archive.FullPath.get()
     print "Magic",archive.Magic.get()
