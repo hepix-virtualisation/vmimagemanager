@@ -198,7 +198,7 @@ class archiveStoreView(object):
     def listImages(self):
         output = {}
         for item in self.store.collection.keys():
-            print "item", item
+            print "listImages.item", item
             collectionstuff = archiveCollectionView( self.store.collection[item])
             collectionstuff.update()
             images = {}
@@ -218,7 +218,6 @@ class archiveStoreView(object):
         output = {}
         
         for item in self.store.collection.keys():
-            print "item", item
             collectionstuff = archiveCollectionView( self.store.collection[item])
             collectionstuff.update()
             images = {}

@@ -148,7 +148,6 @@ class vmControl(object):
         self.archiveStore.updateImages()
         self.ProcessState = vmState(self.libVirtControler,self.cfgModel,ting,self.archiveStore)
         output = {'vmControl' : self.ProcessState.process(instructions)}
-        print output
         return output
         
     def ListBoxes(self):
