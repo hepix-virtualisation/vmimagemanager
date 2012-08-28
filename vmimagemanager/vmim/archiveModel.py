@@ -31,8 +31,11 @@ class archiveInstance(object):
         format = None
         
         magicString = self.Magic.get()
-        if magicString in formatMap.keys():
-            format = formatMap[magicString]
+        cleanstring = str.strip(magicString)
+        splitLine = cleanstring.split(', ')
+        
+        if splitLine[0] in formatMap.keys():
+            format = formatMap[splitLine[0]]
         self.Format.update(format)
 
 class archiveCollection(object):
@@ -43,7 +46,6 @@ class archiveCollection(object):
         if not isinstance(archiveAdd,archiveInstance):
             return
         CollectionKeys = set(self.archives.keys())
-        print CollectionKeys
         newCollection = archiveInstance()
         newName = archiveAdd.Name.get()
         if newName in CollectionKeys:
