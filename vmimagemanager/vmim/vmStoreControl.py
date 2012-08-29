@@ -2,6 +2,7 @@ from vmDisk import diskFacade
 from vmstorefacard import vmStoreFacade
 import magic
 
+import logging
 import os
 
 class StorageControler(object):
@@ -10,7 +11,7 @@ class StorageControler(object):
         self.diskFacardDict = {}
         self.Storage = vmStoreFacade()
         self.UpdateFromModel()
-        
+        self.log = logging.getLogger("vmStorageControler.StorageControler") 
     def UpdateFromModel(self):
         self.Storage.storePath = self.cfgModel.defaultPathImages.get()
         itemsByName = self.cfgModel.vmbyName.keys()

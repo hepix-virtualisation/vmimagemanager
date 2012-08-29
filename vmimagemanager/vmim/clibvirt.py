@@ -288,7 +288,7 @@ class LibVirtCnt(object):
         self.model = model
         # Default time to wait befor assuming Shutdown has failed.
         self.DefaultsShutdownTimeOut = 180
-        
+        self.log = logging.getLogger("clibvirt.LibVirtCnt")
     def updateModel(self):
         RunningDomains = self.connection.listDomainsID()
         for LibVirtRunningDomainId in RunningDomains:
@@ -385,6 +385,7 @@ class LibVirtCnt(object):
     def vmStop(self,vm):
         match = self.model.getVmMatch(vm)
         if match == None:
+            self.log.warning("No matching Vm found:%s"  % (vm))
             return None
         self.updateModel()
         currentState = match.libvirtState.get()     
@@ -429,6 +430,7 @@ class LibVirtCnt(object):
             match.libvirtMaxMem.update(maxMem)
             match.libvirtNrVirtCpu.update(nrVirtCpu)
             match.libvirtCpuTime.update(cpuTime)
+        return match
                 
         
 def tester(conection,model):
