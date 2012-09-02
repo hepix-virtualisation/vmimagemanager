@@ -18,7 +18,7 @@ from archiveControler import archControler
 
 class vmState(object):
     actionsReqBoxes = set(['up','down','store','restore','extract','insert','kill','mount','release'])
-    actionsReqStats = set(['list_images','list_boxes'])
+    actionsReqStats = set(['list_images','list_boxes','list_inserts'])
     def __init__(self,libVirtControler,cfgModel,StorageCntl,archiveStore):
         self.libVirtControler = libVirtControler
         self.cfgModel = cfgModel
@@ -82,7 +82,10 @@ class vmState(object):
     def _processImageList(self):
         output = {'listImages' : self.archiveStore.catImagesOldFormat()}
         return output
-        
+    def _processInsertsList(self):
+        output = {'listOverlays' : self.archiveStore.catInserts()}
+        return output
+       
         
     def process(self,instructions):
         #print instructions
@@ -90,10 +93,14 @@ class vmState(object):
         lenReqStats = len(reqStats)
         if lenReqStats > 0:
             #print "reqStats",reqStats
-            if 'list_boxes' in reqStats:
+            if 'list_boxes' in reqStats:            
                 return self._processBoxesList()
             if 'list_images' in reqStats:
-                return self._processImageList()
+                self.archiveStore.updateImages()
+                return {'listImages' : self.archiveStore.catImagesOldFormat()}
+            if 'list_inserts' in reqStats:
+                return {'listOverlays' : self.archiveStore.catInserts()}
+            
         reqBoxes = self.actionsReqBoxes.intersection(instructions['vmControl']['actions'])
         lenReqBoxes = len(reqBoxes)
         #print "ssss",reqBoxes,instructions
@@ -145,7 +152,7 @@ class vmControl(object):
         if not 'vmControl' in instructions.keys():
             return None
         ting = StorageControler(self.cfgModel)
-        self.archiveStore.updateImages()
+        
         self.ProcessState = vmState(self.libVirtControler,self.cfgModel,ting,self.archiveStore)
         output = {'vmControl' : self.ProcessState.process(instructions)}
         return output

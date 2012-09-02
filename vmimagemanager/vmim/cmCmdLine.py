@@ -44,7 +44,10 @@ def displayCommandOutputListImages(Input):
                 Path += " "
         print Name,Path,ImageType
           
-
+def displayCommandOutputListOverlay(Input):
+    print 'Name                 Directory                     Format'
+    print Input
+    
 def displayCommandOutput(Input):
     if not isinstance(Input,dict):
         return
@@ -59,6 +62,8 @@ def displayCommandOutput(Input):
         displayCommandOutputListBox(Input)
     if "listImages" in OuputTypes:
         displayCommandOutputListImages(Input)
+    if "listOverlays" in OuputTypes:
+        displayCommandOutputListOverlay(Input)
     
 
 def pairsNnot(list_a,list_b):
@@ -92,6 +97,7 @@ def main():
     p.add_option('-k', '--kill', action ='store_true',help='Boxes to kill. Simulates power off for box.', metavar='ACTION')
     p.add_option('-l', '--list-boxes', action ='store_true',help='List Boxes.')
     p.add_option('-L', '--list-images', action ='store_true',help='List images.')
+    p.add_option('--list-inserts', action ='store_true',help='List images overlays.')
     p.add_option('-s', '--store', action ='append', help='Image name(s) to store for box(s)')
     p.add_option('-r', '--restore', action ='append',help='Image name(s) to restore for box(s).')
     p.add_option('-i', '--insert', action ='append',help='Insert name(s) to restore for box(s).')
@@ -198,6 +204,8 @@ def main():
         actions.add("list_boxes")
     if options.list_images:
         actions.add("list_images")
+    if options.list_inserts:
+        actions.add("list_inserts")
     if options.kill:
         actions.add("kill")
     if options.tgz:
@@ -332,6 +340,8 @@ def main():
         actionsList.append("list_boxes")
     if "list_images" in actions:
         actionsList.append("list_images")
+    if "list_inserts" in actions:
+        actionsList.append("list_inserts")
     
     if "down" in actions:
         actionsList.append("down")

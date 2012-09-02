@@ -177,17 +177,9 @@ class archiveStoreView(object):
         newinfo.path.update(directory)
         return newinfo
 
-    def updateImagesCfg(self,config):
+    def updateImagesCfg(self,hostMappingPathImages):
         self.log.warning("updateCfg not finished.") 
-        hostNames = config.vmbyName.keys()
-        hostMappingPathImages = {}
-        for host in hostNames:
-            path = config.vmbyName[host].CfgPathImages.get()
-            if path == None:
-                continue
-            if not path in hostMappingPathImages.keys():
-                hostMappingPathImages[path] = set([])
-            hostMappingPathImages[path].add(host)
+        
         known = set(self.store.collection.keys())
         found = set(hostMappingPathImages.keys())
         collections2make = found.difference(known)
@@ -271,6 +263,7 @@ class archControler(object):
         if directoryDetails == None:
             self.log.error("directoryDetails not found.")
             return None
+        
         directoryView = archiveCollectionView(directoryDetails)
         return directoryView.imageInDirectory(image)
         
@@ -320,7 +313,16 @@ class archControler(object):
     def updateImages(self):
         # reads the models.
         outputer = archiveStoreView(self.mdlImages)
-        outputer.updateImagesCfg(self.mdlCfg)
+        hostNames = self.mdlImages.collection.keys()
+        hostMappingPathImages = {}
+        for host in hostNames:
+            path = self.mdlImages.vmbyName[host].CfgPathImages.get()
+            if path == None:
+                continue
+            if not path in hostMappingPathImages.keys():
+                hostMappingPathImages[path] = set([])
+            hostMappingPathImages[path].add(host)
+        outputer.updateImagesCfg(hostMappingPathImages)
             
     def catImages2(self):
         outputer = archiveStoreView(self.mdlImages)
@@ -334,7 +336,7 @@ class archControler(object):
 
 
     def catInserts(self):
-        outputer = archiveStoreView(self.mdlImages)
+        outputer = archiveStoreView(self.mdlInserts)
         output = {'listImages': outputer.listImages()}
         return output
     def catExtracts(self):
