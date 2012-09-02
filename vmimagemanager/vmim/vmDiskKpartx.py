@@ -194,8 +194,6 @@ class diskMounterKpartX(diskMounterBaseClass):
         
         if self.HostRootSpace == None:
             return False
-        if not os.path.exists(self.HostRootSpace):
-            print 'danger',self.HostRootSpace
         if not os.path.isdir(self.target):
             os.makedirs(self.target)
             self.logger.info( 'Made Directory %s' % (self.target))

@@ -259,10 +259,11 @@ class diskMounterLvm(diskMounterBaseClass):
         
         self._loadpartitions()
         if self.HostRootSpace == None:
-            self.logger.info( 'HostRootSpace %s' % (self.HostRootSpace))
+            self.logger.info( 'HostRootSpace is None')
             return False
         if not os.path.exists(self.HostRootSpace):
-            print 'danger',self.HostRootSpace
+            self.logger.error( 'HostRootSpace does not exist %s' % (self.HostRootSpace))
+            return False
         if not os.path.isdir(self.target):
             os.makedirs(self.target)
             self.logger.info( 'Made Directory %s' % (self.target))
