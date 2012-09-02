@@ -178,8 +178,6 @@ class archiveStoreView(object):
         return newinfo
 
     def updateImagesCfg(self,hostMappingPathImages):
-        self.log.warning("updateCfg not finished.") 
-        
         known = set(self.store.collection.keys())
         found = set(hostMappingPathImages.keys())
         collections2make = found.difference(known)
@@ -190,7 +188,7 @@ class archiveStoreView(object):
     def listImages(self):
         output = {}
         for item in self.store.collection.keys():
-            print "listImages.item", item
+            
             collectionstuff = archiveCollectionView( self.store.collection[item])
             collectionstuff.update()
             images = {}
@@ -313,17 +311,29 @@ class archControler(object):
     def updateImages(self):
         # reads the models.
         outputer = archiveStoreView(self.mdlImages)
-        hostNames = self.mdlImages.collection.keys()
+        hostNames = self.mdlCfg.vmbyName.keys()
         hostMappingPathImages = {}
         for host in hostNames:
-            path = self.mdlImages.vmbyName[host].CfgPathImages.get()
+            path = self.mdlCfg.vmbyName[host].CfgPathImages.get()
             if path == None:
                 continue
             if not path in hostMappingPathImages.keys():
                 hostMappingPathImages[path] = set([])
             hostMappingPathImages[path].add(host)
         outputer.updateImagesCfg(hostMappingPathImages)
-            
+    def updateOverlay(self):
+        # reads the models.
+        outputer = archiveStoreView(self.mdlInserts)
+        hostNames = self.mdlCfg.vmbyName.keys()
+        hostMappingPathImages = {}
+        for host in hostNames:
+            path = self.mdlCfg.vmbyName[host].CfgPathInserts.get()
+            if path == None:
+                continue
+            if not path in hostMappingPathImages.keys():
+                hostMappingPathImages[path] = set([])
+            hostMappingPathImages[path].add(host)
+        outputer.updateImagesCfg(hostMappingPathImages)       
     def catImages2(self):
         outputer = archiveStoreView(self.mdlImages)
         output = outputer.listImages()
@@ -337,7 +347,7 @@ class archControler(object):
 
     def catInserts(self):
         outputer = archiveStoreView(self.mdlInserts)
-        output = {'listImages': outputer.listImages()}
+        output = {'listOverlay': outputer.listImages()}
         return output
     def catExtracts(self):
         outputer = archiveStoreView(self.mdlImages)

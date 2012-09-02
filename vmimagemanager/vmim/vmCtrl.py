@@ -99,6 +99,7 @@ class vmState(object):
                 self.archiveStore.updateImages()
                 return {'listImages' : self.archiveStore.catImagesOldFormat()}
             if 'list_inserts' in reqStats:
+                self.archiveStore.updateOverlay()
                 return {'listOverlays' : self.archiveStore.catInserts()}
             
         reqBoxes = self.actionsReqBoxes.intersection(instructions['vmControl']['actions'])

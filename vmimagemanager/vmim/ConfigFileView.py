@@ -299,7 +299,6 @@ class ConfigFile1(object):
                 self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (MainSection,key,defaultPathImages))
             else:
                 defaultPathInserts = tmpDefaultPathMount
-        
         self.model.defaultPathInserts.update(defaultPathInserts)
         
         
