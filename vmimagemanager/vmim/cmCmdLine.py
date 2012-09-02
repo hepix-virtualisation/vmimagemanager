@@ -383,7 +383,7 @@ def main():
     
     if len(hostdetails) > 0:
         instructions['hostdetails'] = hostdetails
-    log.error('input=%s' % (instructions))
+    log.debug('Control.Process(instructions) instructions="%s"' % (instructions))
     output = Control.Process(instructions)
     displayCommandOutput(output)
 
