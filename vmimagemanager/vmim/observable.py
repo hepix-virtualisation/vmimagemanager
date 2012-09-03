@@ -1,10 +1,18 @@
 import UserDict
-import uuid
 
-def GenKey():
-    # make a random UUID as a fall back
-    # not possible to make quicker uuids without knowing some contex
-    return uuid.uuid4()
+try:
+    import uuid as _uuid
+    def GenKey():
+        return str(_uuid.uuid4())
+except ImportError:
+    def GenKey():
+        from commands import getstatusoutput as run
+        s, o = run('uuidgen')
+        if s == 0:
+            return o
+        else:
+            raise ImportError("Missing uuid library (and can't fake it)")
+
 
 class Observable:
     def __init__(self, initialValue=None):
