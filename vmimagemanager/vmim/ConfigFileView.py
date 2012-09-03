@@ -315,10 +315,11 @@ class ConfigFile1(object):
         ReadVmSet = set(ReadVmList)
         
         vmSections = []
-        
+        # Get a list of vm's sections must have this prefix
         for section in configurationSections:
             if section[:8] == u'vmim.vm.':
                 vmSections.append(section)
+        
         CfgVmList = []
         for sectrion in vmSections:
             enabled = sectrion in ReadVmSet
