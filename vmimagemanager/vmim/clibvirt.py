@@ -17,7 +17,23 @@ import cxsl as cvirthost
 
 # I shoudl make my own GenKeyFunction Later
 from observable import GenKey, Observable, ObservableDict
-import functools
+
+# functools is Python 2.5 only, so we create a different partialfn if we are
+# running a version without functools available
+try:
+    import functools
+    partialfn = functools.partial
+except ImportError:
+    def partialfn(func, *args, **keywords):
+        def newfunc(*fargs, **fkeywords):
+            newkeywords = keywords.copy()
+            newkeywords.update(fkeywords)
+            return func(*(args + fargs), **newkeywords)
+        newfunc.func = func
+        newfunc.args = args
+        newfunc.keywords = keywords
+        return newfunc
+
 
 class vmMdl:
     def __init__(self):
@@ -162,9 +178,9 @@ class vhostMdl:
             vmModel.update(match)
             return match
         newOne = vmMdl()
-        newOne.libvirtUuid.addCallback(self.callbackKey,functools.partial(self._onUuidPost,newOne))
-        newOne.libvirtId.addCallback(self.callbackKey,functools.partial(self._onIdPost,newOne))
-        newOne.libvirtName.addCallback(self.callbackKey,functools.partial(self._onNamePost,newOne))
+        newOne.libvirtUuid.addCallback(self.callbackKey,partialfn(self._onUuidPost,newOne))
+        newOne.libvirtId.addCallback(self.callbackKey,partialfn(self._onIdPost,newOne))
+        newOne.libvirtName.addCallback(self.callbackKey,partialfn(self._onNamePost,newOne))
         vmModel.update(newOne)
         return newOne
         
