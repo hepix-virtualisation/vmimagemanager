@@ -11,9 +11,6 @@ import time
 import re
 
 import libvirt
-import cinterface
-
-import ConfigFileViewLibVirtGen as cvirthost
 
 
 from vmLibVirtMdl import vmMdl, vhostMdl 
@@ -187,16 +184,6 @@ def tester(conection,model):
     model.vmsbyName[Name] = vmModel
 
 
-def debugVm(Vm):
-    message = "debugVm.Name:%s" % Vm.libvirtName.get()
-    Uuid = Vm.libvirtUuid.get()
-    if Uuid != None:
-        message += "\nUuid:%s" % ( Uuid)
-    ID = Vm.libvirtId.get()
-    if ID != None:
-        message += "\nID:%s" % ( ID)
-    print message
-
 
 def debugModel(model):
     for item in model.vmsByUuid.keys():
@@ -209,68 +196,3 @@ def debugModel(model):
     for item in model.vmsbyId.keys():
         print "By Id %s?%s=%s" % (item,model.vmsbyId[item].libvirtName.get(),
             model.vmsbyId[item].libvirtId.get())
-
-class virtualHostContainerLibVirt(cinterface.virtualHostContainer):
-    def __init__(self):
-        cinterface.virtualHostContainer.__init__(self)
-    def createVirtualhost(self,cfg):
-        return cvirthost.virtualhostKvm(cfg)
-
-    def libVirtExport(self):
-        hostNames = []
-        libVirtNames = self.conection.listDefinedDomains()
-        for x in range (0 , len(self.hostlist)):
-            try:
-                if not hasattr(self.hostlist[x],"libvirtObj"):
-                    self.hostlist[x].libvirtObj = self.conection.lookupByName(self.hostlist[x].HostName)
-            except libvirt.libvirtError, e:
-                if (e.get_error_code() == 42):
-                    self.hostlist[x].cfgApply()
-                    self.hostlist[x].RealiseDevice()
-                    
-                    generatorXml = self.hostlist[x].genXmlShouldExist()
-                    if generatorXml != "":
-                        try:
-                            
-                            self.hostlist[x].libvirtObj = self.conection.defineXML(generatorXml)
-                        except libvirt.libvirtError, e:
-                            #print KnownHosts
-                            #print "Exception Generating " + self.hostlist[x].HostName
-                            self.logger.error("generatorXml=%s" % (generatorXml))
-                            self.logger.error("Exception Generating " + self.hostlist[x].HostName)
-                            self.logger.debug(e)
-                            #print dir(e)
-                            #print e.get_error_level()
-                            #print e
-                            #raise e
-                        
-    def libvirtImport(self,conectionStr):
-       
-        #print "libvirtImport",str(conection)
-        
-        self.conection = libvirt.open(str(conectionStr))
-        mytestmodel = vhostMdl()
-        libvirtCon = LibVirtCnt(conectionStr,mytestmodel)
-        libvirtCon.updateModel()
-        libvirtKnonVms = set(mytestmodel.vmsbyName.keys())
-        #print libvirtKnonVms.difference(self.hostlist)
-        #print len(self.hostlist)
-        TmpHostNames = []
-        for libVritId in self.hostlist:
-            TmpHostNames.append(libVritId.HostName)
-        
-        
-        for Name in libvirtKnonVms.difference(TmpHostNames):
-            cfgDict = {}
-            cfgDict["Connection"] = self.conection
-            #if has(libVritId
-            #sif not libVritId
-            model = vmMdl()
-            model.libvirtName.update(Name)
-            match = mytestmodel.getVmMatch(model)
-            libvirtdConnection = libvirtCon.getLibVrtPtr(match)
-            cfgDict["HostName"]  = Name
-            fred =  self.virtualHostGenerator(cfgDict)
-        
-        
-        return True
