@@ -177,6 +177,14 @@ class LibVirtCnt(object):
             match.libvirtCpuTime.update(cpuTime)
         return match
                 
+    def DefineHost(self,generatorXml):
+        try:
+            libvirtObj = self.conection.defineXML(generatorXml)
+        except libvirt.libvirtError, e:
+            self.logger.error("generatorXml=%s" % (generatorXml))
+            self.logger.debug(e)
+            return
+        self.updateModel()
         
 def tester(conection,model):
     vmModel = vmMdl()

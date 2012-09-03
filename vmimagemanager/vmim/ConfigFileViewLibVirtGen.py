@@ -43,7 +43,11 @@ except ImportError:
     from elementtree.ElementTree  import Element, SubElement, dump,tostring
 
 
-class libvirtStorageFacard:
+
+class virtualhostKvm:
+    def __init__(self,model):
+        self.model = model
+        
     def LibVirtXmlTreeGenerateAlt1(self,devices):    
         self.logger.debug("LibVirtXmlTreeGenerate")
         disk = SubElement(devices, "disk",device="disk")
@@ -65,12 +69,6 @@ class libvirtStorageFacard:
             source.set('dev', self.HostDisk)
         except:
             source.set('dev', "/dev/mapper/d430-sysVm002")
-
-
-class virtualhostKvm:
-    def __init__(self,model):
-        self.model = model
-
     
     def genXmlShouldExist(self, BoxName):
     
@@ -143,3 +141,5 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         text = str(result)
         self.logger.debug(text)
         return text
+
+

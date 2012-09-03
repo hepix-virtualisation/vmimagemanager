@@ -1,2 +1,1 @@
-
-import vmimagemanager
+import vmCtrl
