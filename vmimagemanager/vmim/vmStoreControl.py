@@ -37,7 +37,6 @@ class StorageControler(object):
             self.log.warning("No configuration for '%s'" % (hostname))
             return
         self.UpdateFromModel()
-        path = os.path.join(self.Storage.storePath,storename)
         hostDetails = diskFacade()
         hostDetails.disk = self.cfgModel.vmbyName[hostname].CfgDiskType.get()
         hostDetails.path = self.cfgModel.vmbyName[hostname].CfgDiskImage.get()
