@@ -35,7 +35,7 @@ class ConfigFile1(object):
             DefaultPathExtracts = self.model.defaultPathExtracts.get()
             DefaultPathInserts = self.model.defaultPathInserts.get()
             
-            keyPreferances = ['hostname']
+            keyPreferances = ['hostname','HostName']
             key = _selectBestKeyFor(keyPreferances,availableKeys)
             if key == None:
                 self.log.info( "Section '%s', no key '%s' Ignoring Section."  % (keyPreferances[0]))
