@@ -56,8 +56,13 @@ class vmState(object):
             
         if action in ["insert"]:
             for item in hostInfo[hostName]['storeInsert']:
-                format = self.archiveStore.getInsertsMdl(hostName,item['name']).Format.get()
-                self.StorageCntl.insert(hostName,item["name"],format)
+                model = self.archiveStore.getInsertsMdl(hostName,item['name'])
+                # THis error handling shodul have been caught earilier
+                if model == None:
+                    self.log.error("Invalid stroe details")
+                else:            
+                    format = model.Format.get()
+                    self.StorageCntl.insert(hostName,item["name"],format)
         
         if action in ["release","up"]:
             self.StorageCntl.release(hostName)
