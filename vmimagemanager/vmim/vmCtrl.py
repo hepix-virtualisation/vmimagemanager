@@ -56,7 +56,8 @@ class vmState(object):
             
         if action in ["insert"]:
             for item in hostInfo[hostName]['storeInsert']:
-                self.StorageCntl.insert(hostName,item["name"],hostInfo[hostName]['storeFormat'])
+                format = self.archiveStore.getInsertsMdl(hostName,item['name']).Format.get()
+                self.StorageCntl.insert(hostName,item["name"],format)
         
         if action in ["release","up"]:
             self.StorageCntl.release(hostName)
