@@ -57,9 +57,9 @@ class vmState(object):
         if action in ["insert"]:
             for item in hostInfo[hostName]['storeInsert']:
                 model = self.archiveStore.getInsertsMdl(hostName,item['name'])
-                # THis error handling shodul have been caught earilier
+                # THis error handling should have been caught earilier
                 if model == None:
-                    self.log.error("Invalid stroe details")
+                    self.log.error("Invalid store details")
                 else:            
                     format = model.Format.get()
                     self.StorageCntl.insert(hostName,item["name"],format)
@@ -94,7 +94,6 @@ class vmState(object):
        
         
     def process(self,instructions):
-        #print instructions
         reqStats = self.actionsReqStats.intersection(instructions['vmControl']['actions'])
         lenReqStats = len(reqStats)
         if lenReqStats > 0:
@@ -110,7 +109,6 @@ class vmState(object):
             
         reqBoxes = self.actionsReqBoxes.intersection(instructions['vmControl']['actions'])
         lenReqBoxes = len(reqBoxes)
-        #print "ssss",reqBoxes,instructions
         if lenReqBoxes > 0:
             output = {}
             instructionsKeys = instructions.keys()
@@ -119,8 +117,11 @@ class vmState(object):
                 return 
             
             for host in instructions['hostdetails'].keys():
-                for action in instructions['vmControl']['actions']:
-                    self._processAction(instructions,{ host :instructions['hostdetails'][host]},action)
+                actions = set(instructions['vmControl']['actions'])
+                if len(actions) > 0:
+                    self._processAction(instructions,{ host :instructions['hostdetails'][host]},actions)
+                else:
+                    self.log.error("No actions specified.")
         return True
     def updateDiskModelByHostName(self):
         self.libVirtControler.updateModel()
@@ -143,8 +144,8 @@ class vmControl(object):
         self.libVirtModel = vhostMdl()
         self.archiveStore = archControler(self.cfgModel)
     def LoadConfigCfg(self,configfile):
-        config = ConfigFile1(self.cfgModel)
-        return config.upDateModel(configfile)
+        self.config = ConfigFile1(self.cfgModel)
+        return self.config.upDateModel(configfile)
 
     def _onlibvirtConStr(self):
         connectionStr = self.cfgModel.libvirtConStr.get()
