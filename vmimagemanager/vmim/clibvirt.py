@@ -37,7 +37,11 @@ class LibVirtCnt(object):
     def updateModel(self):
         RunningDomains = self.connection.listDomainsID()
         for LibVirtRunningDomainId in RunningDomains:
-            hostPtr = self.connection.lookupByID(LibVirtRunningDomainId)
+            try:
+                hostPtr = self.connection.lookupByID(LibVirtRunningDomainId)
+            except libvirt.libvirtError, E:
+                self.log.warning("Exception thrown %s" % E)
+                continue
             Name = hostPtr.name()
             Uuid = hostPtr.UUIDString()
             ID = hostPtr.ID()

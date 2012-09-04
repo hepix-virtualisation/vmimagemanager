@@ -259,8 +259,8 @@ class ConfigFile1(object):
         if key == None:
             self.log.info( "Configuration file does not have a section '%s', key '%s' setiong the default Path Mount when mounting VM's."  % (MainSection,keyPreferances[0]))
         else:
-            tmpDefaultPathMount = config.get(MainSection,key)
-            if not isinstance( tmpDefaultPathMount, str ):
+            tmpDefaultPathMount = config.getJson(MainSection,key)
+            if not isinstance( tmpDefaultPathMount, unicode ):
                 self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (MainSection,key,defaultPathMount))
             else:
                 defaultPathMount = tmpDefaultPathMount
@@ -270,8 +270,8 @@ class ConfigFile1(object):
         if key == None:
             self.log.info( "Configuration file does not have a section '%s', key '%s' setiong the default Path Mount when mounting VM's."  % (MainSection,keyPreferances[0]))
         else:
-            tmpDefaultPathMount = config.get(MainSection,key)
-            if not isinstance( tmpDefaultPathMount, str ):
+            tmpDefaultPathMount = config.getJson(MainSection,key)
+            if not isinstance( tmpDefaultPathMount, unicode ):
                 self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (MainSection,key,defaultPathImages))
             else:
                 defaultPathImages = tmpDefaultPathMount
@@ -281,8 +281,8 @@ class ConfigFile1(object):
         if key == None:
             self.log.info( "Configuration file does not have a section '%s', key '%s' setiong the default Path Mount when mounting VM's."  % (MainSection,keyPreferances[0]))
         else:
-            tmpDefaultPathExtracts = config.get(MainSection,key)
-            if not isinstance( tmpDefaultPathMount, str ):
+            tmpDefaultPathExtracts = config.getJson(MainSection,key)
+            if not isinstance( tmpDefaultPathMount, unicode ):
                 self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (MainSection,key,defaultPathExtracts))
             else:
                 defaultPathExtracts = tmpDefaultPathExtracts
@@ -294,8 +294,8 @@ class ConfigFile1(object):
         if key == None:
             self.log.info( "Configuration file does not have a section '%s', key '%s' setiong the default Path Mount when mounting VM's."  % (MainSection,keyPreferances[0]))
         else:
-            tmpDefaultPathMount = config.get(MainSection,key)
-            if not isinstance( tmpDefaultPathMount, str ):
+            tmpDefaultPathMount = config.getJson(MainSection,key)
+            if not isinstance( tmpDefaultPathMount, unicode ):
                 self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (MainSection,key,defaultPathImages))
             else:
                 defaultPathInserts = tmpDefaultPathMount
