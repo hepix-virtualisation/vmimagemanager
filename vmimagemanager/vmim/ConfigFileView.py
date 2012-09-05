@@ -183,6 +183,12 @@ class ConfigFile1(object):
             
             
             
+            
+            if DefnitionDiskMount ==None:
+                defaultPathMount =  self.model.defaultPathMount.get()
+                if defaultPathMount != None:
+                    DefnitionDiskMount = "%s/%s" % (defaultPathMount,DefaultHostName)
+                    
             if not DefaultHostName in self.model.vmbyName.keys():
                 self.model.vmbyName[DefaultHostName] = vmModel()
             
