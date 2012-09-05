@@ -175,7 +175,6 @@ class ConfigFile1(object):
             if (DefnitionDiskType == None) and (DefinitionRoot != None):
                 self.log.info( "section '%s', defaulting image format to 'lvm'" % (SectionVm))
                 DefnitionDiskType = "lvm"
-            
             if DefnitionDiskType == None:
                 self.log.info( "Section '%s', no key '%s' Ignoring Section."  % (SectionVm,DefnitionDiskType))
                 return
@@ -211,13 +210,8 @@ class ConfigFile1(object):
             if DefaultPathInserts != None:
                 DefaultPathInserts = os.path.normpath(DefaultPathInserts)
             self.model.vmbyName[DefaultHostName].CfgPathInserts.update(DefaultPathInserts)
-            
             return DefaultHostName
-            
-            
-            
-            
-        
+
         config = jsonConfigParser()
         config.readfp(open(configfile,'r'))
         configurationSections = config.sections()
