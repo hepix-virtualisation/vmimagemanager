@@ -36,25 +36,24 @@ class vmState(object):
             return
         hostName = keys.pop()
         inputs.libvirtName.set(hostName)
-        
-        if action in ["kill"]:
+        if len(action.intersection(["kill"])) > 0:
             self.libVirtControler.Kill(inputs)
-        if action in ["extract","insert","store","restore","down","mount"]:
+        if len(action.intersection(["extract","insert","store","restore","down","mount"])) > 0:
             self.libVirtControler.vmStop(inputs)
-        if action in ["extract","insert","store","restore","mount"]:
+        if len(action.intersection(["extract","insert","store","restore","mount"])) > 0:
             self.StorageCntl.mount(hostName)
-        if action in ["extract"]:
+        if len(action.intersection(["extract"])) > 0:
             for item in hostInfo[hostName]['storeExtract']:
                 self.StorageCntl.extract(hostName,item['name'],item['directory'],hostInfo[hostName]['storeFormat'])
-        if action in ["store"]:
+        if len(action.intersection(["store"])) > 0:
             self.StorageCntl.Storage.storeFormat = hostInfo[hostName]['storeFormat']
             self.StorageCntl.store(hostName,hostInfo[hostName]['storeName'])
             
-        if action in ["restore"]:
+        if len(action.intersection(["restore"])) > 0:
             self.StorageCntl.Storage.storeFormat = hostInfo[hostName]['storeFormat']
             self.StorageCntl.restore(hostName,hostInfo[hostName]['restoreName'])
             
-        if action in ["insert"]:
+        if len(action.intersection(["insert"])) > 0:
             for item in hostInfo[hostName]['storeInsert']:
                 model = self.archiveStore.getInsertsMdl(hostName,item['name'])
                 # THis error handling should have been caught earilier
@@ -64,9 +63,9 @@ class vmState(object):
                     format = model.Format.get()
                     self.StorageCntl.insert(hostName,item["name"],format)
         
-        if action in ["release","up"]:
+        if len(action.intersection(["release","up"])) > 0:
             self.StorageCntl.release(hostName)
-        if action in ["up"]:
+        if len(action.intersection(["up"])) > 0:
             self.libVirtControler.vmStart(inputs)
     def _processBoxesList(self):
         cfgBoxes = set(self.cfgModel.vmbyName.keys())
