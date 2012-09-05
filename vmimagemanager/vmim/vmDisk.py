@@ -37,7 +37,8 @@ class diskFacade(object):
             elif name == "lvm":
                 self._uploaderImp = diskMounterLvm()
             else:
-                del(self._uploaderImp)
+	    	if hasattr(self, '_uploaderImp'):
+                    del(self._uploaderImp)
             if hasattr(self, '_uploaderImp'):
                 self._uploaderImp.path = self.path
                 self._uploaderImp.partition = self.partition
