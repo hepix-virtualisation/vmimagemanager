@@ -121,6 +121,7 @@ class diskMounterKpartX(diskMounterBaseClass):
             self.logger.debug("")
             return False
         
+        
         self.HostRootSpace = os.path.join("/dev/mapper",correct['Path'])
         return True
     def _loadpartitions(self):
@@ -188,7 +189,6 @@ class diskMounterKpartX(diskMounterBaseClass):
         #print "mount:", currentState
         if ((currentState & 2) == 2):
             return True
-            
         if self.HostRootSpace == None:
             self._loadpartitions()
         

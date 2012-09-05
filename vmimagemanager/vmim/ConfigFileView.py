@@ -433,6 +433,7 @@ class ConfigFile1(object):
                         unprocessed.append(item)
                 if len(unprocessed) > 0:
                     self.log.warning( "Configuration file does not have a section '%s', key '%s' list, ignoed %s."  % (MainSection,key,unprocessed))
+
         
         
         self.setDefaultPathImages()
@@ -440,6 +441,7 @@ class ConfigFile1(object):
         self.setDefaultPathMount()
         self.setDefaultPathOverlayExtracts()
         
+
         self.processVmSections()
         
             
