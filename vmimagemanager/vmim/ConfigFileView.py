@@ -261,7 +261,7 @@ class ConfigInterpretVm(object):
             defaultType = 'shared'
         
         if self.model.vmbyName[self.hostname].CfgDiskImage.get() != None and self.model.vmbyName[self.hostname].CfgDiskImagePartition.get() != None:
-            defaultType = 'kvm'
+            defaultType = 'kpartx'
         keyPreferances = ['store_type']
         key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
         if key == None:
