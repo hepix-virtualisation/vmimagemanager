@@ -195,13 +195,21 @@ class ConfigFile1(object):
             self.model.vmbyName[DefaultHostName].CfgHostName.update(DefaultHostName)
             self.model.vmbyName[DefaultHostName].CfgRoot.update(DefinitionRoot)
             self.model.vmbyName[DefaultHostName].CfgSwap.update(DefinitionSwap)
+            if DefnitionDiskMount != None:
+                DefnitionDiskMount = os.path.normpath(DefnitionDiskMount)
             self.model.vmbyName[DefaultHostName].CfgMountPoint.update(DefnitionDiskMount)
             self.model.vmbyName[DefaultHostName].CfgMac.update(DefnitionMac)
             self.model.vmbyName[DefaultHostName].CfgDiskImage.update(DefnitionDiskImage)
             self.model.vmbyName[DefaultHostName].CfgDiskImagePartition.update(DefnitionDiskImagePartition)
             self.model.vmbyName[DefaultHostName].CfgDiskType.update(DefnitionDiskType)
+            if DefaultPathImages != None:
+                DefaultPathImages = os.path.normpath(DefaultPathImages)
             self.model.vmbyName[DefaultHostName].CfgPathImages.update(DefaultPathImages)
+            if DefaultPathExtracts != None:
+                DefaultPathExtracts = os.path.normpath(DefaultPathExtracts)
             self.model.vmbyName[DefaultHostName].CfgPathExtracts.update(DefaultPathExtracts)
+            if DefaultPathInserts != None:
+                DefaultPathInserts = os.path.normpath(DefaultPathInserts)
             self.model.vmbyName[DefaultHostName].CfgPathInserts.update(DefaultPathInserts)
             
             return DefaultHostName
@@ -281,6 +289,8 @@ class ConfigFile1(object):
                 self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (MainSection,key,defaultPathImages))
             else:
                 defaultPathImages = tmpDefaultPathMount
+        if defaultPathImages != None:
+            defaultPathImages = os.path.normpath(defaultPathImages)
         self.model.defaultPathImages.update(defaultPathImages)
         keyPreferances = ['vmextracts']
         key = _selectBestKeyFor(keyPreferances,availableKeys)
@@ -293,6 +303,8 @@ class ConfigFile1(object):
             else:
                 defaultPathExtracts = tmpDefaultPathExtracts
         
+        if defaultPathExtracts != None:
+            defaultPathExtracts = os.path.normpath(defaultPathExtracts)
         self.model.defaultPathExtracts.update(defaultPathExtracts)
         
         keyPreferances = ['vmextracts']
@@ -305,6 +317,8 @@ class ConfigFile1(object):
                 self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (MainSection,key,defaultPathImages))
             else:
                 defaultPathInserts = tmpDefaultPathMount
+        if defaultPathInserts != None:
+            defaultPathInserts = os.path.normpath(defaultPathInserts)
         self.model.defaultPathInserts.update(defaultPathInserts)
         
         
@@ -315,6 +329,9 @@ class ConfigFile1(object):
         if defaultPathExtracts == None and defaultPathInserts != None:
             self.log.info( "Defaiulting section '%s' extracts path to '%s'."  % (SectionVm,defaultPathInserts))
             defaultPathExtracts = defaultPathInserts
+        
+        
+        
         
         
          # Now process the vms 

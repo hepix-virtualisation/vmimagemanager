@@ -1,5 +1,6 @@
 from observable import Observable, ObservableDict
 import logging, logging.config
+import os.path
 
 class mountedModel(object):
     def __init__(self):
