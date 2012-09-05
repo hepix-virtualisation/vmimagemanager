@@ -13,193 +13,273 @@ def selectBestKeyFor(selections,availableKeys):
     return None
 
 
-
-def _upDateModelVm(self,SectionVm,config):
-    items = config.items(SectionVm)
-    availableKeys = set()
-    for (key,value) in items:
-        availableKeys.add(key)
-    DefaultHostName = None
-    DefnitionDiskType = None
-    DefinitionRoot = None
-    DefinitionSwap = None
-    DefnitionDiskMount = None
-    DefnitionMac = None
-    DefnitionDiskImage = None
-    DefnitionDiskImagePartition = None
-    DefaultPathImages = self.model.defaultPathImages.get()
-    DefaultPathExtracts = self.model.defaultPathExtracts.get()
-    DefaultPathInserts = self.model.defaultPathInserts.get()
-
-    keyPreferances = ['hostname','HostName']
-    key = selectBestKeyFor(keyPreferances,availableKeys)
-    if key == None:
-        self.log.info( "Section '%s', no key '%s' Ignoring Section."  % (keyPreferances[0]))
-        return
-    else:
-        tmpDefaultPathMount = config.getJson(SectionVm,key)
-        if not isinstance( tmpDefaultPathMount, unicode ):
-            self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (SectionVm,key,defaultPathImages))
-        else:
-            DefaultHostName = tmpDefaultPathMount
-
-    # Set up default MountPath
-
-    if isinstance(self.model.defaultPathMount.get(),str):
-        DefnitionDiskMount = os.path.join(self.model.defaultPathMount.get(),DefaultHostName)
-
-    keyPreferances = ['root']
-    key = selectBestKeyFor(keyPreferances,availableKeys)
-    if key == None:
-        self.log.debug( "Section '%s', no key '%s'."  % (SectionVm,keyPreferances[0]))
-    else:
-        tmpDefaultPathMount = config.getJson(SectionVm,key)
-        if not isinstance( tmpDefaultPathMount, unicode ):
-            self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (SectionVm,key,DefinitionRoot))
-        else:
-            DefinitionRoot = tmpDefaultPathMount
-
-    keyPreferances = ['swap']
-    key = selectBestKeyFor(keyPreferances,availableKeys)
-    if key == None:
-        self.log.debug( "Section '%s', no key '%s'."  % (SectionVm,keyPreferances[0]))
-    else:
-        tmpDefaultPathMount = config.getJson(SectionVm,key)
-        if not isinstance( tmpDefaultPathMount, unicode ):
-            self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (SectionVm,key,DefinitionSwap))
-        else:
-            DefinitionSwap = tmpDefaultPathMount
-
-    keyPreferances = ['mount']
-    key = selectBestKeyFor(keyPreferances,availableKeys)
-    if key == None:
-        self.log.debug( "Section '%s', no key '%s'."  % (SectionVm,keyPreferances[0]))
-    else:
-        tmpDefaultPathMount = config.getJson(SectionVm,key)
-        if not isinstance( tmpDefaultPathMount, unicode ):
-            self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (SectionVm,key,DefnitionDiskMount))
-        else:
-            DefnitionDiskMount = tmpDefaultPathMount
-
-
-    keyPreferances = ['mac']
-    key = selectBestKeyFor(keyPreferances,availableKeys)
-    if key == None:
-        self.log.debug( "Section '%s', no key '%s'."  % (SectionVm,keyPreferances[0]))
-    else:
-        tmpDefaultPathMount = config.getJson(SectionVm,key)
-        if not isinstance( tmpDefaultPathMount, unicode ):
-            self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (SectionVm,key,DefnitionMac))
-        else:
-            DefnitionMac = tmpDefaultPathMount
-
-    keyPreferances = ['hostdisk']
-    key = selectBestKeyFor(keyPreferances,availableKeys)
-    if key == None:
-        self.log.debug( "Section '%s', no key '%s'."  % (SectionVm,keyPreferances[0]))
-    else:
-        tmpDefaultPathMount = config.getJson(SectionVm,key)
-        if not isinstance( tmpDefaultPathMount, unicode ):
-            self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (SectionVm,key,DefnitionDiskImage))
-        else:
-            DefnitionDiskImage = tmpDefaultPathMount
-
-
-    keyPreferances = ['partition']
-    key = selectBestKeyFor(keyPreferances,availableKeys)
-    if key == None:
-        self.log.debug( "Section '%s', no key '%s'."  % (SectionVm,keyPreferances[0]))
-    else:
-        tmpDefaultPathMount = config.getJson(SectionVm,key)
-        if not isinstance( tmpDefaultPathMount, int ):
-            self.log.warning( "Configuration file does not have a section '%s', key '%s' is not an integer, defaulting to %s."  % (SectionVm,key,DefnitionDiskImagePartition))
-        else:
-            DefnitionDiskImagePartition = tmpDefaultPathMount
-
-    keyPreferances = ['diskType']
-    key = selectBestKeyFor(keyPreferances,availableKeys)
-    if key == None:
-        self.log.debug( "Section '%s', no key '%s'."  % (SectionVm,keyPreferances[0]))
-    else:
-        tmpDefaultPathMount = config.getJson(SectionVm,key)
-        if not isinstance( tmpDefaultPathMount, unicode ):
-            self.log.warning( "Configuration file does not have a section '%s', key '%s' is not an string, defaulting to %s."  % (SectionVm,key,DefnitionDiskImagePartition))
-        else:
-            DefnitionDiskType = tmpDefaultPathMount
-
-
-    keyPreferances = ['vmimages']
-    key = selectBestKeyFor(keyPreferances,availableKeys)
-    if key == None:
-        self.log.debug( "Section '%s', no key '%s'."  % (SectionVm,keyPreferances[0]))
-    else:
-        tmpDefaultPathImages = config.getJson(SectionVm,key)
-        if not isinstance( tmpDefaultPathImages, unicode ):
-            self.log.debug( "Configuration file does not have a section '%s', key '%s' is not an string, defaulting to %s."  % (SectionVm,key,DefaultPathImages))
-        else:
-            DefaultPathImages = tmpDefaultPathImages
-
-    keyPreferances = ['vmextracts']
-    key = selectBestKeyFor(keyPreferances,availableKeys)
-    if key == None:
-        self.log.debug( "Section '%s', no key '%s'."  % (SectionVm,keyPreferances[0]))
-    else:
-        tmpDefaultPathExtracts = config.getJson(SectionVm,key)
-        if not isinstance( tmpDefaultPathExtracts, unicode ):
-            self.log.debug( "Configuration file does not have a section '%s', key '%s' is not an string, defaulting to %s."  % (SectionVm,key,DefaultPathExtracts))
-        else:
-            DefaultPathExtracts = tmpDefaultPathExtracts
-
-    keyPreferances = ['vminserts']
-    key = selectBestKeyFor(keyPreferances,availableKeys)
-    if key == None:
-        self.log.debug( "Section '%s', no key '%s'."  % (SectionVm,keyPreferances[0]))
-    else:
-        tmpDefaultPathInserts = config.getJson(SectionVm,key)
-        if not isinstance( tmpDefaultPathInserts, unicode ):
-            self.log.info( "Configuration file does not have a section '%s', key '%s' is not an string, defaulting to %s."  % (SectionVm,key,DefaultPathInserts))
-        else:
-            DefaultPathInserts = tmpDefaultPathInserts
-
-
-
-
-
-    if (DefnitionDiskType == None) and (DefnitionDiskImage != None) and (DefnitionDiskImagePartition != None):
-        self.log.info( "section '%s', defaulting image format to 'kpartx'"  % (SectionVm))
-        DefnitionDiskType = "kpartx"
-    if (DefnitionDiskType == None) and (DefinitionRoot != None):
-        self.log.info( "section '%s', defaulting image format to 'lvm'" % (SectionVm))
-        DefnitionDiskType = "lvm"
-
-    if DefnitionDiskType == None:
-        self.log.info( "Section '%s', no key '%s' Ignoring Section."  % (SectionVm,DefnitionDiskType))
-        return
-
-
-
-
-    if not DefaultHostName in self.model.vmbyName.keys():
-        self.model.vmbyName[DefaultHostName] = vmModel()
-
-    self.model.vmbyName[DefaultHostName].CfgHostName.update(DefaultHostName)
-    self.model.vmbyName[DefaultHostName].CfgRoot.update(DefinitionRoot)
-    self.model.vmbyName[DefaultHostName].CfgSwap.update(DefinitionSwap)
-    self.model.vmbyName[DefaultHostName].CfgMountPoint.update(DefnitionDiskMount)
-    self.model.vmbyName[DefaultHostName].CfgMac.update(DefnitionMac)
-    self.model.vmbyName[DefaultHostName].CfgDiskImage.update(DefnitionDiskImage)
-    self.model.vmbyName[DefaultHostName].CfgDiskImagePartition.update(DefnitionDiskImagePartition)
-    self.model.vmbyName[DefaultHostName].CfgDiskType.update(DefnitionDiskType)
-    self.model.vmbyName[DefaultHostName].CfgPathImages.update(DefaultPathImages)
-    self.model.vmbyName[DefaultHostName].CfgPathExtracts.update(DefaultPathExtracts)
-    self.model.vmbyName[DefaultHostName].CfgPathInserts.update(DefaultPathInserts)
-
-    return DefaultHostName
-
-
-
+class ConfigInterpretVm(object):
+    def __init__(self,model,config,ConfigSectionName):
+        self.log = logging.getLogger("ConfigFileView.ConfigInterpretVm")
+        self.model = model
+        self.config = config
+        self.ConfigSectionName = ConfigSectionName
+        self.canUpdate = False
+        self.hostname = None
+        self.availableKeys = set([])
+    def getConfigSectionKey(self,section,keyPreferances):
+        
+        return selectBestKeyFor(keyPreferances,self.availableKeys)
     
+    def getConfigValue(self,section,key,valueType,Default):
+        tmpDefaultPathMount = self.config.getJson(section,key)
+        if not isinstance( tmpDefaultPathMount, valueType ):
+            self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a '%s', defaulting to %s."  % (self.ConfigSectionName,key,valueType,Default))
+            return None
+        return tmpDefaultPathMount
+    def updateAll(self):
+        self.updateAvailableKeys()
+        self.updateName()
+        if self.hostname == None:
+            self.log.info("Ignoring Section '%s' as no 'name' defined"  % (self.ConfigSectionName))
+            return
+        self.updatePathSharedPartition()
+        self.updatePathSharedSwap()
+        self.updatePathMount()
+        self.updatePathImages()
+        self.updatePathOverlays()
+        self.updatePathExtracts()
+        self.updateDiskImagePartition()
+        self.updateDiskImage()
+        self.updateMac()
+        self.updateStorageType()
+    def updateAvailableKeys(self):
+        foundKeys = []
+        for (key,value) in self.config.items(self.ConfigSectionName):
+            foundKeys.append(key)
+        self.availableKeys = set(foundKeys)
+        
+    def updateName(self):
+        defaultPathImages = None
+        keyPreferances = ['hostname','HostName']
+        key = selectBestKeyFor(keyPreferances,self.availableKeys)
+        if key == None:
+            self.log.info( "Section '%s', no key '%s' Ignoring Section."  % (keyPreferances[0]))
+            return
+        HostName = self.config.getJson(self.ConfigSectionName,key)
+        if not isinstance( HostName, unicode ):
+            self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (self.ConfigSectionName,key,defaultPathImages))
+            return
+        keys = self.model.vmbyName.keys()
+        if not HostName in self.model.vmbyName.keys():
+            self.model.vmbyName[HostName] = vmModel()
+        self.model.vmbyName[HostName].CfgHostName.set(HostName)
+        self.canUpdate = True
+        self.hostname = HostName
 
+    def updatePathSharedPartition(self):
+        if self.hostname == None:
+            self.log.info("Ignoring Section '%s' as no 'name' defined"  % (self.ConfigSectionName))
+            return
+        DefaultPathMountPrefix = None
+        keyPreferances = ['root']
+        key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
+        if key == None:
+            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],DefaultPathMountPrefix))
+            self.model.vmbyName[self.hostname].CfgRoot.update(DefaultPathMountPrefix)
+            return
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,DefaultPathMountPrefix)
+        if RawPathMount == None:
+            self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],DefaultPathMountPrefix))
+            self.model.vmbyName[self.hostname].CfgRoot.update(defaultPathMount)
+            return
+        normPath = os.path.normpath(RawPathMount)
+        
+        self.model.vmbyName[self.hostname].CfgRoot.update(normPath)
+        return 
+        
+    
+    def updatePathMount(self):
+        if self.hostname == None:
+            self.log.info("Ignoring Section '%s' as no 'name' defined"  % (self.ConfigSectionName))
+            return
+        DefaultPathMountPrefix = self.model.defaultPathMount.get()
+        defaultPathMount = "/mnt/vm/%s" % (self.hostname)
+        if DefaultPathMountPrefix != None:
+            defaultPathMount = os.path.join(DefaultPathMountPrefix,self.hostname)
+        keyPreferances = ['mount']
+        key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
+        if key == None:
+            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPathMount))
+            self.model.vmbyName[self.hostname].CfgMountPoint.update(defaultPathMount)
+            return
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPathMount)
+        if RawPathMount == None:
+            self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPathMount))
+            self.model.vmbyName[self.hostname].CfgMountPoint.update(defaultPathMount)
+            return
+        normPath = os.path.normpath(RawPathMount)
+        self.model.vmbyName[self.hostname].CfgMountPoint.update(normPath)
+        return 
+        
+        
+    
+    def updatePathImages(self):
+        if self.hostname == None:
+            self.log.info("Ignoring Section '%s' as no 'name' defined"  % (self.ConfigSectionName))
+            return
+        defaultPath = self.model.defaultPathImages.get()
+        keyPreferances = ['mount']
+        key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
+        if key == None:
+            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.model.vmbyName[self.hostname].CfgPathImages.update(defaultPath)
+            return
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
+        if RawPathMount == None:
+            self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.model.vmbyName[self.hostname].CfgPathImages.update(defaultPath)
+            return
+        normPath = os.path.normpath(RawPathMount)
+        self.model.vmbyName[self.hostname].CfgPathImages.update(normPath)
+        return 
+        
+    
+    def updatePathOverlays(self):
+        if self.hostname == None:
+            self.log.info("Ignoring Section '%s' as no 'name' defined"  % (self.ConfigSectionName))
+            return
+        defaultPath = self.model.defaultPathInserts.get()
+        keyPreferances = ['overlay','vminserts']
+        key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
+        if key == None:
+            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.model.vmbyName[self.hostname].CfgPathInserts.update(defaultPath)
+            return
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
+        if RawPathMount == None:
+            self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.model.vmbyName[self.hostname].CfgPathInserts.update(defaultPath)
+            return
+        normPath = os.path.normpath(RawPathMount)
+        self.model.vmbyName[self.hostname].CfgPathInserts.update(normPath)
+        return 
+
+    def updatePathExtracts(self):
+        if self.hostname == None:
+            self.log.info("Ignoring Section '%s' as no 'name' defined"  % (self.ConfigSectionName))
+            return
+        defaultPath = self.model.defaultPathExtracts.get()
+        keyPreferances = ['vmextracts']
+        key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
+        if key == None:
+            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.model.vmbyName[self.hostname].CfgPathExtracts.update(defaultPath)
+            return
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
+        if RawPathMount == None:
+            self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.model.vmbyName[self.hostname].CfgPathExtracts.update(defaultPath)
+            return
+        normPath = os.path.normpath(RawPathMount)
+        self.model.vmbyName[self.hostname].CfgPathExtracts.update(normPath)
+    
+    
+    def updateDiskImagePartition(self):
+        if self.hostname == None:
+            self.log.info("Ignoring Section '%s' as no 'name' defined"  % (self.ConfigSectionName))
+            return
+        defaultPath = None
+        keyPreferances = ['partition']
+        key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
+        if key == None:
+            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.model.vmbyName[self.hostname].CfgDiskImagePartition.update(defaultPath)
+            return
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,int,defaultPath)
+        if RawPathMount == None:
+            self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.model.vmbyName[self.hostname].CfgDiskImagePartition.update(defaultPath)
+            return
+        self.model.vmbyName[self.hostname].CfgDiskImagePartition.update(RawPathMount)
+    def updateDiskImage(self):
+        if self.hostname == None:
+            self.log.info("Ignoring Section '%s' as no 'name' defined"  % (self.ConfigSectionName))
+            return
+        defaultPath = None
+        keyPreferances = ['hostdisk']
+        key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
+        if key == None:
+            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.model.vmbyName[self.hostname].CfgDiskImage.update(defaultPath)
+            return
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
+        if RawPathMount == None:
+            self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.model.vmbyName[self.hostname].CfgDiskImage.update(defaultPath)
+            return
+        normPath = os.path.normpath(RawPathMount)
+        self.model.vmbyName[self.hostname].CfgDiskImage.update(normPath)
+    def updatePathSharedSwap(self):
+        if self.hostname == None:
+            self.log.info("Ignoring Section '%s' as no 'name' defined"  % (self.ConfigSectionName))
+            return
+        defaultPath = None
+        keyPreferances = ['swap']
+        key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
+        if key == None:
+            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.model.vmbyName[self.hostname].CfgSwap.update(defaultPath)
+            return
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
+        if RawPathMount == None:
+            self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.model.vmbyName[self.hostname].CfgSwap.update(defaultPath)
+            return
+        normPath = os.path.normpath(RawPathMount)
+        self.model.vmbyName[self.hostname].CfgSwap.update(normPath)
+    
+    def updateMac(self):
+        if self.hostname == None:
+            self.log.info("Ignoring Section '%s' as no 'name' defined"  % (self.ConfigSectionName))
+            return
+        defaultPath = []
+        keyPreferances = ['mac']
+        key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
+        if key == None:
+            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.model.vmbyName[self.hostname].CfgMac.update(defaultPath)
+            return
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,list,defaultPath)
+        if RawPathMount == None:
+            self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.model.vmbyName[self.hostname].CfgMac.update(defaultPath)
+            return
+        self.model.vmbyName[self.hostname].CfgMac.update(RawPathMount)
+    
+    def updateStorageType(self):
+        if self.hostname == None:
+            self.log.info("Ignoring Section '%s' as no 'name' defined"  % (self.ConfigSectionName))
+            return
+        defaultType = None
+        if self.model.vmbyName[self.hostname].CfgDiskImage.get() != None and self.model.vmbyName[self.hostname].CfgDiskImagePartition.get() != None:
+            defaultType = 'shared'
+        
+        if self.model.vmbyName[self.hostname].CfgDiskImage.get() != None and self.model.vmbyName[self.hostname].CfgDiskImagePartition.get() != None:
+            defaultType = 'kvm'
+        keyPreferances = ['store_type']
+        key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
+        if key == None:
+            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultType))
+            self.model.vmbyName[self.hostname].CfgMac.update(defaultType)
+            return
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,list,defaultType)
+        if RawPathMount == None:
+            self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultType))
+            self.model.vmbyName[self.hostname].CfgMac.update(defaultType)
+            return
+        normPath = os.path.normpath(RawPathMount)
+        self.model.vmbyName[self.hostname].CfgMac.update(normPath)
+    
+    
+    
+    
+    
 class ConfigFile1(object):
     def __init__(self,model):
         self.model = model
@@ -256,6 +336,7 @@ class ConfigFile1(object):
         if defaultPathExtracts == None:
             return
         self.model.defaultPathImages.update(defaultPathExtracts)
+        
     
     def setDefaultPathExtracts(self):
         defaultPathExtracts = None
@@ -268,7 +349,7 @@ class ConfigFile1(object):
         if defaultPathExtracts == None:
             return
         self.model.defaultPathExtracts.update(defaultPathExtracts)
-    
+        
 
     def setDefaultPathMount(self):
         defaultPathExtracts = None
@@ -280,7 +361,7 @@ class ConfigFile1(object):
         defaultPathExtracts = self.getConfigValue(self.mainSection,key,unicode,defaultPathExtracts)
         if defaultPathExtracts == None:
             return
-        self.model.defaultPathExtracts.update(defaultPathExtracts)
+        
     
 
 
@@ -290,46 +371,12 @@ class ConfigFile1(object):
         defaultPathExtracts = self.model.defaultPathExtracts.get()
         defaultPathInserts = self.model.defaultPathInserts.get()
         if defaultPathExtracts != None and defaultPathInserts == None:
-            self.log.info( "Defaiulting section '%s' inserts path to '%s'."  % (self.mainSection,defaultPathInserts))
-            self.model.defaultPathExtracts.update(defaultPathExtracts)
+            self.log.info( "Defaiulting section '%s' inserts path to '%s'."  % (self.mainSection,defaultPathExtracts))
+            self.model.defaultPathInserts.update(defaultPathExtracts)
         if defaultPathExtracts == None and defaultPathInserts != None:
             self.log.info( "Defaiulting section '%s' extracts path to '%s'."  % (self.mainSection,defaultPathInserts))
-            self.model.defaultPathInserts.update(defaultPathInserts)
+            self.model.defaultPathExtracts.update(defaultPathInserts)
         
-    def setVM(self,sectionName):
-        print sectionName
-        keyPreferances = ['hostname','HostName']
-        key = self.getConfigSectionKey(sectionName,keyPreferances)
-        if key == None:
-            self.log.info("Ignoring section: no '%s' key in '%s' section."  % (keyPreferances[0],self.mainSection))
-            return
-        hostName = self.getConfigValue(sectionName,key,unicode,None)
-        if hostName == None:
-            self.log.info("Ignoring section: value for '%s' section '%s' key is invalid."  % (sectionName,defaultPathInserts))
-            return
-        if not hostName in self.model.vmbyName.keys():
-            self.model.vmbyName[hostName] = vmModel()
-        
-        defaultPathImages = self.model.defaultPathImages.get()
-        defaultPathInserts = self.model.defaultPathInserts.get()
-        defaultPathExtracts = self.model.defaultPathExtracts.get()
-        defaultPathInserts = self.model.defaultPathInserts.get()
-        defaultPathMount = self.model.defaultPathMount.get()
-        if defaultPathMount == None:
-            defaultPathMount = '/mnt'
-        defaultPathMount = os.path.join(defaultPathMount,hostName)
-        keyPreferances = ['mount']
-        key = self.getConfigSectionKey(sectionName,keyPreferances)
-        if key == None:
-            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (sectionName,keyPreferances[0],defaultPathMount))
-        else:
-            tmp = self.getConfigValue(sectionName,key,unicode,defaultPathMount)
-            if tmp != None:
-                defaultPathMount = tmp
-        keyPreferances = ['root']
-        key = self.getConfigSectionKey(sectionName,keyPreferances)
-        if key == None:
-            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (sectionName,keyPreferances[0],defaultPathMount))
 
     def processVmSections(self):
         vmSections = self.getVMSections()
@@ -339,7 +386,8 @@ class ConfigFile1(object):
         defaultPathInserts = self.model.defaultPathInserts.get()
         defaultPathMount = self.model.defaultPathMount.get()
         for sectrion in vmSections:
-            self.setVM(sectrion)
+            processor = ConfigInterpretVm(self.model,self.config,sectrion)
+            processor.updateAll()
         
         
     def upDateModel(self,configfile):
@@ -394,19 +442,5 @@ class ConfigFile1(object):
         
         self.processVmSections()
         
-        # Now process the vms 
-        ReadVmSet = set(ReadVmList)
-        
-        vmSections = self.getVMSections()
-        
-        CfgVmList = []
-        for sectrion in vmSections:
-            enabled = sectrion in ReadVmSet
-            result = _upDateModelVm(self,sectrion,self.config)
-            if result != None:
-                self.model.vmbyName[result].CfgListed.update(enabled)
-                CfgVmList.append(result)
-        CfgVmSet = set(CfgVmList)
-            
             
             
