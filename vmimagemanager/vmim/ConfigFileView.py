@@ -380,11 +380,6 @@ class ConfigFile1(object):
 
     def processVmSections(self):
         vmSections = self.getVMSections()
-        CfgVmList = []
-        defaultPathImages = self.model.defaultPathImages.get()
-        defaultPathExtracts = self.model.defaultPathExtracts.get()
-        defaultPathInserts = self.model.defaultPathInserts.get()
-        defaultPathMount = self.model.defaultPathMount.get()
         for sectrion in vmSections:
             processor = ConfigInterpretVm(self.model,self.config,sectrion)
             processor.updateAll()
