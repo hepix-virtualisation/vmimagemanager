@@ -157,12 +157,12 @@ def main():
         if os.path.isfile(str(options.log_config)):
             logging.config.fileConfig(options.log_config)
         else:
-            logging.basicConfig(level=logging.INFO)
+            logging.basicConfig(level=logging.WARNING)
             log = logging.getLogger("main")
             log.error("Logfile configuration file '%s' was not found." % (options.log_config))
             sys.exit(1)
     else:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.WARNING)
     log = logging.getLogger("main")
     # Now logging is set up process other options
     if options.box:
