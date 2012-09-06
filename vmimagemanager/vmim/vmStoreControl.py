@@ -1,5 +1,5 @@
 from vmDisk import diskFacade
-from vmstorefacard import vmStoreFacade
+from vmStoreFacard import vmStoreFacade
 import magic
 
 import logging
