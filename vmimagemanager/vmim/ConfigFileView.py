@@ -80,7 +80,7 @@ class ConfigInterpretVm(object):
         keyPreferances = ['root']
         key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
         if key == None:
-            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],DefaultPathMountPrefix))
+            self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],DefaultPathMountPrefix))
             self.model.vmbyName[self.hostname].CfgRoot.update(DefaultPathMountPrefix)
             return
         RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,DefaultPathMountPrefix)
@@ -105,7 +105,7 @@ class ConfigInterpretVm(object):
         keyPreferances = ['mount']
         key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
         if key == None:
-            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPathMount))
+            self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPathMount))
             self.model.vmbyName[self.hostname].CfgMountPoint.update(defaultPathMount)
             return
         RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPathMount)
@@ -127,7 +127,7 @@ class ConfigInterpretVm(object):
         keyPreferances = ['mount']
         key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
         if key == None:
-            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgPathImages.update(defaultPath)
             return
         RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
@@ -148,7 +148,7 @@ class ConfigInterpretVm(object):
         keyPreferances = ['overlay','vminserts']
         key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
         if key == None:
-            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgPathInserts.update(defaultPath)
             return
         RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
@@ -168,7 +168,7 @@ class ConfigInterpretVm(object):
         keyPreferances = ['vmextracts']
         key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
         if key == None:
-            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgPathExtracts.update(defaultPath)
             return
         RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
@@ -188,7 +188,7 @@ class ConfigInterpretVm(object):
         keyPreferances = ['partition']
         key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
         if key == None:
-            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgDiskImagePartition.update(defaultPath)
             return
         RawPathMount = self.getConfigValue(self.ConfigSectionName,key,int,defaultPath)
@@ -205,7 +205,7 @@ class ConfigInterpretVm(object):
         keyPreferances = ['hostdisk']
         key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
         if key == None:
-            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgDiskImage.update(defaultPath)
             return
         RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
@@ -223,7 +223,7 @@ class ConfigInterpretVm(object):
         keyPreferances = ['swap']
         key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
         if key == None:
-            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgSwap.update(defaultPath)
             return
         RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
@@ -242,7 +242,7 @@ class ConfigInterpretVm(object):
         keyPreferances = ['mac']
         key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
         if key == None:
-            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
+            self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgMac.update(defaultPath)
             return
         RawPathMount = self.getConfigValue(self.ConfigSectionName,key,list,defaultPath)
@@ -265,7 +265,7 @@ class ConfigInterpretVm(object):
         keyPreferances = ['store_type']
         key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
         if key == None:
-            self.log.info("Section '%s' key '%s' missing defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultType))
+            self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultType))
             self.model.vmbyName[self.hostname].CfgMac.update(defaultType)
             return
         RawPathMount = self.getConfigValue(self.ConfigSectionName,key,list,defaultType)
