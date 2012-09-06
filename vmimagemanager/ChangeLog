@@ -1,0 +1,8 @@
+Changelog
+
+vmimagemanager-0.3.6
+
+ * Added this change log.
+ * Caught applicagation Fatal errors.
+ * Forsed configuration string type to be unicode.
+ * More defaulting of paths.
