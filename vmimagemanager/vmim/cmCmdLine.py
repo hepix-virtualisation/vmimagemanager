@@ -117,6 +117,7 @@ def main():
     p.add_option('--config', action ='append',help='Read vmimagemanager configutration file', metavar='VMIM_CFG')
     p.add_option('--print-config', action ='store',help='Write a vmimagemanager configuration file.', metavar='OUTPUTFILE')
     p.add_option('--log-config', action ='store',help='Logfile configuration file.', metavar='LOGFILE')
+    p.add_option('--verbose', action ='count',help='Global log level.', metavar='LOGFILE')
     
     
     
@@ -144,25 +145,31 @@ def main():
     coreOveride = None
     
     Control = vmCtrl.vmControl()
-    
+    LoggingLevel = logging.WARNING
     if 'VMIM_CFG' in os.environ:
         ConfigurationFilePath = os.environ['VMIM_CFG']
     if 'VMIM_LOG_CONF' in os.environ:
         logFile = os.environ['VMILS_LOG_CONF']
     
     # Set up log file
+    if options.verbose:
+        if options.verbose == 1:
+            LoggingLevel = logging.INFO
+        if options.verbose == 2:
+            LoggingLevel = logging.DEBUG
     if options.log_config:
         logFile = options.log_config
     if logFile != None:
         if os.path.isfile(str(options.log_config)):
             logging.config.fileConfig(options.log_config)
         else:
-            logging.basicConfig(level=logging.WARNING)
+            logging.basicConfig(level=LoggingLevel)
             log = logging.getLogger("main")
             log.error("Logfile configuration file '%s' was not found." % (options.log_config))
             sys.exit(1)
     else:
-        logging.basicConfig(level=logging.WARNING)
+        
+        logging.basicConfig(level=LoggingLevel)
     log = logging.getLogger("main")
     # Now logging is set up process other options
     if options.box:
@@ -216,6 +223,7 @@ def main():
         cmdFormatOptions.add("cpio.bz2")
     if options.print_config:
         print_config = True
+    
     
     # 1 So we have some command line validation
     if len(actions) == 0:
