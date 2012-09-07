@@ -84,12 +84,6 @@ class vmState(object):
                 newBox['disk'] = 0
             boxesOutput[item] = newBox
         return {'listBox' : boxesOutput }
-    def _processImageList(self):
-        output = {'listImages' : self.archiveStore.catImagesOldFormat()}
-        return output
-    def _processInsertsList(self):
-        output = {'listOverlays' : self.archiveStore.catInserts()}
-        return output
        
         
     def process(self,instructions):
