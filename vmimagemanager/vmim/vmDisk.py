@@ -1,5 +1,5 @@
 from observable import Observable
-from diskMounterAbstract import diskMounterBaseClass
+from vmDiskAbstract import diskMounterBaseClass
 from vmDiskKpartx import diskMounterKpartX
 from vmDiskLvm import diskMounterLvm
 import types

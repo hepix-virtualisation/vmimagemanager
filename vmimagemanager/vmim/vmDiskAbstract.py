@@ -50,7 +50,7 @@ class mountedModel(object):
 class diskMounterBaseClass(object):
     mounted = mountedModel()
     def __init__(self):
-        self.log = logging.getLogger("diskMounterAbstract.diskMounterBaseClass") 
+        self.log = logging.getLogger("vmDiskAbstract.diskMounterBaseClass") 
         # 1 Unknown
         # 2 Mounted (is it mounted)
         # 4 Released

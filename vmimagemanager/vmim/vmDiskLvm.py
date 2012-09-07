@@ -1,4 +1,4 @@
-from diskMounterAbstract import diskMounterBaseClass
+from vmDiskAbstract import diskMounterBaseClass
 import os
 import logging, logging.config
 import commands
