@@ -7,7 +7,8 @@
 from observable import GenKey, Observable, ObservableDict
 
 formatMap = { "directory" : "rsync" ,
-    'gzip compressed data': "tgz"}
+    'gzip compressed data': "tgz",
+    'bzip2 compressed data' : "cpio.bz2" }
 
 
 class archiveInstance(object):
