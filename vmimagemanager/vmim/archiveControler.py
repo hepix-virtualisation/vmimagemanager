@@ -347,11 +347,11 @@ class archControler(object):
 
     def catInserts(self):
         outputer = archiveStoreView(self.mdlInserts)
-        output = {'listOverlay': outputer.listImages()}
+        output = outputer.listImages()
         return output
     def catExtracts(self):
-        outputer = archiveStoreView(self.mdlImages)
-        output = {'listImages': outputer.listImages()}
+        outputer = archiveStoreView(self.mdlExtracts)
+        output = outputer.listImages()
         return output
 
 
