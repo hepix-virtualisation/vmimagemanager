@@ -268,7 +268,7 @@ class ConfigInterpretVm(object):
             self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultType))
             self.model.vmbyName[self.hostname].CfgDiskType.update(defaultType)
             return
-        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,list,defaultType)
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultType)
         if RawPathMount == None:
             self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultType))
             self.model.vmbyName[self.hostname].CfgDiskType.update(defaultType)
