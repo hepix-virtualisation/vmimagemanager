@@ -6,7 +6,7 @@ vmimagemanager-0.3.8
  * fixed command line processing of config file.
  * fixed autodetecting shared paritions.
  * added detection of format 'bzip2 compressed data' : 'cpio.bz2'.
- * internal improvewments.
+ * internal improvements.
  
 vmimagemanager-0.3.7
 
