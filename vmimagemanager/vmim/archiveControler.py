@@ -340,12 +340,6 @@ class archControler(object):
         output = outputer.listImages()
         return output
 
-    def catImagesOldFormat(self):
-        outputer = archiveStoreView(self.mdlImages)
-        output = outputer.listImagesCompat()
-        return output
-
-
     def catInserts(self):
         outputer = archiveStoreView(self.mdlInserts)
         output = outputer.listImages()
