@@ -118,7 +118,7 @@ def main():
     p.add_option('--mount', action ='store_true',help='Mount the box(es) disk.')
     p.add_option('--release', action ='store_true',help='Release box(es) disk.')
     
-    p.add_option('--config', action ='append',help='Read vmimagemanager configutration file', metavar='VMIM_CFG')
+    p.add_option('--config', action ='store',help='Read vmimagemanager configutration file', metavar='VMIM_CFG')
     p.add_option('--print-config', action ='store',help='Write a vmimagemanager configuration file.', metavar='OUTPUTFILE')
     p.add_option('--verbose', action ='count',help='Change global log level, increasing log output.', metavar='LOGFILE')
     p.add_option('--quiet', action ='count',help='Change global log level, decreasing log output.', metavar='LOGFILE')
@@ -213,7 +213,7 @@ def main():
         actions.add("extract")
         
     if options.config != None:
-        if os.path.isfile(str(options.log_config)):
+        if os.path.isfile(str(options.config)):
             ConfigurationFilePath = str(options.config)
         else:
             log.error("Configuration file '%s' was not found." % (options.config))
