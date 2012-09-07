@@ -1,6 +1,6 @@
 Changelog
 
-vmimagemanager-0.3.8
+vmimagemanager-0.3.[89]
 
  * updated example config file.
  * fixed command line processing of config file.
