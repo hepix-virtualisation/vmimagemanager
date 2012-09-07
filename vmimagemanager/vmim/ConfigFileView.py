@@ -257,8 +257,8 @@ class ConfigInterpretVm(object):
             self.log.info("Ignoring Section '%s' as no 'name' defined"  % (self.ConfigSectionName))
             return
         defaultType = None
-        if self.model.vmbyName[self.hostname].CfgDiskImage.get() != None and self.model.vmbyName[self.hostname].CfgDiskImagePartition.get() != None:
-            defaultType = 'shared'
+        if self.model.vmbyName[self.hostname].CfgRoot.get() != None and self.model.vmbyName[self.hostname].CfgSwap.get() != None:
+            defaultType = 'partition'
         
         if self.model.vmbyName[self.hostname].CfgDiskImage.get() != None and self.model.vmbyName[self.hostname].CfgDiskImagePartition.get() != None:
             defaultType = 'kpartx'
