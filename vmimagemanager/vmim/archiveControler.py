@@ -198,7 +198,7 @@ class archiveStoreView(object):
                 details = {'Path': newArchive.Directory.get(),
                     'fullPath': newArchive.FullPath.get(), 
                     'type': newArchive.Format.get(), 
-                    'Name': newArchive.Name.get()}, 
+                    'Name': newArchive.Name.get()} 
                 images[fullPath] = details
             output[item] = images
         return output
