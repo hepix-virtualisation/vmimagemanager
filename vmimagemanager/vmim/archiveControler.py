@@ -334,7 +334,8 @@ class archControler(object):
                 hostMappingPathImages[path] = set([])
             hostMappingPathImages[path].add(host)
         outputer.updateImagesCfg(hostMappingPathImages)       
-    def catImages2(self):
+    
+    def catImages(self):
         outputer = archiveStoreView(self.mdlImages)
         output = outputer.listImages()
         return output

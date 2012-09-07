@@ -26,28 +26,32 @@ def displayCommandOutputListBox(Input):
 
 
 def displayCommandOutputListImages(Input):
+    #import json
+    #print json.dumps(Input, sort_keys=True, indent=4)
     print 'Name                 Directory                     Format'
     print '---------------------------------------------------------'
     setOfNames = set()
-    for key in Input["vmControl"]["listImages"].keys():
-        availableKeys = Input["vmControl"]["listImages"][key].keys()
-        Name = Input["vmControl"]["listImages"][key]['Name']
-        ImageType = None
-        if 'type' in availableKeys:
-            ImageType = Input["vmControl"]["listImages"][key]['type']
-        while len(Name) < 20:
-                Name += " "
-        Path = None
-        if 'Path' in availableKeys:
-            Path = Input["vmControl"]["listImages"][key]['Path']
-        while len(Path) < 30:
-                Path += " "
-        print Name,Path,ImageType
+    for directory in Input["vmControl"]["listImages"].keys():
+        for key in Input["vmControl"]["listImages"][directory].keys():
+            availableKeys = Input["vmControl"]["listImages"][directory][key].keys()
+            Name = Input["vmControl"]["listImages"][directory][key]['Name']
+            ImageType = None
+            if 'type' in availableKeys:
+                ImageType = Input["vmControl"]["listImages"][directory][key]['type']
+            while len(Name) < 20:
+                    Name += " "
+            Path = None
+            if 'Path' in availableKeys:
+                Path = Input["vmControl"]["listImages"][directory][key]['Path']
+            while len(Path) < 30:
+                    Path += " "
+            print Name,Path,ImageType
           
 def displayCommandOutputListOverlay(Input):
     print 'Name                 Directory                     Format'
-    print Input
-    
+    import json
+    print json.dumps(Input, sort_keys=True, indent=4)
+
 def displayCommandOutput(Input):
     if not isinstance(Input,dict):
         return

@@ -101,7 +101,7 @@ class vmState(object):
                 return self._processBoxesList()
             if 'list_images' in reqStats:
                 self.archiveStore.updateImages()
-                return {'listImages' : self.archiveStore.catImagesOldFormat()}
+                return {'listImages' : self.archiveStore.catImages()}
             if 'list_inserts' in reqStats:
                 self.archiveStore.updateOverlay()
                 return {'listOverlays' : self.archiveStore.catInserts()}
