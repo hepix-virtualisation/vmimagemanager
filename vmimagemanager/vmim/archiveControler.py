@@ -170,6 +170,7 @@ class archiveStoreView(object):
         if directory in setOfPaths:
             return self.store.collection[directory]
         output = archiveCollection()
+        output.path.update(directory)
         newinfo = self.store.addCollection(output)
         if newinfo == None:
             self.log.error("Failed to add:%s" %(output))
@@ -188,7 +189,6 @@ class archiveStoreView(object):
     def listImages(self):
         output = {}
         for item in self.store.collection.keys():
-            
             collectionstuff = archiveCollectionView( self.store.collection[item])
             collectionstuff.update()
             images = {}
