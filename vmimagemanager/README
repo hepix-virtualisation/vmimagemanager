@@ -102,53 +102,56 @@ Configuring
 
 
 
-Configuration Section "VmImageManager"
+Configuration Section "vmim.local"
 
 vmimagemanager manages your snapshots of an OS to devices and a large image store location.This path is set.on my server this space is mounted under "/server/vmstore"
 
-vmimages=/server/vmstore/images
-vmextracts=/server/vmstore/extracts
+vmimages="/server/vmstore/images"
+vmextracts="/server/vmstore/extracts"
 
 
 the Generated configurations for Xen and for the templates to generate them are by default in the "/var/lib/vmimagemanager/xen" allong with the lock files, with a directory for maintaining state per host.
 
-vmconfdir=/etc/vmimagemanager/
-xenconftemplate=/etc/vmimagemanager/vmimagemanager-xen.template
+vmconfdir="/etc/vmimagemanager/"
+xenconftemplate="/etc/vmimagemanager/vmimagemanager-xen.template"
 
 Configuring a Slot Section
 
-The slot section can be titled anything though calling it the box name "HostName=" is stated.
+The slot section can be titled anything after a "" prefix. For example:
 
-[DebianStable]
-vm_slot_enabled=on
-HostName=DebianStable
-root=/dev/hda5
-swap=/dev/hda10
-mount=/mnt/virt.yokel.org
-host=virt.yokel.org
-mac=02:11:62:22:21:13
+[vmim.vm.1]
+HostName="DebianStable"
+store_type="partition"
+root="/dev/hda5"
+swap="/dev/hda10"
+mount="/mnt/virt.yokel.org"
+host="virt.yokel.org"
+mac=["02:11:62:22:21:13"]
 
 I then use LVM now in conjunction with these scripts becasue I use a lot of partitions, and the current linux Kernel (2.6.18) does not support more than 15 partitions per drive which is clearly no enough if your Virtual maschines are small in memorry demands.
 
-[pong]
-vm_slot_enabled=on
-HostName=pong
-root=/dev/mapper/d430-sysLenny
-#root=/dev/sbird/vm001sys
-swap=/dev/mapper/d430-swapLenny
-#swap=/dev/sbird/vm001swap
-#mount=/mnt/vm001.yokel.org
-mac=02:01:63:22:51:13
+For this reason you may prefure to use disk images:
+
+[vmim.vm.2]
+HostName="pong"
+store_type="kpartx"
+root="/dev/mapper/d430-sysLenny"
+#root="/dev/sbird/vm001sys"
+swap="/dev/mapper/d430-swapLenny"
+#swap="/dev/sbird/vm001swap"
+#mount="/mnt/vm001.yokel.org"
+mac=["02:01:63:22:51:13"]
 #ip=192.168.0.28
 
-vmcfg
-vmlock
-vmextracts
-cmdFormatFilter
-xenconftemplate
+The system can also support RAW images specified as:
 
+[vmim.vm.2]
+store_type="partition"
+HostName="exampleImageBased"
+HostDisk="/dev/mapper/vg.01-hudson_slave_vm01"
+partition=1
 
 These configuration fields are set to be applied with the template for the xen configuration. which is stored in the setting
 
-[VmImageManager]
-xenconftemplate=/etc/vmimagemanager/vmimagemanager-xen.template
+[vmim.local]
+xenconftemplate="/etc/vmimagemanager/vmimagemanager-xen.template"
