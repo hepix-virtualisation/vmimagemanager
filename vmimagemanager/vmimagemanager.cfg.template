@@ -9,7 +9,7 @@ vmemulator="qemu:///system"
 # Are based on a configuration file for the templates to generate them 
 # Place to mount images
 
-mount=/mnt/vm/
+mount="/mnt/vm/"
 
 
 # # vmimages # #
@@ -19,7 +19,7 @@ mount=/mnt/vm/
 # build server or compute farm theis directory will grow fast 
 # unless you apply a cleaning policy.
 
-vmimages=/server/vmstore/images
+vmimages="/server/vmstore/images"
 
 # # vmextracts # #
 #
@@ -28,8 +28,9 @@ vmimages=/server/vmstore/images
 # build server or compute farm theis directory will grow fast 
 # unless you apply a cleaning policy.
 
-vmextracts=/server/vmstore/extracts
+vmextracts="/server/vmstore/extracts"
 
+# Not yet implemented
 
 vmlist = ["vmim.vm.1"]
 
@@ -46,9 +47,8 @@ bridge=bridge0
 
 
 [vmim.vm.1]
-
-
 #Configuration sections such as this contain configuration for hosts
+# All host sections start with the prefix 'vmim.vm.'.
 # as the slot enablement option states.
 # enabled=on/off
 
@@ -71,7 +71,7 @@ swap="/dev/hda10"
 mount="/mnt/virt.yokel.org"
 
 # Setting Mac addresses and IP through dhcp seems a good way of running xen
-mac="02:11:62:22:21:13"
+mac=["02:11:62:22:21:13"]
 
 # Since we are using mac addresses which is better we dont specify ip address
 #ip=192.168.0.28
@@ -103,7 +103,7 @@ HostName="hudson-slave-vm01.desy.de"
 HostDisk="/dev/mapper/vg.01-hudson_slave_vm01"
 partition=1
 mount="/mnt/virt/vg.01-hudson_slave_vm01"
-mac="02:11:69:22:32:11"
+mac=["02:11:69:22:32:11"]
 vmimages=/space/vmimages
 
 
@@ -113,7 +113,7 @@ HostName="hudson-slave-vm02.desy.de"
 HostDisk="/dev/mapper/vg.01-hudson_slave_vm02"
 partition=1
 mount="/mnt/virt/vg.01-hudson_slave_vm02"
-mac="02:11:69:22:32:12"
+mac=["02:11:69:22:32:12"]
 vmimages=/space/vmimages
 
 
