@@ -32,12 +32,13 @@ class StorageControler(object):
         hostDetails.target = self.cfgModel.vmbyName[hostname].CfgMountPoint.get()
         hostDetails.partitionNo = self.cfgModel.vmbyName[hostname].CfgDiskImagePartition.get()
         self.Storage.imageStore(hostDetails,storename)
-    def restore(self,hostname,storename):
+    def restore(self,hostname,storename,imageformat):
         if not hostname in self.cfgModel.vmbyName.keys():
             self.log.warning("No configuration for '%s'" % (hostname))
             return
         self.UpdateFromModel()
         hostDetails = diskFacade()
+        self.Storage.storeFormat = imageformat
         hostDetails.disk = self.cfgModel.vmbyName[hostname].CfgDiskType.get()
         hostDetails.path = self.cfgModel.vmbyName[hostname].CfgDiskImage.get()
         hostDetails.target = self.cfgModel.vmbyName[hostname].CfgMountPoint.get()
