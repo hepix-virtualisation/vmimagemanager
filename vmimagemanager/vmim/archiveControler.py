@@ -106,8 +106,6 @@ class StorageView(object):
             self.addDirectory(direct)
             self.directoryUpdate(direct)
 
-    
-
 
 
 class archiveCollectionView(object):
@@ -151,7 +149,8 @@ class archiveCollectionView(object):
             knownImageNames = self.collection.archives.keys()
         if not ImageName in knownImageNames:
             # Updated the directory and still not here:
-            self.log.error("No model setsssssssssss")
+            
+            self.log.error("Image not found:%s/%s" % (self.collection.path.get(),ImageName))
             return None
         return self.collection.archives[ImageName]
 
@@ -160,7 +159,7 @@ class archiveStoreView(object):
     def __init__(self,store):
         self.store = store
         #print type(Collection)
-        self.log = logging.getLogger("Events")
+        self.log = logging.getLogger("archiveStoreView")
 
     def addDirectory(self,directory):
         if not os.path.isdir(directory):
