@@ -124,7 +124,7 @@ class ConfigInterpretVm(object):
             self.log.info("Ignoring Section '%s' as no 'name' defined"  % (self.ConfigSectionName))
             return
         defaultPath = self.model.defaultPathImages.get()
-        keyPreferances = ['mount']
+        keyPreferances = ['vmimages']
         key = self.getConfigSectionKey(self.ConfigSectionName,keyPreferances)
         if key == None:
             self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
