@@ -31,6 +31,7 @@ class vmState(object):
         inputs = vmMdl()
         keys = hostInfo.keys()
         #print action
+        #self.log.debug("input=%s" % (instructions))
         if len(keys) != 1:
             print "oooo noooo"
             return
@@ -51,7 +52,16 @@ class vmState(object):
             
         if len(action.intersection(["restore"])) > 0:
             self.StorageCntl.Storage.storeFormat = hostInfo[hostName]['storeFormat']
-            self.StorageCntl.restore(hostName,hostInfo[hostName]['restoreName'])
+            self.archiveStore.updateImages()
+            imagedetails = self.archiveStore.getImageMdl(hostName,hostInfo[hostName]['restoreName'])
+            if imagedetails == None:
+                self.log.error("Image not found")
+                return
+            else:
+                fileFormat = imagedetails.Format.get()
+
+                print type(self.StorageCntl)
+                self.StorageCntl.restore(hostName,hostInfo[hostName]['restoreName'],fileFormat)
             
         if len(action.intersection(["insert"])) > 0:
             for item in hostInfo[hostName]['storeInsert']:
