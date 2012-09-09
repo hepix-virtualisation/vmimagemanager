@@ -22,8 +22,7 @@ class vmStoreFacade(object):
     Should be robust for setting the impleemntation or attributes
     in any order."""
     def __init__(self):
-        pass
-
+        self.log = logging.getLogger("vmStoreFacade.vmStoreFacade") 
     @Property
     def storeFormat():
         doc = "storeFormat type"
@@ -36,6 +35,7 @@ class vmStoreFacade(object):
             if storeFormat in diskTypes.keys():
                 self._uploaderImp = diskTypes[storeFormat]()
             else:
+                # dont delete if it does nto exist
                 if hasattr(self, '_uploaderImp'):
                     del(self._uploaderImp)
             if hasattr(self, '_uploaderImp'):
