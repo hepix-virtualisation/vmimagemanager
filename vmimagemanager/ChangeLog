@@ -1,5 +1,11 @@
 Changelog
 
+vmimagemanager-0.3.10
+
+ * updated the README.
+ * Fixed detection of image formats on restore.
+
+
 vmimagemanager-0.3.[89]
 
  * updated example config file.
