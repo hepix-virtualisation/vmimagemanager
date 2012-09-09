@@ -1,9 +1,9 @@
 Introduction to vm-image-manager
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Is a simple python script for managing a small cluster of xen virtual machines on a single host with one command.
-It is designed to complement the xm series of commands.
-So far its optimized for repeatedly restarting a Virtual Machine slot with an image, with one command line.
+Is a simple python script originally for managing a small cluster of xen virtual machines on a single host with one command. 
+It now uses libvirt to control the virtualisation. So far its optimized for repeatedly restarting a Virtual Machine slot 
+with an image, with one command line.
 
 Features
 
@@ -22,6 +22,13 @@ Dependacies
 
 Based upon python and elementtree, lxml. These are packaged as standard in 
 debain.
+
+kpartx
+mount
+bzip2
+gzip
+tar
+cpio
 
 In Redhat the following packages are needed.
 
