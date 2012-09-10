@@ -62,14 +62,15 @@ class vmState(object):
                 self.StorageCntl.restore(hostName,hostInfo[hostName]['restoreName'],fileFormat)
             
         if len(action.intersection(["insert"])) > 0:
-            self.archiveStore.updateImages()
-            imagedetails = self.archiveStore.getInsertsMdl(hostName,hostInfo[hostName]['storeInsert'])
-            if imagedetails == None:
-                self.log.error("Image not found")
-                return
-            else:
-                fileFormat = imagedetails.Format.get()
-                self.StorageCntl.insert(hostName,hostInfo[hostName]['storeInsert'],fileFormat)
+            for item in hostInfo[hostName]['storeInsert']:
+                self.archiveStore.updateImages()
+                imagedetails = self.archiveStore.getInsertsMdl(hostName,item['name'])
+                if imagedetails == None:
+                    self.log.error("Image not found:%s",item['name'])
+                    return
+                else:
+                    fileFormat = imagedetails.Format.get()
+                    self.StorageCntl.insert(hostName,item['name'],fileFormat)
         
         if len(action.intersection(["release","up"])) > 0:
             self.StorageCntl.release(hostName)
