@@ -59,19 +59,17 @@ class vmState(object):
                 return
             else:
                 fileFormat = imagedetails.Format.get()
-
-                print type(self.StorageCntl)
                 self.StorageCntl.restore(hostName,hostInfo[hostName]['restoreName'],fileFormat)
             
         if len(action.intersection(["insert"])) > 0:
-            for item in hostInfo[hostName]['storeInsert']:
-                model = self.archiveStore.getInsertsMdl(hostName,item['name'])
-                # THis error handling should have been caught earilier
-                if model == None:
-                    self.log.error("Invalid store details")
-                else:            
-                    format = model.Format.get()
-                    self.StorageCntl.insert(hostName,item["name"],format)
+            self.archiveStore.updateImages()
+            imagedetails = self.archiveStore.getInsertsMdl(hostName,hostInfo[hostName]['storeInsert'])
+            if imagedetails == None:
+                self.log.error("Image not found")
+                return
+            else:
+                fileFormat = imagedetails.Format.get()
+                self.StorageCntl.insert(hostName,hostInfo[hostName]['storeInsert'],fileFormat)
         
         if len(action.intersection(["release","up"])) > 0:
             self.StorageCntl.release(hostName)

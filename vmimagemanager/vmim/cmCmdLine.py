@@ -403,9 +403,9 @@ def main():
         if lenNeedStorageRestoreName > 0:
             boxdetails['restoreName'] = restore[index]
         if lenNeedStorageInsert > 0:
-            boxdetails['storeInsert'] = insertList
+            boxdetails['storeInsert'] = insertList[index]['name']
         if lenNeedStorageExtracts > 0:
-            boxdetails['storeExtract'] = extractList
+            boxdetails['storeExtract'] = extractList[index]['name']
         
         
         hostdetails[thisBox] = boxdetails
