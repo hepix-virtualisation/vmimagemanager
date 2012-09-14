@@ -1,27 +1,28 @@
-Introduction to vm-image-manager
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Introduction to vmimagemanager
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Is a simple python script originally for managing a small cluster of xen virtual machines on a single host with one command. 
-It now uses libvirt to control the virtualisation. So far its optimized for repeatedly restarting a Virtual Machine slot 
-with an image, with one command line.
+vmimagemanager was originally created for software testing, and automation of deployment. It's original form was a linear script, which has since been completly rewritern to make furture extention easier and the benifits are now showing.
+
+It uses libvirt to control the virtualisation execution. 
+
+So it is optimized for repeatedly restarting a Virtual Machine slot and adding or removing images or image overlays, with one command line, rather than shuting down, mounting the raw file system, and restarting the virtual maschine and variations on this work flow.
 
 Features
 
-    * Templates xen configuration files.
     * Simple Slot and Virtual Machine model of deployment.
-    * Per Slot configuration, at the template, or a hand customized version.
-    * Locking of slots wile processing I/O demands. (Over riddern by killing the originating process)
-    * Speeds the import and export of xen images to tgz archives
-    * Speedy frequent redeploys with rsync.
-    * Extracting or Overlaying Archived Directories images.
+    * Per Slot configuration.
+    * Speeds the import and export of images to archives.
+    * Multiple Disk mounting options including image or partions csharing.
+    * Multiple archive formats, including rsync, tar.gz and cpio.bz2
+    * Very speedy frequent redeploys with rsync.
     * Defaults and per Slot configuration.
-    * Manages mounting domains when then Vm is down and un-mounting when the domain is launched.
+    * Manages mounting domains when then Vm is down and 
+       un-mounting when the domain is launched.
     * Manages exporting images in tar.gz format.
 
 Dependacies
 
-Based upon python and elementtree, lxml. These are packaged as standard in 
-debain.
+Thisw applicaityon makes have use of the command line tools.
 
 kpartx
 mount
@@ -29,6 +30,8 @@ bzip2
 gzip
 tar
 cpio
+
+It is writern in python and uses magic, an elementtree implementation. These are packaged as standard in debain.
 
 In Redhat the following packages are needed.
 
@@ -39,10 +42,8 @@ python-lxml - available from DAG.
 
 Limitations
 
-    * Only works with xen at the moment.
-    * Only works with xfs/ext3 at the moment.
-    * Still requires work on mis-configured Xen systems.
-    * Does very little but speed some common operations.
+    * Only works with libvirt at the moment.
+    * Does very little.
 
 Model
 
@@ -52,25 +53,18 @@ This simple model can be complicated further by migration of hosts. At the momen
 
 Performance
 
+To minimise booting time we recomend direct kernel booting set in libvirt. Boot speeds have noticibly decreased with Scientific Linux 6. Using rsync to store and retrive disk images can be remarkably fast for reimaging, but LVM snapshot distrcution and creation is faster.
+
 In testing timings for shutting down, rsync reinstalling and rebooting a standard a vanilla Scientific Linux (Red Hat Enterprise Binary compatible) where in the region of 30-40 seconds for SL3 and 40-50 seconds for SL4, your performance may vary mine does, on an unltra portable laptop with slower hard drives with debian testing 70-80 seconds, the latency rync delay(*2) shows the file system or block level tools will have to be options in the future. The test cycle was from a static running system, shutdown, rsync, bootup and running busy (ssh comes up a few seconds later).  The messurements are to the time of execution of the vmimagemanager using the unix command "time" the unix on line help system has detailed execusion details.
 
 (2)Im sure with minimal changes this code base can support the use of volume management or zfs, the performance of bootup may still dominate execution time if not modified.
 
 Roadmap
 
-This script is intended to be in the developers tool box. It has also evolved to become something intended to provide some stop gap until virtualisation awareness is available with mature batch queues. The script is intended to forfill only the initial requirement for resorces specified explisitly by specific referancable OS images.
+This script is intended to be useful in many developers tool box. It has also evolved to become something intended to provide some stop gap until virtualisation awareness is available with mature batch queues. The script is intended to forfill only the initial requirement for resorces specified explisitly by specific referancable OS images.
 
- are available grid OS requirements placed on an LHC worker node. Along with SGE (sun grid engine) virtualizing the worker node, into a library of images generated at the experiments repeatble deployment demands. 
+vmimageamanager is useful for off line backing up virtual machine systems, extracting and inserting directories, and reseting the operating system, using rsync. It is meant to be useful and user friendly so suggestions are always welcome.
 
-This script will always aim to be as user friendly as possible. 
-
-Other Plans include a platform application for flexible virtulization abstraction for a build system, so that software projects can build rpm's or debian debs easily with virtual build servers. This will be released as alpha shortly.
-
-Why use vmimagemanager script to manage virtual machines ?
-
-Useful for off line backing up virtual machine systems, extracting and inserting directories, and reseting the operating system, using rsync.
-My script is a simple script, and is meant to be useful and user friendly.
-Its usage is meant to be combined with the xm tools from xen and depends on them and complements them until a better solution for end users comes.
 This tool is also meant to be used by other automation tools, such as automated build and testing set ups, where simplicity of managing virtual machine slots for your own scripts is a priority not a gui.
 
 Notes
@@ -81,11 +75,6 @@ Setting Up
 ~~~~~~~~~~
 
 Installing prerequasits
-
-Running Xen kernel.
-Download the python script tar,gz
-open the compressed directory.
-run the python setup command to install from what ever format you chose, we seek to retain python 2.3 backward compatibility for some time.
 
 python setup.py  --help-commands
 
@@ -105,9 +94,6 @@ d430:~# vim /etc/vmimagemanager/vmimagemanager.cfg
 
 Configuring
 ~~~~~~~~~~~
-
-
-
 
 Configuration Section "vmim.local"
 
@@ -129,8 +115,8 @@ The slot section can be titled anything after a "" prefix. For example:
 [vmim.vm.1]
 HostName="DebianStable"
 store_type="partition"
-root="/dev/hda5"
-swap="/dev/hda10"
+HostDisk="/dev/mapper/vg.01-hudson_slave_vm01"
+partition=1
 mount="/mnt/virt.yokel.org"
 host="virt.yokel.org"
 mac=["02:11:62:22:21:13"]
