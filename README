@@ -22,7 +22,7 @@ Features
 
 Dependacies
 
-Thisw applicaityon makes have use of the command line tools.
+This application makes use of the folowing command line tools.
 
 kpartx
 mount
@@ -31,7 +31,8 @@ gzip
 tar
 cpio
 
-It is writern in python and uses magic, an elementtree implementation. These are packaged as standard in debain.
+It is writern in python and uses python magic module, and so is not installable in Redhat Enterprisse linux 5 
+and below. It uses an elementtree implementation many shoudl work. These are packaged as standard in debain.
 
 In Redhat the following packages are needed.
 
@@ -39,33 +40,28 @@ python - Available in standard RHEL
 python-elementtree - Available in standard RHEL
 python-lxml - available from DAG.
 
-
 Limitations
 
     * Only works with libvirt at the moment.
-    * Does very little.
 
 Model
 
-Virtualization hosts will run a fixed number of "Slots" upon which Virtual Machines can be started, The rational of this is based on the work of many groups in HTC (*1) it seems that the number of jobs per host is typically proportional to the CPU/cores's, Memory allowing, although this varies with IO jobs and CPU requirements for the job. On this reasoning the slot and virtual machine model was used.
+Virtualization hosts will run a fixed number of "Slots" upon which Virtual Machines can be started, The rational of this is based on the work of many groups in HTC (*1) it seems that the number of jobs per host is typically proportional to the CPU/cores's, Memory allowing, although this varies with IO jobs and CPU requirements for the job. On this reasoning the slot and virtual machine model was used. Further experimenting shows that IO requirements of VM workloads can greatly influance the number of virtual maschines a host can support.
 
-This simple model can be complicated further by migration of hosts. At the moment I am only thinking about this.
+This simple model can be complicated further by migration of hosts. This is not a common requirement in High throughput computing but could prove useful, this is not to be investigated in the command line version of this aplication.
 
 Performance
 
-To minimise booting time we recomend direct kernel booting set in libvirt. Boot speeds have noticibly decreased with Scientific Linux 6. Using rsync to store and retrive disk images can be remarkably fast for reimaging, but LVM snapshot distrcution and creation is faster.
+To minimise booting time we recomend direct kernel booting set in libvirt. Boot speeds have noticibly decreased with Scientific Linux 6. Using rsync to store and retrive disk images can be remarkably fast for reimaging, but LVM snapshot distrcution and creation is faster, the code has been redeisnged to support this as a simple plugin to a facade but LVM support is not yet included.
 
-In testing timings for shutting down, rsync reinstalling and rebooting a standard a vanilla Scientific Linux (Red Hat Enterprise Binary compatible) where in the region of 30-40 seconds for SL3 and 40-50 seconds for SL4, your performance may vary mine does, on an unltra portable laptop with slower hard drives with debian testing 70-80 seconds, the latency rync delay(*2) shows the file system or block level tools will have to be options in the future. The test cycle was from a static running system, shutdown, rsync, bootup and running busy (ssh comes up a few seconds later).  The messurements are to the time of execution of the vmimagemanager using the unix command "time" the unix on line help system has detailed execusion details.
-
-(2)Im sure with minimal changes this code base can support the use of volume management or zfs, the performance of bootup may still dominate execution time if not modified.
+I have found large SAS arrays and SSD's have good performance with virtualisation. Low RPM single spindle storeage should be avoided on high throughput systems.
 
 Roadmap
 
-This script is intended to be useful in many developers tool box. It has also evolved to become something intended to provide some stop gap until virtualisation awareness is available with mature batch queues. The script is intended to forfill only the initial requirement for resorces specified explisitly by specific referancable OS images.
+vmimageamanager is useful for off line backing up virtual machine systems, extracting and inserting directories, and reseting the operating system, I usually use rsync. It is meant to be useful and user friendly so suggestions are always welcome.
 
-vmimageamanager is useful for off line backing up virtual machine systems, extracting and inserting directories, and reseting the operating system, using rsync. It is meant to be useful and user friendly so suggestions are always welcome.
+This tool is also meant to be used by other automation tools, such as automated build and testing set ups, Unfortunaly I have no current automated test suit for this application, This is a high priority. I hope to connect the backend to an AMQP server in the near future. Then it might be suitable for high availablity work.
 
-This tool is also meant to be used by other automation tools, such as automated build and testing set ups, where simplicity of managing virtual machine slots for your own scripts is a priority not a gui.
 
 Notes
 
@@ -82,6 +78,11 @@ should help you get started I prefure to only install packages (Mine or other pe
 
 $python setup.py install 
 
+I also recomend building RPM's.
+
+$python setup.py bdist_rpm
+
+Debian derivatives "deb" packages 
 
 Copy a template over to the correct location.
 
@@ -101,12 +102,6 @@ vmimagemanager manages your snapshots of an OS to devices and a large image stor
 
 vmimages="/server/vmstore/images"
 vmextracts="/server/vmstore/extracts"
-
-
-the Generated configurations for Xen and for the templates to generate them are by default in the "/var/lib/vmimagemanager/xen" allong with the lock files, with a directory for maintaining state per host.
-
-vmconfdir="/etc/vmimagemanager/"
-xenconftemplate="/etc/vmimagemanager/vmimagemanager-xen.template"
 
 Configuring a Slot Section
 
