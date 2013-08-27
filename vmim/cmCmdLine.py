@@ -120,8 +120,8 @@ def main():
     
     p.add_option('--config', action ='store',help='Read vmimagemanager configutration file', metavar='VMIM_CFG')
     p.add_option('--print-config', action ='store',help='Write a vmimagemanager configuration file.', metavar='OUTPUTFILE')
-    p.add_option('--verbose', action ='count',help='Change global log level, increasing log output.', metavar='LOGFILE')
-    p.add_option('--quiet', action ='count',help='Change global log level, decreasing log output.', metavar='LOGFILE')
+    p.add_option('-v','--verbose', action ='count',help='Change global log level, increasing log output.', metavar='LOGFILE')
+    p.add_option('-q','--quiet', action ='count',help='Change global log level, decreasing log output.', metavar='LOGFILE')
     p.add_option('--log-config', action ='store',help='Logfile configuration file, (overrides command line).', metavar='LOGFILE')
     
     
