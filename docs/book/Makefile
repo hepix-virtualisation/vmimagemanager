@@ -11,7 +11,7 @@ SOURCES = Book.xml
 
 #  The extension for all HTML output (e.g. html or shtml).  Must NOT
 #  start with a dot.
-HTML_EXT = shtml
+HTML_EXT = html
 
 
 # All stylesheets used by various outputs
