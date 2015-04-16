@@ -17,3 +17,4 @@ include docs/pics/SGE_WN.txt
 include README
 include libvirt.xsl
 include vmimagemanager.cfg.template
+include tests/*
