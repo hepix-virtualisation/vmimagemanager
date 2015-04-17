@@ -7,7 +7,7 @@ import nose
 import logging
 
 class TestModule_runnershell2(unittest.TestCase):
-    def test_initialise(self):    
+    def test_initialise(self):
         pass
 
 if __name__ == "__main__":
