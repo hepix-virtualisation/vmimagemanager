@@ -1,5 +1,9 @@
 Changelog
 
+vmimagemanager-0.3.13
+
+* Added an example dummy nose test.
+
 vmimagemanager-0.3.11
 
  * added short command options -v and -q for verbose and quiet
