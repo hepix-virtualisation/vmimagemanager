@@ -3,7 +3,7 @@ from ConfigParserJson import jsonConfigParser
 
 import os
 
-from ConfigModel import vmModel , CfgModel
+from ConfigModel import vmModel
 
 
 def selectBestKeyFor(selections,availableKeys):
