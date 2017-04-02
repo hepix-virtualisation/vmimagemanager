@@ -1,7 +1,7 @@
 import ConfigParser
 import sys
 import logging, logging.config
-
+from text_type import text_type
 
 if float(sys.version[:3]) >= 2.6:
     import json
@@ -15,7 +15,7 @@ class jsonConfigParser(ConfigParser.SafeConfigParser):
         self.log = logging.getLogger("vmCtrl.jsonConfigParser")
         ConfigParser.SafeConfigParser.__init__(self)
     def getJson(self,section,option):
-        value = unicode(self.get(section,option))
+        value = text_type(self.get(section,option))
         try:
             return json.loads(value)
         except ValueError:

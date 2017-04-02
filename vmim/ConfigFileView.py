@@ -1,7 +1,8 @@
+import os
 import logging, logging.config
 from ConfigParserJson import jsonConfigParser
+from text_type import text_type
 
-import os
 
 from ConfigModel import vmModel
 
@@ -62,7 +63,7 @@ class ConfigInterpretVm(object):
             self.log.info( "Section '%s', no key '%s' Ignoring Section."  % (keyPreferances[0]))
             return
         HostName = self.config.getJson(self.ConfigSectionName,key)
-        if not isinstance( HostName, unicode ):
+        if not isinstance( HostName, text_type ):
             self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (self.ConfigSectionName,key,defaultPathImages))
             return
         keys = self.model.vmbyName.keys()
@@ -83,7 +84,7 @@ class ConfigInterpretVm(object):
             self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],DefaultPathMountPrefix))
             self.model.vmbyName[self.hostname].CfgRoot.update(DefaultPathMountPrefix)
             return
-        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,DefaultPathMountPrefix)
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,text_type,DefaultPathMountPrefix)
         if RawPathMount == None:
             self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],DefaultPathMountPrefix))
             self.model.vmbyName[self.hostname].CfgRoot.update(defaultPathMount)
@@ -108,7 +109,7 @@ class ConfigInterpretVm(object):
             self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPathMount))
             self.model.vmbyName[self.hostname].CfgMountPoint.update(defaultPathMount)
             return
-        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPathMount)
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,text_type,defaultPathMount)
         if RawPathMount == None:
             self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPathMount))
             self.model.vmbyName[self.hostname].CfgMountPoint.update(defaultPathMount)
@@ -130,7 +131,7 @@ class ConfigInterpretVm(object):
             self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgPathImages.update(defaultPath)
             return
-        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,text_type,defaultPath)
         if RawPathMount == None:
             self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgPathImages.update(defaultPath)
@@ -151,7 +152,7 @@ class ConfigInterpretVm(object):
             self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgPathInserts.update(defaultPath)
             return
-        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,text_type,defaultPath)
         if RawPathMount == None:
             self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgPathInserts.update(defaultPath)
@@ -171,7 +172,7 @@ class ConfigInterpretVm(object):
             self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgPathExtracts.update(defaultPath)
             return
-        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,text_type,defaultPath)
         if RawPathMount == None:
             self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgPathExtracts.update(defaultPath)
@@ -208,7 +209,7 @@ class ConfigInterpretVm(object):
             self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgDiskImage.update(defaultPath)
             return
-        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,text_type,defaultPath)
         if RawPathMount == None:
             self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgDiskImage.update(defaultPath)
@@ -226,7 +227,7 @@ class ConfigInterpretVm(object):
             self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgSwap.update(defaultPath)
             return
-        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultPath)
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,text_type,defaultPath)
         if RawPathMount == None:
             self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultPath))
             self.model.vmbyName[self.hostname].CfgSwap.update(defaultPath)
@@ -268,7 +269,7 @@ class ConfigInterpretVm(object):
             self.log.info("Section '%s' key '%s' is missing, so defaulting to '%s'."  % (self.ConfigSectionName,keyPreferances[0],defaultType))
             self.model.vmbyName[self.hostname].CfgDiskType.update(defaultType)
             return
-        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,unicode,defaultType)
+        RawPathMount = self.getConfigValue(self.ConfigSectionName,key,text_type,defaultType)
         if RawPathMount == None:
             self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],defaultType))
             self.model.vmbyName[self.hostname].CfgDiskType.update(defaultType)
@@ -321,7 +322,7 @@ class ConfigFile1(object):
         if key == None:
             self.log.info("Configuration file does not have a section '%s', key '%s' section the default VM image directory."  % (self.mainSection,keyPreferances[0]))
             return
-        defaultPathExtracts = self.getConfigValue(self.mainSection,key,unicode,defaultPathExtracts)
+        defaultPathExtracts = self.getConfigValue(self.mainSection,key,text_type,defaultPathExtracts)
         if defaultPathExtracts == None:
             return
         self.model.defaultPathImages.update(defaultPathExtracts)
@@ -333,7 +334,7 @@ class ConfigFile1(object):
         if key == None:
             self.log.info("Configuration file does not have a section '%s', key '%s' section the default VM ovelay image directory."  % (self.mainSection,keyPreferances[0]))
             return
-        defaultPathExtracts = self.getConfigValue(self.mainSection,key,unicode,defaultPathExtracts)
+        defaultPathExtracts = self.getConfigValue(self.mainSection,key,text_type,defaultPathExtracts)
         if defaultPathExtracts == None:
             return
         self.model.defaultPathImages.update(defaultPathExtracts)
@@ -346,7 +347,7 @@ class ConfigFile1(object):
         if key == None:
             self.log.info("Configuration file does not have a section '%s', key '%s' section the default VM extracts image directory."  % (self.mainSection,keyPreferances[0]))
             return
-        defaultPathExtracts = self.getConfigValue(self.mainSection,key,unicode,defaultPathExtracts)
+        defaultPathExtracts = self.getConfigValue(self.mainSection,key,text_type,defaultPathExtracts)
         if defaultPathExtracts == None:
             return
         self.model.defaultPathExtracts.update(defaultPathExtracts)
@@ -359,7 +360,7 @@ class ConfigFile1(object):
         if key == None:
             self.log.info("Configuration file does not have a section '%s', key '%s' section the default Path Mount when mounting VM's."  % (self.mainSection,keyPreferances[0]))
             return
-        defaultPathExtracts = self.getConfigValue(self.mainSection,key,unicode,defaultPathExtracts)
+        defaultPathExtracts = self.getConfigValue(self.mainSection,key,text_type,defaultPathExtracts)
         if defaultPathExtracts == None:
             return
         
@@ -423,7 +424,7 @@ class ConfigFile1(object):
             else:
                 unprocessed = []
                 for item in tmpReadVmList:
-                    if isinstance( item, unicode ):
+                    if isinstance( item, text_type ):
                         ReadVmList.append(item)
                     else:
                         unprocessed.append(item)
