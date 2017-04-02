@@ -1,8 +1,14 @@
 Changelog
 
-vmimagemanager-0.3.11
+vmimagemanager-0.3.12
 
  * added short command options -v and -q for verbose and quiet
+
+vmimagemanager-0.3.11
+
+ * added this changelog
+ * imporved manifest and setuptools setup.
+ * Updated documenation
 
 vmimagemanager-0.3.10
 
