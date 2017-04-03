@@ -1,7 +1,3 @@
-
-from observable import Observable
-import types
-
 import logging
 
 from vmStoreTgz import vmStoreTgz
@@ -91,8 +87,6 @@ class vmStoreFacade(object):
     
     
 if __name__ == "__main__" :
-    import time
-    import sys
     from vmDisk import diskFacade
     logging.basicConfig(level=logging.DEBUG)
     
