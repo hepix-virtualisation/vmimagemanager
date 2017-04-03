@@ -9,7 +9,6 @@ import string
 import sys
 import commands
 import time
-import re
 
 try:
     from xml.etree.ElementTree import Element, SubElement, dump,tostring
