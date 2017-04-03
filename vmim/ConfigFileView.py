@@ -66,7 +66,6 @@ class ConfigInterpretVm(object):
         if not isinstance( HostName, text_type ):
             self.log.warning( "Configuration file does not have a section '%s', key '%s' is not a string, defaulting to %s."  % (self.ConfigSectionName,key,defaultPathImages))
             return
-        keys = self.model.vmbyName.keys()
         if not HostName in self.model.vmbyName.keys():
             self.model.vmbyName[HostName] = vmModel()
         self.model.vmbyName[HostName].CfgHostName.set(HostName)
