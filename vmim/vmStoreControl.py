@@ -1,9 +1,7 @@
 from vmDisk import diskFacade
 from vmStoreFacard import vmStoreFacade
-import magic
-
 import logging
-import os
+
 
 class StorageControler(object):
     def __init__(self,cfgModel):
