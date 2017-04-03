@@ -104,7 +104,6 @@ class vmState(object):
         reqBoxes = self.actionsReqBoxes.intersection(instructions['vmControl']['actions'])
         lenReqBoxes = len(reqBoxes)
         if lenReqBoxes > 0:
-            output = {}
             instructionsKeys = instructions.keys()
             if not  'hostdetails' in instructionsKeys:
                 self.log.info("No hostdetails")
