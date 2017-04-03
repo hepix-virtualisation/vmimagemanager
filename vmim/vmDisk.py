@@ -1,19 +1,8 @@
-from observable import Observable
-from vmDiskAbstract import diskMounterBaseClass
 from vmDiskKpartx import diskMounterKpartX
 from vmDiskLvm import diskMounterLvm
-import types
-
-import logging
-
-
 
 def Property(func):
     return property(**func())
-
-
-
-
 
 class diskFacade(object):
     """Facade class for mulitple implementations of diskhandling,
@@ -250,7 +239,6 @@ class diskFacade(object):
             self._uploaderImp.updateFromMtab(ByTarget,BySource)
 if __name__ == "__main__" :
     import time
-    logging.basicConfig(level=logging.DEBUG)
     df = diskFacade()
     #df.disk = 'kpartx'
     #df.path = '/var/lib/libvirt/images/lenny.img'
