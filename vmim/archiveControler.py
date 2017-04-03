@@ -4,7 +4,6 @@ import logging
 
 from archiveModel import archiveStore,archiveCollection,archiveInstance
 
-from vmStoreFacard import vmStoreFacade
 import magic
 import os
 
