@@ -1,19 +1,9 @@
-import logging, logging.config
-from observable import GenKey, Observable, ObservableDict
-
-
-import ConfigParser
-
-from clibvirt import vmMdl, vhostMdl, LibVirtCnt, LibVirtConnection
-
-from ConfigModel import vmModel , CfgModel
-
+import logging
+from observable import GenKey
+from clibvirt import vmMdl, vhostMdl, LibVirtCnt
+from ConfigModel import CfgModel
 from ConfigFileView import ConfigFile1
-
-import os
-
 from vmStoreControl import StorageControler
-
 from archiveControler import archControler
 
 log = logging.getLogger(__name__)
