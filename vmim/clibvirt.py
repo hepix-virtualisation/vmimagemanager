@@ -1,22 +1,12 @@
 #!/usr/bin/python
 
-import logging, logging.config
-
-
-import os
-import os.path
-import sys
-import getopt
+import logging
 import time
-import re
-
 import libvirt
+from vmLibVirtMdl import vmMdl 
 
 
-from vmLibVirtMdl import vmMdl, vhostMdl 
-
-
-
+log = logging.getLogger(__name__)
 
 
 class LibVirtConnection:
