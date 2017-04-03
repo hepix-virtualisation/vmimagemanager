@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import logging, logging.config
+import logging
 
 
 
@@ -47,6 +47,7 @@ except ImportError:
 class virtualhostKvm:
     def __init__(self,model):
         self.model = model
+        self.logger = logging.getLogger("ConfigFileViewLibVirtGen.virtualhostKvm")
         
     def LibVirtXmlTreeGenerateAlt1(self,devices):    
         self.logger.debug("LibVirtXmlTreeGenerate")
