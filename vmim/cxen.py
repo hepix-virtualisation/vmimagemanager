@@ -13,7 +13,7 @@ import time
 try:
     from xml.etree.ElementTree import Element, SubElement, dump,tostring
 except ImportError:
-    from elementtree.ElementTree  import Element, SubElement, dump,tostring
+    from elementtree.ElementTree  import Element, SubElement, dump,tostring # noqa
 
 # Note this methos may not be needed    
 def VitualHostsList():
