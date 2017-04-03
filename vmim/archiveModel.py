@@ -3,7 +3,7 @@
 
 
 
-# I shoudl make my own GenKeyFunction Later
+# I should make my own GenKeyFunction Later
 from observable import GenKey, Observable, ObservableDict
 
 formatMap = { "directory" : "rsync" ,
@@ -80,4 +80,4 @@ class archiveStore(object):
         for item in self.collection.keys():
             itemName = self.collection[item].path.get()
             if itemName != item:
-                print "shoudl not happen"
+                print "should not happen"
