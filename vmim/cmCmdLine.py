@@ -30,7 +30,6 @@ def displayCommandOutputListImages(Input):
     #print json.dumps(Input, sort_keys=True, indent=4)
     print('Name                 Directory                     Format')
     print('---------------------------------------------------------')
-    setOfNames = set()
     for directory in Input["vmControl"]["listImages"].keys():
         for key in Input["vmControl"]["listImages"][directory].keys():
             availableKeys = Input["vmControl"]["listImages"][directory][key].keys()
