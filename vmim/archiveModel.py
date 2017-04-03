@@ -1,6 +1,7 @@
+import logging
 
 
-
+log = logging.getLogger(__name__)
 
 
 # I should make my own GenKeyFunction Later
@@ -80,4 +81,4 @@ class archiveStore(object):
         for item in self.collection.keys():
             itemName = self.collection[item].path.get()
             if itemName != item:
-                print "should not happen"
+                log.error("should not happen")
