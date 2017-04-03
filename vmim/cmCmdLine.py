@@ -218,7 +218,7 @@ def main():
             sys.exit(1)
         
     if options.core:
-        coreOveride = options.core
+        log.error("Not implemented")
     if options.up:
         actions.add("up")
     if options.down:
