@@ -392,9 +392,6 @@ class ConfigFile1(object):
         MainSection = 'vmim.local'
         ReadVmList = []
         libvirtConStr = 'qemu:///system'
-        
-        defaultPathImages = None
-        defaultPathMount = None
         if not MainSection in configurationSections:
             self.log.fatal( "Configuration file does not have a section '%s'"  % (MainSection))
             return False
