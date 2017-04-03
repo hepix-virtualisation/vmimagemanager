@@ -39,8 +39,8 @@ class LibVirtCnt(object):
         for LibVirtRunningDomainId in RunningDomains:
             try:
                 hostPtr = self.connection.lookupByID(LibVirtRunningDomainId)
-            except libvirt.libvirtError, E:
-                self.log.warning("Exception thrown %s" % E)
+            except libvirt.libvirtError as expt:
+                self.log.warning("Exception thrown %s" % expt)
                 continue
             Name = hostPtr.name()
             Uuid = hostPtr.UUIDString()
