@@ -114,7 +114,6 @@ class diskMounterKpartX(diskMounterBaseClass):
             if int(item['Number']) == self.partitionNo:    
                 correct = item
         if correct == None:
-            partitionList = []
             self.logger.error('Partiton  "%s" does not exist.' % (self.partitionNo))
             for item in DiskPartitionD:
                 self.logger.info( "Partion %s exists" % (item['Number']))
