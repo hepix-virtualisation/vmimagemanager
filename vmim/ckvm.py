@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import logging
-import os
 from xml.etree.ElementTree import Element, SubElement, tostring
 import cvirthost
 
