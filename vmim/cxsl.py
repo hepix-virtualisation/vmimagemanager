@@ -66,11 +66,10 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         os_type = SubElement(os, "type",arch="x86_64",machine="pc")
         os_type.text = str("hvm")
         features = SubElement(domain, "features")
-        acpi = SubElement(features, "acpi")
-        apic = SubElement(features, "apic")
-        pae = SubElement(features, "pae")
-        
-        clock = SubElement(domain, "clock",offset="utc")
+        SubElement(features, "acpi")
+        SubElement(features, "apic")
+        SubElement(features, "pae")
+        SubElement(domain, "clock",offset="utc")
         on_power_off  = SubElement(domain, "on_poweroff")
         on_power_off.text = "destroy"
         on_reboot = SubElement(domain, "on_reboot")
@@ -88,8 +87,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
              
              interface = SubElement(devices, "interface")
              interface.set('type', "bridge")
-             mac_address = SubElement(interface, "mac",address='%s' % (self.DcgDict["HostMacAddress"]))
-             source = SubElement(interface, "source",bridge='%s' % (self.DcgDict["bridge"]))
+             SubElement(interface, "mac",address='%s' % (self.DcgDict["HostMacAddress"]))
+             SubElement(interface, "source",bridge='%s' % (self.DcgDict["bridge"]))
         else:
             log.debug("Has no mac address")
         
