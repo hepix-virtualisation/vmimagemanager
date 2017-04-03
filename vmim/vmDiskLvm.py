@@ -27,7 +27,7 @@ class lvmControl:
         (rc,output) = commands.getstatusoutput(cmd)
         if rc != 0:
             self.logger.error('Failed "%s"' % (cmd))
-            self.logger.error(cmdoutput)
+            self.logger.error(output)
             self.logger.error('Return Code=%s' % (rc))
             sys.exit(1)
         if "" == output:
