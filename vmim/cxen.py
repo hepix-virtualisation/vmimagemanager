@@ -7,7 +7,6 @@ import os
 import os.path
 import string
 import sys
-import getopt
 import commands
 import time
 import re
