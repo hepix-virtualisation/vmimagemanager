@@ -13,7 +13,6 @@ class StorageView(object):
         self.log = logging.getLogger("Events")
     def returnFiileType(self,magicStr):
         cleanstring = str.strip(magicStr)
-        splitString = dir(magicStr)
         splitLine = cleanstring.split(', ')
         if splitLine[0] == 'gzip compressed data':
             return "tgz"
