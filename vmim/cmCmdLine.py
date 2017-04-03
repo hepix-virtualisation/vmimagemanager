@@ -6,13 +6,13 @@ import vmCtrl
 import string
 from __version__ import version 
 def usage():
-    print "usage"
+    print("usage")
 
 
 # User interface
 def displayCommandOutputListBox(Input):
-    print 'Name                                            Disk Virt'
-    print '---------------------------------------------------------'
+    print('Name                                            Disk Virt')
+    print('---------------------------------------------------------')
     for key in Input["vmControl"]["listBox"].keys():
         name = Input["vmControl"]["listBox"][key]["name"]
         nameLen = len(name)
@@ -28,8 +28,8 @@ def displayCommandOutputListBox(Input):
 def displayCommandOutputListImages(Input):
     #import json
     #print json.dumps(Input, sort_keys=True, indent=4)
-    print 'Name                 Directory                     Format'
-    print '---------------------------------------------------------'
+    print('Name                 Directory                     Format')
+    print('---------------------------------------------------------')
     setOfNames = set()
     for directory in Input["vmControl"]["listImages"].keys():
         for key in Input["vmControl"]["listImages"][directory].keys():
@@ -48,9 +48,9 @@ def displayCommandOutputListImages(Input):
             print Name,Path,ImageType
           
 def displayCommandOutputListOverlay(Input):
-    print 'Name                 Directory                     Format'
+    print('Name                 Directory                     Format')
     import json
-    print json.dumps(Input, sort_keys=True, indent=4)
+    print(json.dumps(Input, sort_keys=True, indent=4))
 
 def displayCommandOutput(Input):
     if not isinstance(Input,dict):
