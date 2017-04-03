@@ -120,11 +120,11 @@ if __name__ == "__main__" :
     
     sf.storeFormat = 'rsync'
     sf.storePath = '/server/store'
-    print sf.imageList()
+    print (sf.imageList())
     df.mount()
-    print sf.imageStore(df,'fred.rsync')
+    print (sf.imageStore(df,'fred.rsync'))
     df.readMtab()
-    print sf.imageRestore(df,'fred.rsync')
+    print (sf.imageRestore(df,'fred.rsync'))
     df.readMtab()
     df.release()
     
@@ -132,11 +132,11 @@ if __name__ == "__main__" :
     sf.storePath = '/server/store'
    
     
-    print sf.imageList()
+    print (sf.imageList())
     df.mount()
     
-    print sf.imageStore(df,'fred.tgz')
+    print (sf.imageStore(df,'fred.tgz'))
     df.readMtab()
-    print sf.imageRestore(df,'fred.tgz')
+    print (sf.imageRestore(df,'fred.tgz'))
     df.readMtab()
     df.release()
