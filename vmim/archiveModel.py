@@ -5,7 +5,7 @@ log = logging.getLogger(__name__)
 
 
 # I should make my own GenKeyFunction Later
-from observable import GenKey, Observable, ObservableDict
+from observable import Observable, ObservableDict
 
 formatMap = { "directory" : "rsync" ,
     'gzip compressed data': "tgz",
