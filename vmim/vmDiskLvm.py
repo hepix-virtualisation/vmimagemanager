@@ -184,10 +184,10 @@ class diskMounterLvm(diskMounterBaseClass):
         self.lvm.updateModel()
         self.uuid = self.lvm.getUUIDbyVolumeGroupLogicalVolume(self.lvmVolumeGroup,self.lvmVolume)
         HostRootSpace = None
-        print self.uuid
+        self.logger.debug("lvm uuid=%s" % self.uuid)
         if self.uuid != None:
             partition = self.lvm.logicalVolsByUUID[self.uuid]
-            print partition.has_key('Path')
+            self.logger.debug(partition.has_key('Path'))
             if partition.has_key('Path'):
                 HostRootSpace = partition['Path']
         self.HostRootSpace = HostRootSpace
@@ -238,7 +238,7 @@ class diskMounterLvm(diskMounterBaseClass):
             self.logger.info( 'HostRootSpace %s' % (self.HostRootSpace))
             return False
         if not os.path.exists(self.HostRootSpace):
-            print 'danger',self.HostRootSpace
+            self.logger.error('exists:%s' % (self.HostRootSpace))
         if not os.path.isdir(self.target):
             os.makedirs(self.target)
             self.logger.info( 'Made Directory %s' % (self.target))
