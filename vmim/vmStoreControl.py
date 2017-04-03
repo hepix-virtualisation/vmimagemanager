@@ -67,8 +67,6 @@ class StorageControler(object):
             self.log.warning("No configuration for '%s'" % (hostname))
             return
         self.UpdateFromModel()
-        foundHost = self.findByHostName(hostname)
-        #print (hostname,storename,storeformat,self.cfgModel.vmbyName[hostname].CfgPathInserts.get())
         hostDetails = diskFacade()
         hostDetails.disk = self.cfgModel.vmbyName[hostname].CfgDiskType.get()
         hostDetails.path = self.cfgModel.vmbyName[hostname].CfgDiskImage.get()
@@ -82,8 +80,6 @@ class StorageControler(object):
             self.log.warning("No configuration for '%s'" % (hostname))
             return
         self.UpdateFromModel()
-        foundHost = self.findByHostName(hostname)
-        #print (hostname,storename,storeformat,self.cfgModel.vmbyName[hostname].CfgPathInserts.get())
         hostDetails = diskFacade()
         hostDetails.disk = self.cfgModel.vmbyName[hostname].CfgDiskType.get()
         hostDetails.path = self.cfgModel.vmbyName[hostname].CfgDiskImage.get()
