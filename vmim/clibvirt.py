@@ -199,12 +199,12 @@ def tester(conection,model):
 
 def debugModel(model):
     for item in model.vmsByUuid.keys():
-        print "By UUID %s?%s=%s,%s" % (item,model.vmsByUuid[item].libvirtName.get(),
+        log.debug("By UUID %s?%s=%s,%s" % (item,model.vmsByUuid[item].libvirtName.get(),
             model.vmsByUuid[item].libvirtUuid.get(),
-            model.vmsByUuid[item])
+            model.vmsByUuid[item]))
     for item in model.vmsbyName.keys():
-        print "By Name %s?%s=%s" % (item,model.vmsbyName[item].libvirtName.get(),
-            model.vmsbyName[item].libvirtUuid.get())
+        log.debug("By Name %s?%s=%s" % (item,model.vmsbyName[item].libvirtName.get(),
+            model.vmsbyName[item].libvirtUuid.get()))
     for item in model.vmsbyId.keys():
-        print "By Id %s?%s=%s" % (item,model.vmsbyId[item].libvirtName.get(),
-            model.vmsbyId[item].libvirtId.get())
+        log.debug("By Id %s?%s=%s" % (item,model.vmsbyId[item].libvirtName.get(),
+            model.vmsbyId[item].libvirtId.get()))
