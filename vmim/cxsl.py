@@ -1,9 +1,6 @@
 #!/usr/bin/python
 
-import logging, logging.config
-
-
-
+import logging
 from os import path
 try: from lxml import etree
 except ImportError:
@@ -31,18 +28,14 @@ except ImportError:
     def StringIO(s):
         if isinstance(s, str): s = s.encode("UTF?8")
         return BytesIO(s)
-
-import string
-import sys
-import getopt
-import time
-import re
 try:
-    from xml.etree.ElementTree import Element, SubElement, dump,tostring
+    from xml.etree.ElementTree import Element, SubElement, tostring
 except ImportError:
-    from elementtree.ElementTree  import Element, SubElement, dump,tostring
+    from elementtree.ElementTree  import Element, SubElement, tostring
 
 import cvirthost
+
+log = logging.getLogger(__name__)
 
 class virtualhostKvm(cvirthost.virtualhost):
 
@@ -90,7 +83,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         emulator.text = "/usr/libexec/qemu-kvm"
         self.RealiseDevice()
         self.DiskSubsystem.LibVirtXmlTreeGenerate(devices)
-        self.logger.debug("DiskSubsystem %s" %(self.DiskSubsystem))
+        log.debug("DiskSubsystem %s" %(self.DiskSubsystem))
         if self.DcgDict.has_key("bridge") and self.DcgDict.has_key("HostMacAddress"):
              
              interface = SubElement(devices, "interface")
@@ -98,7 +91,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
              mac_address = SubElement(interface, "mac",address='%s' % (self.DcgDict["HostMacAddress"]))
              source = SubElement(interface, "source",bridge='%s' % (self.DcgDict["bridge"]))
         else:
-            self.logger.debug("Has no mac address")
+            log.debug("Has no mac address")
         
         #print "self.genXml=" + self.genXml()
         #print "genXmlShouldExist=" + text
@@ -108,17 +101,16 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
                 defaultTransfrom = ""
                 for line in open(libvirtxsltfile):
                     defaultTransfrom += line
-                self.logger.debug( defaultTransfrom)
+                log.debug( defaultTransfrom)
             else:
-                self.logger.error("libvirtxslt file not found with path %s" % (libvirtxsltfile))
+                log.error("libvirtxslt file not found with path %s" % (libvirtxsltfile))
         else:
-            self.logger.error("libvirtxslt file not defined.")
+            log.error("libvirtxslt file not defined.")
         xslt_tree   =  etree.XML(defaultTransfrom)
         transform = etree.XSLT(xslt_tree)
         f = StringIO(tostring(domain))
         doc = etree.parse(f)
         result = transform(doc)
         text = str(result)
-        self.logger.debug(text)
-        
+        log.debug(text)
         return text
