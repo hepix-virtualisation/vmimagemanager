@@ -75,13 +75,13 @@ class LibVirtCnt(object):
         ID = match.libvirtId.get()
         if ID in self.model.lookupByID.keys():
             #print 'found ID',ID
-            ptr = self.connection.lookupByID(LibVirtRunningDomainId)
+            ptr = self.connection.lookupByID(ID)
             if ptr != None:
                 return ptr
         Name = match.vmsbyName.get()
         if Name in self.model.vmsbyName.keys():
             #print 'found Name',Name
-            ptr = self.connection.lookupByName(LibVirtRunningDomainId)
+            ptr = self.connection.lookupByName(Name)
             if ptr != None:
                 return ptr
         
