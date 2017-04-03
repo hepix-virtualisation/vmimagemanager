@@ -14,6 +14,8 @@ from xml.etree.ElementTree import Element, SubElement, dump,tostring
 import cvirthost
 
 
+log = logging.getLogger(__name__)
+
 class virtualhostKvm(cvirthost.virtualhost):
 
 
@@ -51,7 +53,7 @@ class virtualhostKvm(cvirthost.virtualhost):
         self.DiskSubsystem.LibVirtXmlTreeGenerate(devices)
         self.logger.debug("DiskSubsystem %s" %(self.DiskSubsystem))
         if hasattr(self,"Bridge") and hasattr(self,"HostMacAddress"):
-             print "bridge222=%s" % (self.Bridge)
+             log.debug("bridge=%s" % (self.Bridge))
              interface = SubElement(devices, "interface")
              interface.set('type', "bridge")
              mac_address = SubElement(interface, "mac",address='%s' % (self.HostMacAddress))
