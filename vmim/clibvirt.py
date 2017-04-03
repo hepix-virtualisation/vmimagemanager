@@ -111,7 +111,7 @@ class LibVirtCnt(object):
         
         while MorToBeDone:
             
-            rc = vmDetails.create()
+            vmDetails.create()
             self.updateModel()
             currentState = match.libvirtState.get()
             if currentState in [1,2]:
