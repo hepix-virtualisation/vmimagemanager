@@ -65,7 +65,7 @@ class diskMounterBaseClass(object):
         if not hasattr(self, 'target'):
             mounted = False
         if not self.target in ByTarget.keys():
-            print 'no match',ByTarget.keys(),self.target
+            self.debug('no match',ByTarget.keys(),self.target)
             mounted = False
         oldState = self.state.get()
         currentState = oldState
