@@ -1,10 +1,6 @@
-from vmDiskAbstract import diskMounterBaseClass
 import os
 import logging, logging.config
 import commands
-import sys
-
-import string
 
 
 class vmStoreCpiobz(object):
