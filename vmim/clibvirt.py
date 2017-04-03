@@ -179,12 +179,6 @@ class LibVirtCnt(object):
             self.logger.debug(expt)
             return
         self.updateModel()
-        
-def tester(conection,model):
-    vmModel = vmMdl()
-    vmModel.libvirtName.set(Name)
-    model.vmsbyName[Name] = vmModel
-
 
 
 def debugModel(model):
