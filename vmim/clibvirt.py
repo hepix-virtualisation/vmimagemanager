@@ -173,7 +173,7 @@ class LibVirtCnt(object):
                 
     def DefineHost(self,generatorXml):
         try:
-            libvirtObj = self.conection.defineXML(generatorXml)
+            self.conection.defineXML(generatorXml)
         except libvirt.libvirtError as expt:
             self.logger.error("generatorXml=%s" % (generatorXml))
             self.logger.debug(expt)
