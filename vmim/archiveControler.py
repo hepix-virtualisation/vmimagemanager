@@ -78,12 +78,8 @@ class StorageView(object):
         
     def updateCfg(self,Cfg):
         hostpathmapping = {}
-        pathhostmapping = {}
-        output = {}
         cfgPaths = set()
         cfgInserts = set()
-        pthInfo = {}
-        wooblebird = set()
         allHosts = Cfg.vmbyName.keys()
         if len(allHosts) == 0:
             cfgPaths = set(Cfg.defaultPathImages.get())
