@@ -147,7 +147,7 @@ class LibVirtCnt(object):
             counter += 1
             if counter < timeout:
                 try:
-                    rc = vmDetails.shutdown()
+                    vmDetails.shutdown()
                     #print rc
                 except libvirt.libvirtError as Expt:
                     currentState = match.libvirtState.get()
