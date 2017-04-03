@@ -16,6 +16,8 @@ from vmStoreControl import StorageControler
 
 from archiveControler import archControler
 
+log = logging.getLogger(__name__)
+
 class vmState(object):
     actionsReqBoxes = set(['up','down','store','restore','extract','insert','kill','mount','release'])
     actionsReqStats = set(['list_images','list_boxes','list_inserts'])
@@ -33,7 +35,7 @@ class vmState(object):
         #print action
         #self.log.debug("input=%s" % (instructions))
         if len(keys) != 1:
-            print "oooo noooo"
+            log.error("No key found")
             return
         hostName = keys.pop()
         inputs.libvirtName.set(hostName)
@@ -151,8 +153,6 @@ class vmControl(object):
 
     def _onlibvirtConStr(self):
         connectionStr = self.cfgModel.libvirtConStr.get()
-        if not isinstance( connectionStr, unicode ):
-            print "asdaSDASD"
         self.libVirtControler = LibVirtCnt(connectionStr,self.libVirtModel)
         self.libVirtControler.updateModel()
 
@@ -193,7 +193,7 @@ if __name__ == "__main__" :
     Control.LoadConfigCfg('vmimagemanager.cfg')
     
     
-    print Control.cfgModel.vmbyName[u'hudson-slave-vm01.desy.de'].CfgMountPoint.get()
+    print (Control.cfgModel.vmbyName[u'hudson-slave-vm01.desy.de'].CfgMountPoint.get())
     
     
     
@@ -239,4 +239,4 @@ if __name__ == "__main__" :
         'hostdetails': {},
         }
     }
-    print Control.Process(instructions)
+    print (Control.Process(instructions))
