@@ -38,8 +38,6 @@ class mountedModel(object):
         
     def mounted(self,HostRootSpace,target):
         self.readMtab()
-        targetKeys = set(self.ByTarget.keys())
-        sourceKeys = set(self.BySource.keys())
         if not target in self.ByTarget.keys():
             return False
         if not HostRootSpace in self.BySource.keys():
