@@ -355,7 +355,6 @@ def main():
     for item in insert:
         insertList.append({'name' : item})
     actionsList = []
-    boxesExtractSet = None
     if "list_boxes" in actions:
         pass
         #print Control.ListBoxes()
@@ -373,8 +372,6 @@ def main():
         actionsList.append("restore")
     if "extract" in actions:
         actionsList.append("extract")
-        boxesExtractSet = []
-        
     if "insert" in actions:
         actionsList.append("insert")
     if "up" in actions:
