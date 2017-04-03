@@ -197,9 +197,7 @@ class archiveStoreView(object):
         return output
     
     def listImagesCompat(self):
-        foundImages = set([])
-        output = {}
-        
+        output = {}        
         for item in self.store.collection.keys():
             collectionstuff = archiveCollectionView( self.store.collection[item])
             collectionstuff.update()
