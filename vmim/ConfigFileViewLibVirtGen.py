@@ -32,15 +32,10 @@ except ImportError:
         if isinstance(s, str): s = s.encode("UTF?8")
         return BytesIO(s)
 
-import string
-import sys
-import getopt
-import time
-import re
 try:
-    from xml.etree.ElementTree import Element, SubElement, dump,tostring
+    from xml.etree.ElementTree import Element, SubElement, tostring
 except ImportError:
-    from elementtree.ElementTree  import Element, SubElement, dump,tostring
+    from elementtree.ElementTree  import Element, SubElement, tostring
 
 
 
