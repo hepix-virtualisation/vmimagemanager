@@ -231,7 +231,7 @@ class archControler(object):
 
     def hasHost(self,hostname):
         keys = self.mdlCfg.vmbyName.keys()
-        if not host in keys:
+        if not hostname in keys:
             self.log.error("Host not configured")
             return None
         return self.mdlCfg.vmbyName[hostname]
