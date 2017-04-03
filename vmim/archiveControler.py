@@ -100,7 +100,7 @@ class StorageView(object):
         #
         currentKeys = self.getSetOfPaths()
         keys2make = cfgPaths.difference(currentKeys)
-        print "keys2make=%s" % (keys2make)
+        self.log.debug("keys2make=%s" % (keys2make))
         
         for direct in keys2make:
             self.addDirectory(direct)
