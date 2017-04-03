@@ -159,9 +159,9 @@ class LibVirtCnt(object):
                 try:
                     rc = vmDetails.shutdown()
                     #print rc
-                except libvirt.libvirtError, E:
+                except libvirt.libvirtError as Expt:
                     currentState = match.libvirtState.get()
-                    print "exception thrownddd" , E
+                    self.log.error("exception thrown" + str(Expt))
                     vmDetails = self.getLibVrtPtr(match)
             else:
                 self.logger.warning("Timed out shutting down domain")
