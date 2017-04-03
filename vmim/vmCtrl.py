@@ -120,13 +120,7 @@ class vmState(object):
         self.libVirtControler.updateModel()
         self.HostsSetlibvirt = set(self.libVirtControler.model.vmsbyName.keys())
         self.HostsSetGfg = set(self.cfgModel.vmbyName.keys())
-        
-        
-        chgSet = set(self.cfgModel.vmbyName.keys())
-        setToAdded = set(self.cfgModel.vmbyName.keys())
-        
-        #print "chgSet",        chgSet
-       
+
 
 class vmControl(object):
     def __init__(self):
