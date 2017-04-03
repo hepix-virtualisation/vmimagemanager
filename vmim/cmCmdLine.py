@@ -141,7 +141,6 @@ def main():
     ConfigurationFilePath = '/etc/vmimagemanager/vmimagemanager.cfg'
     print_config = False
     store = []
-    cmdInserts = []
     insert = []
     extract = []
     extractDirectory = []
