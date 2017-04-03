@@ -106,6 +106,7 @@ class vmControlXen:
 
     def Kill(self):
         self.ShutDown()
+        domainList = VitualHostsList()
         if domainList.has_key(self.HostName):
             cmd = "xm destroy %s" % (self.HostName)
             (rc,cmdoutput) = commands.getstatusoutput(cmd)
