@@ -1,6 +1,6 @@
 
 # I shoudl make my own GenKeyFunction Later
-from observable import GenKey, Observable, ObservableDict
+from observable import Observable, ObservableDict
 
 
 class vmModel(object):
