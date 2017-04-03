@@ -20,8 +20,8 @@ def displayCommandOutputListBox(Input):
             while len(name) < 50:
                 name += " "
         
-        line = "%s %s %s" % (name,Input["vmControl"]["listBox"][key]["disk"],Input["vmControl"]["listBox"][key]["libvirt"])
-        print line
+        line = ("%s %s %s" % (name,Input["vmControl"]["listBox"][key]["disk"],Input["vmControl"]["listBox"][key]["libvirt"]))
+        print(line)
 
 
 
@@ -45,7 +45,7 @@ def displayCommandOutputListImages(Input):
                 Path = Input["vmControl"]["listImages"][directory][key]['Path']
             while len(Path) < 30:
                     Path += " "
-            print Name,Path,ImageType
+            print(Name,Path,ImageType)
           
 def displayCommandOutputListOverlay(Input):
     print('Name                 Directory                     Format')
@@ -285,7 +285,7 @@ def main():
         #print "setOfUnavailableBox",setOfUnavailableBox
         lenSetOfUnavailableBox = len(setOfUnavailableBox)
         if lenSetOfUnavailableBox > 0:
-            print "The following boxes do not exist:%s" % (string.join(setOfUnavailableBox,", "))
+            print("The following boxes do not exist:%s" % (string.join(setOfUnavailableBox,", ")))
             displayCommandOutput(boxStruct)
             sys.exit(1)
     lenAvailableBoxes = len(availableBoxes)
