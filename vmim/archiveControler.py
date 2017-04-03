@@ -342,9 +342,7 @@ class archControler(object):
 
 
 if __name__ == "__main__" :
-    import time
-    import sys
-    from ConfigModel import vmModel , CfgModel
+    from ConfigModel import CfgModel
     from ConfigFileView import ConfigFile1
     logging.basicConfig(level=logging.INFO)
     thisCfgModel = CfgModel()
