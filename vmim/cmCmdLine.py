@@ -139,7 +139,6 @@ def main():
     actionsReqSingleBox = set(['extract'])
     cmdFormatOptions = set([])
     ConfigurationFilePath = '/etc/vmimagemanager/vmimagemanager.cfg'
-    print_config = False
     store = []
     insert = []
     extract = []
@@ -240,7 +239,7 @@ def main():
     if options.cpio_bzip:
         cmdFormatOptions.add("cpio.bz2")
     if options.print_config:
-        print_config = True
+        log.error("Not implemented")
     
     
     # 1 So we have some command line validation
