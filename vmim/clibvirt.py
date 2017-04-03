@@ -157,7 +157,7 @@ class LibVirtCnt(object):
                 self.logger.warning("Timed out shutting down domain")
                 counter = 0
                 #print "timed Out"
-                rc = vmDetails.destroy()
+                vmDetails.destroy()
                 #print rc
             
             time.sleep(1)
