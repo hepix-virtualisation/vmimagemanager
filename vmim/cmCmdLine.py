@@ -144,9 +144,7 @@ def main():
     insert = []
     extract = []
     extractDirectory = []
-    storageFormat = None
-    coreOveride = None
-    
+    storageFormat = None  
     Control = vmCtrl.vmControl()
     LoggingLevel = logging.WARNING
     LoggingLevelCounter = 2
