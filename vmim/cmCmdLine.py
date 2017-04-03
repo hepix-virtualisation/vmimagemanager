@@ -255,10 +255,7 @@ def main():
     # Handle conflicting actions
     actions_req_sel = actionsReqBoxes.intersection(actions)
     lenActions_req_sel = len(actions_req_sel)
-    lenBoxes = len(box)
-    lenStore = len(store)
-    
-    
+
     # Check Data for only sending in available boxes.
     
     availableBoxes = []
