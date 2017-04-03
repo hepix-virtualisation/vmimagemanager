@@ -1,16 +1,8 @@
 #!/usr/bin/python
 
-import logging, logging.config
-
-
+import logging
 import os
-import os.path
-import string
-import sys
-import getopt
-import time
-import re
-from xml.etree.ElementTree import Element, SubElement, dump,tostring
+from xml.etree.ElementTree import Element, SubElement, tostring
 import cvirthost
 
 
