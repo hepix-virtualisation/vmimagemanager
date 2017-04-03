@@ -86,7 +86,7 @@ class ConfigInterpretVm(object):
         RawPathMount = self.getConfigValue(self.ConfigSectionName,key,text_type,DefaultPathMountPrefix)
         if RawPathMount == None:
             self.log.info("Section '%s' key '%s' invalid defaulting to '%s'"  % (self.ConfigSectionName,keyPreferances[0],DefaultPathMountPrefix))
-            self.model.vmbyName[self.hostname].CfgRoot.update(defaultPathMount)
+            self.model.vmbyName[self.hostname].CfgRoot.update(DefaultPathMountPrefix)
             return
         normPath = os.path.normpath(RawPathMount)
         
