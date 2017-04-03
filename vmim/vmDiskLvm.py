@@ -33,10 +33,6 @@ class lvmControl:
         if "" == output:
             self.logger.warning(' Cant mount The Disk "%s" has no partitons' % (self.path))
             return False
-        rootStripLen = None
-        newVolumesByPath = {}
-        newVolumeGroups = {}
-        CurrentGroup = None
         ouputLines = output.split("\n")
         ouputLinesLen = len(ouputLines)
         if ouputLinesLen == 0:
@@ -48,7 +44,6 @@ class lvmControl:
         foundlist = []
         for i in range(1,ouputLinesLen):
             line = ouputLines[i].split('vmDiskLm')
-            lenline = len (line)
             dictionary = {}
             for j in range(0,lenKeys):
                 #print i,j
