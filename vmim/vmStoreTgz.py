@@ -45,8 +45,7 @@ class vmStoreTgz(object):
             self.log.error('Command "%s" Failed' % (cmd))
             self.log.error( 'rc=%s,output=%s' % (rc,cmdoutput))
             return False
-        
-        self.log.debug('rm Ok')
+        self.log.debug("ran command.")
         return True
 
     def insertRestore(self,diskFacade,storeName):
@@ -57,12 +56,13 @@ class vmStoreTgz(object):
             self.log.error("Error: File %s is not found" % (InsertPath))
             return None
         cmd=  "tar -zxpsf %s --exclude=lost+found   -C %s" % (InsertPath,diskFacade.target)
-        print cmd
+        self.log.debug("running command %s" % ( cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             self.log.error('Failed "%s"' % (cmd))
             self.log.error(cmdoutput)
             self.log.error('Return Code=%s' % (rc))
+        self.log.debug("ran command.")
         return True
 
     def insertStore(self,diskFacade,storeName,directory):
@@ -73,9 +73,11 @@ class vmStoreTgz(object):
             return None
         destArchive = os.path.join(self.storePath,storeName)
         cmd = "tar -zcpsf %s --exclude=lost+found -C %s %s" % (destArchive,diskFacade.target,directory)
+        self.log.debug("running command %s" % ( cmd))
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
             logging.error('Failed "%s"' % (cmd))
             logging.error(cmdoutput)
             logging.error('Return Code=%s' % (rc))
+        self.log.debug("ran command.")
         return 0
