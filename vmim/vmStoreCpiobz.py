@@ -84,7 +84,7 @@ class vmStoreCpiobz(object):
             return None
         destArchive = os.path.join(self.storePath,storeName)
         cmd = "cd %s; find %s -print |cpio -o -Hnewc |bzip2 -9 -z -q -f > %s" % (diskFacade.target,directory,destArchive)
-        print cmd
+        self.log.debug(cmd)
         return 0
         (rc,cmdoutput) = commands.getstatusoutput(cmd)
         if rc != 0:
