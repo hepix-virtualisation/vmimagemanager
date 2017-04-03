@@ -4,8 +4,6 @@ import logging, logging.config
 import commands
 import sys
 
-import string
-
 def Property(func):
     return property(**func())
 
