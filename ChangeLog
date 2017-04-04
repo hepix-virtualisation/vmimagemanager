@@ -1,5 +1,11 @@
 Changelog
 
+vmimagemanager-0.3.13
+
+ * Moved to tox test framework
+ * Added static code analysis with flake8
+ * Lots of bug fixes from flake8
+
 vmimagemanager-0.3.12
 
  * added short command options -v and -q for verbose and quiet
@@ -23,11 +29,11 @@ vmimagemanager-0.3.[89]
  * fixed autodetecting shared paritions.
  * added detection of format 'bzip2 compressed data' : 'cpio.bz2'.
  * internal improvements.
- 
+
 vmimagemanager-0.3.7
 
  * Bugfixes.
- 
+
 
 vmimagemanager-0.3.6
 
