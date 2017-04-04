@@ -1,10 +1,16 @@
 Changelog
 
-vmimagemanager-0.3.13
+vmimagemanager-0.3.14
 
- * Moved to tox test framework
+ * Moved to pytest test framework in setup.py
  * Added static code analysis with flake8
  * Lots of bug fixes from flake8
+ * Moved to tox test framework
+
+
+vmimagemanager-0.3.13
+
+ * Initial tox work
 
 vmimagemanager-0.3.12
 
