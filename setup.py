@@ -68,7 +68,6 @@ setup(name='vmimagemanager',
         'pytest',
     ],
     setup_requires=[
-        'pytest',
     ],
     cmdclass = {'test': PyTest},
     )
