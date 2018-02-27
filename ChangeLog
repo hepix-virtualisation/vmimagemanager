@@ -1,5 +1,9 @@
 Changelog
 
+vmimagemanager-0.3.15
+
+ * Change setup.py and tox
+
 vmimagemanager-0.3.14
 
  * Moved to pytest test framework in setup.py
