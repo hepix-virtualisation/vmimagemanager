@@ -1,16 +1,26 @@
 from vmim.__version__ import version
 from sys import version_info
 
-if version_info < (2, 6):
-	from distutils.core import setup
-else:
-	try:
-        	from setuptools import setup, find_packages
-	except ImportError:
-        	from ez_setup import use_setuptools
-        	use_setuptools()
-        	from setuptools import setup, find_packages
 
+if version_info < (2, 6):
+    import sys
+    print ("Please use a newer version of python")
+    sys.exit(1)
+
+if version_info < (2, 7):
+    from distutils.core import setup
+    import sys
+
+if version_info > (2, 7):
+    try:
+        from setuptools import setup, find_packages
+    except ImportError:
+	    try:
+                from distutils.core import setup
+	    except ImportError:
+                from ez_setup import use_setuptools
+                use_setuptools()
+                from setuptools import setup, find_packages
 
 from setuptools.command.test import test as TestCommand
 import sys
@@ -53,13 +63,6 @@ setup(name='vmimagemanager',
 'docs/examples/logging.conf',
 'docs/examples/libvirt-redhat-el-6.xsl',
 'docs/examples/libvirt-redhat-el-5.xsl'])],
-    tests_require=[
-        'coverage >= 3.0',
-        'pytest',
-    ],
-    setup_requires=[
-        'pytest',
-    ],
     cmdclass = {'test': PyTest},
     )
 
