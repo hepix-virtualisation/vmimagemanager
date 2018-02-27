@@ -63,6 +63,13 @@ setup(name='vmimagemanager',
 'docs/examples/logging.conf',
 'docs/examples/libvirt-redhat-el-6.xsl',
 'docs/examples/libvirt-redhat-el-5.xsl'])],
+    tests_require=[
+        'coverage >= 3.0',
+        'pytest',
+    ],
+    setup_requires=[
+        'pytest',
+    ],
     cmdclass = {'test': PyTest},
     )
 
